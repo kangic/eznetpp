@@ -1,0 +1,7 @@
+#include "../src/eznetpp.h"
+
+int main(void) {
+  eznetpp::test();
+  
+  return 0;
+}
