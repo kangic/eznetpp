@@ -13,7 +13,7 @@ runner::~runner(void) {
 }
 
 void runner::run(void) {
-  printf("hello test!");
+
 }
 
 }  // namespace eznetpp
