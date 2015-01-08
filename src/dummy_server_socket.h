@@ -1,6 +1,8 @@
 #ifndef _EZNETPP_SRC_DUMMY_SERVER_SOCKET_H_
 #define _EZNETPP_SRC_DUMMY_SERVER_SOCKET_H_
 
+#include <string>
+
 #include "./macros.h"
 #include "./if_event_listener.h"
 
@@ -17,7 +19,9 @@ class dummy_server_socket
   virtual void handle_write();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(dummy_server_socket);
+  std::string host_ip;
+  int host_port;
+  int max_waiting_cnt;
 };
 }  // namespace eznetpp
 
