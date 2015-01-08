@@ -1,5 +1,6 @@
-#ifndef _EZNETPP_SRC_RUNNER_H_
-#define _EZNETPP_SRC_RUNNER_H_
+// Copyright[2015] <kangic21@gmail.com>
+#ifndef SRC_RUNNER_H_
+#define SRC_RUNNER_H_
 
 #include "./macros.h"
 
@@ -19,5 +20,5 @@ class runner {
 }  // namespace eznetpp
 
 
-#endif  // _EZNETPP_SRC_RUNNER_H_
+#endif  // SRC_RUNNER_H_
 
