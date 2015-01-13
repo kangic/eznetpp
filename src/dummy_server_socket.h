@@ -15,6 +15,7 @@ class dummy_server_socket
 
  public:
   // override
+  virtual void handle_accept();
   virtual void handle_read();
   virtual void handle_write();
 

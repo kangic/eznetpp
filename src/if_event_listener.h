@@ -9,6 +9,7 @@ class if_event_listener {
   virtual ~if_event_listener() {}
   
  public:
+  virtual void handle_accept() = 0;
   virtual void handle_read() = 0;
   virtual void handle_write() = 0;
 };

@@ -10,6 +10,10 @@ dummy_server_socket::dummy_server_socket(void) {
 dummy_server_socket::~dummy_server_socket(void) {
 }
 
+void dummy_server_socket::handle_accept() {
+  printf("received event - handle_accpet()\n");
+}
+
 void dummy_server_socket::handle_read() {
   printf("received event - handle_read()\n");
 }
