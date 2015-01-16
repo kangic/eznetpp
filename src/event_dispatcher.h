@@ -7,21 +7,28 @@
 
 namespace eznetpp {
 class if_event_listener;
-  
 class event_dispatcher {
  public:
+  static event_dispatcher* get_instance();
+  static void release_instance();
+  
+ private:
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
   
  public:
-  bool reg_event_listener(eznetpp::if_event_listener* listener);
-  bool unreg_event_listener(eznetpp::if_event_listener* listener);
+  bool reg_event_listener(if_event_listener* listener);
+  bool unreg_event_listener(if_event_listener* listener);
 
-  void dispatch();
+  void push_event(const char* buffer, int len);
 
+  // variables
  private:
-  std::vector<eznetpp::if_event_listener*> listener_container_;
-  
+  // singlton object
+  static event_dispatcher* instance;
+
+  std::vector<if_event_listener*> listener_container_;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
 };
