@@ -2,9 +2,11 @@
 #define _EZNETPP_SRC_DUMMY_SERVER_SOCKET_H_
 
 #include <string>
+#include <vector>
 
 #include "./macros.h"
 #include "./if_event_listener.h"
+#include "./event_dispatcher.h"
 
 namespace eznetpp {
 class dummy_server_socket
@@ -19,10 +21,18 @@ class dummy_server_socket
   virtual void handle_read();
   virtual void handle_write();
 
+  int write(int to_connector, const char* buffer, int len);
+
+ protected:
+  void *read_thread();
+
  private:
   std::string host_ip;
   int host_port;
   int max_waiting_cnt;
+
+  int server_socket;
+  std::vector<int> connector_sockets;
 };
 }  // namespace eznetpp
 
