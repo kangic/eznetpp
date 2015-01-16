@@ -7,9 +7,9 @@ int main(void) {
   eznetpp::usr_server s(ip_addr, port_num, max_accept_nums);
   eznetpp::runner r;
 
-  r.addEventListener(s);
-  
+  r.add_event_listener(s);
+
   r.run();
-  
+
   return 0;
 }
