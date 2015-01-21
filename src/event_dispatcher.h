@@ -18,7 +18,7 @@ class event_dispatcher {
   
  public:
   bool reg_event_listener(if_event_listener* listener);
-  bool unreg_event_listener(if_event_listener* listener);
+  bool dereg_event_listener(if_event_listener* listener);
 
   void push_event(const char* buffer, int len);
 

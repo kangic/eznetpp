@@ -48,7 +48,7 @@ bool event_dispatcher::reg_event_listener(
   return true;
 }
 
-bool event_dispatcher::unreg_event_listener(
+bool event_dispatcher::dereg_event_listener(
     if_event_listener* listener) {
   std::vector<if_event_listener*>::iterator iter;
   for (iter = listener_container_.begin();
