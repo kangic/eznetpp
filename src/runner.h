@@ -6,12 +6,16 @@
 
 namespace eznetpp {
 
+class if_event_listener;
+
 class runner {
  public:
   runner(void);
   virtual ~runner(void);
 
  public:
+  void register_event_listener(if_event_listener* listener);
+  void deregister_event_listener(if_event_listener* listener);
   void run(void);
 
  private:
