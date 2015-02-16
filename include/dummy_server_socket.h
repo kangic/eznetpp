@@ -21,6 +21,8 @@ class dummy_server_socket
   virtual void handle_read();
   virtual void handle_write();
 
+	void set_env(const std::string& ip, unsigned int port, unsigned int max_accepts);
+
   int write(int to_connector, const char* buffer, int len);
 
  protected:
@@ -29,7 +31,7 @@ class dummy_server_socket
  private:
   std::string host_ip;
   int host_port;
-  int max_waiting_cnt;
+  int max_accepts_cnt;
 
   int server_socket;
   std::vector<int> connector_sockets;
