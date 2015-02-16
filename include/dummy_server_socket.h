@@ -9,32 +9,37 @@
 #include "./event_dispatcher.h"
 
 namespace eznetpp {
+class if_connection;
 class dummy_server_socket
   : public if_event_listener {
- public:
+public:
   dummy_server_socket();
   virtual ~dummy_server_socket();
 
- public:
+public:
   // override
-  virtual void handle_accept();
-  virtual void handle_read();
-  virtual void handle_write();
+  virtual void on_accept();
+  virtual void on_read();
+  virtual void on_write();
 
 	void set_env(const std::string& ip, unsigned int port, unsigned int max_accepts);
 
   int write(int to_connector, const char* buffer, int len);
 
- protected:
-  void *read_thread();
+protected:
+  void* read_thread();
 
- private:
+private:
+	void start_accept();
+
+private:
   std::string host_ip;
   int host_port;
   int max_accepts_cnt;
 
   int server_socket;
-  std::vector<int> connector_sockets;
+
+  std::vector<if_connection&> connections;
 };
 }  // namespace eznetpp
 

@@ -5,13 +5,13 @@
 
 namespace eznetpp {
 class if_event_listener {
- public:
+public:
   virtual ~if_event_listener() {}
   
- public:
-  virtual void handle_accept() = 0;
-  virtual void handle_read() = 0;
-  virtual void handle_write() = 0;
+public:
+  virtual void on_accept() = 0;
+  virtual void on_read() = 0;
+  virtual void on_write() = 0;
 };
   
 }  // namespace eznetpp
