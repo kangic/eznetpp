@@ -1,6 +1,6 @@
 Build Env
 =========
-- [ ] Modify Makefile to make the sub directory for moving obj files and test bin files.
+- [ ] Adapt the cmake tool instead of the make
 - [ ] Adapt the googletest.
 
 Tester
