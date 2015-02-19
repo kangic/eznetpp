@@ -4,22 +4,28 @@
 
 #include "./macros.h"
 
+#include "../include/event_dispatcher.h"
+
 namespace eznetpp {
 
 class if_event_listener;
 
 class runner {
- public:
+public:
   runner(void);
   virtual ~runner(void);
 
- public:
+public:
   void register_event_listener(if_event_listener* listener);
   void deregister_event_listener(if_event_listener* listener);
   void run(void);
 
- private:
+private:
   DISALLOW_COPY_AND_ASSIGN(runner);
+
+	// variables
+private:
+	event_dispatcher evt_dispatcher;
 };
 }  // namespace eznetpp
 
