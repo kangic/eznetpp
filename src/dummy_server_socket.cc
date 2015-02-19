@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "./dummy_server_socket.h"
+#include "../include/dummy_server_socket.h"
 
 namespace eznetpp {
 

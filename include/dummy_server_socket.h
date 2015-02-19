@@ -9,7 +9,7 @@
 #include "./event_dispatcher.h"
 
 namespace eznetpp {
-class if_connection;
+class connection;
 class dummy_server_socket
   : public if_event_listener {
 public:
@@ -39,7 +39,7 @@ private:
 
   int server_socket;
 
-  std::vector<if_connection&> connections;
+  std::vector<connection*> connections;
 };
 }  // namespace eznetpp
 
