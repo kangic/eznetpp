@@ -5,7 +5,7 @@ Build Env
 
 Tester
 ======
-- [ ] Make a test_server_socket class.
+- [ ] Make a usr_server class.
 
 Runner
 ======
@@ -14,7 +14,10 @@ Runner
 
 Event Dispatcher
 ================
+- [ ] Define necessary events for communicating lib between app.
 - [ ] Make a event queue and a work thread for dispatching event.
 
 Dummy Server Socket
 ===================
+- [ ] Send a mock event for testing.
+
