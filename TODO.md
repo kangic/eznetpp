@@ -1,6 +1,6 @@
 Build Env
 =========
-- [ ] Adapt the cmake tool instead of the make
+- [x] Adapt the cmake tool instead of the make
 - [ ] Adapt the googletest.
 
 Tester
