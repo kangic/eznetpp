@@ -1,12 +1,10 @@
-#include "./event_dispatcher.h"
+#include "../include/event_dispatcher.h"
 
 #include <cstdio>
 
-#include "./if_event_listener.h"
+#include "../include/if_event_listener.h"
 
 namespace eznetpp {
-
-event_dispatcher *event_dispatcher::instance = NULL;
 
 event_dispatcher::event_dispatcher(void) {
   listener_container_.clear();
@@ -14,21 +12,6 @@ event_dispatcher::event_dispatcher(void) {
 
 event_dispatcher::~event_dispatcher(void) {
   listener_container_.clear();
-}
-
-event_dispatcher* event_dispatcher::get_instance() {
-  if (instance == NULL) {
-    instance = new event_dispatcher();
-  }
-
-  return instance;
-}
-
-void event_dispatcher::release_instance() {
-  if (instance != NULL) {
-    delete instance;
-    instance = NULL;
-  }
 }
 
 bool event_dispatcher::reg_event_listener(
