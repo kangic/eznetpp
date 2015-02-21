@@ -4,19 +4,18 @@
 #include "../include/dummy_server_socket.h"
 
 class usr_server : public eznetpp::dummy_server_socket {
- public:
+public:
 	 usr_server();
 	 usr_server(const std::string ip, unsigned int port, unsigned int max_accepts);
 	 virtual ~usr_server();
   
- public:
-  void handle_accept();
-  void handle_read();
-  void handle_write();
+public:
+	// override
+  void on_accept();
+  void on_read();
+  void on_write();
 
-	void set_env(const std::string& ip, unsigned int port, unsigned int max_accepts);
-
- private:
+private:
 	dummy_server_socket svr;
 };
   
