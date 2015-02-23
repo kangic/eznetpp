@@ -1,15 +1,16 @@
-#ifndef _EZNETPP_SRC_CONNECTION_H_
-#define _EZNETPP_SRC_CONNECTION_H_
+#ifndef _EZNETPP_SRC_DUMMY_CONNECTION_H_
+#define _EZNETPP_SRC_DUMMY_CONNECTION_H_
 
 #include "macros.h"
 
 namespace eznetpp {
-class connection {
+class dummy_connection {
 public:
-	connection();
-	virtual ~connection();
+	dummy_connection();
+	virtual ~dummy_connection();
 
 public:
+	void socket(int id);
 	int socket();
 
 private:
@@ -18,4 +19,4 @@ private:
  
 } // namespace eznetpp
 
-#endif	// _EZNETPP_SRC_CONNECTION_H_
+#endif	// _EZNETPP_SRC_DUMMY_CONNECTION_H_
