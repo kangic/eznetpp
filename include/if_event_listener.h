@@ -1,5 +1,5 @@
-#ifndef _EZNETPP_SRC_IF_EVENT_LISTENER_H_
-#define _EZNETPP_SRC_IF_EVENT_LISTENER_H_
+#ifndef _EZNETPP_SRC_IF_SERVER_H_
+#define _EZNETPP_SRC_IF_SERVER_H_
 
 #include <string>
 
@@ -7,17 +7,19 @@
 
 namespace eznetpp {
 class dummy_connection;
-class if_event_listener {
+class if_server {
 public:
-  virtual ~if_event_listener() {}
+  virtual ~if_server() {}
   
 public:
   virtual void on_accept(const dummy_connection& conn) {}
   virtual void on_read(const dummy_connection& conn, const std::string& msg
                      , int len) {}
   virtual void on_write(const dummy_connection& conn, unsigned int len) {}
+
+	virtual bool start_async_io() {}
 };
   
 }  // namespace eznetpp
 
-#endif  // _EZNETPP_SRC_IF_EVENT_LISTENER_H_
+#endif  // _EZNETPP_SRC_IF_SERVER_H_
