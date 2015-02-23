@@ -21,7 +21,7 @@ bool event_dispatcher::reg_event_listener(
   for (iter = listener_container_.begin();
        iter != listener_container_.end();
        ++iter) {
-    if ( (*iter) == listener )
+    if (*iter == listener)
       return false;
   }
 
@@ -37,7 +37,7 @@ bool event_dispatcher::dereg_event_listener(
   for (iter = listener_container_.begin();
        iter != listener_container_.end();
        ++iter) {
-    if ( (*iter) == listener ) {
+    if (*iter == listener) {
       iter = listener_container_.erase(iter);
       return true;
     }
