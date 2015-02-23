@@ -9,7 +9,7 @@ int main(void) {
   usr_server s("192.168.1.23", 6666, 5);
   eznetpp::runner r;
 
-  r.register_event_listener(&s);
+  r.register_server(&s);
 
   r.run();
 

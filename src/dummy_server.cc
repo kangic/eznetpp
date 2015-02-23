@@ -18,21 +18,6 @@ dummy_server::dummy_server(void)
 dummy_server::~dummy_server(void) {
 }
 
-/*
-void dummy_server::on_accept(const dummy_connection& conn) {
-  printf("received event - on_accpet()\n");
-}
-
-void dummy_server::on_read(const dummy_connection& conn, const std::string& msg
-                     , int len) {
-  printf("received event - on_read()\n");
-}
-
-void dummy_server::on_write(const dummy_connection& conn, unsigned int len) {
-  printf("received event - on_write()\n");
-}
-*/
-
 void dummy_server::set_env(const std::string& ip, unsigned int port
 		, unsigned int max_accepts) {
 	host_ip = ip;
@@ -43,7 +28,7 @@ void dummy_server::set_env(const std::string& ip, unsigned int port
 	server_socket = 6;	// call socket();
 }
 
-int dummy_server::async_run() {
+int dummy_server::start_async_io() {
 	int ret = pthread_create(&accept_th_id, NULL, accept_thread_caller, this);
 
 	if (ret != 0) {

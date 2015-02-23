@@ -7,27 +7,20 @@
 #include <pthread.h>
 
 #include "./macros.h"
-#include "./if_event_listener.h"
+#include "./if_server.h"
 #include "./event_dispatcher.h"
 
 namespace eznetpp {
-class dummy_server : public if_event_listener {
+class dummy_server : public if_server {
 public:
   dummy_server();
   virtual ~dummy_server();
 
 public:
-  // override
-	/*
-  virtual void on_accept(const dummy_connection& conn);
-  virtual void on_read(const dummy_connection& conn, const std::string& msg
-                     , int len);
-  virtual void on_write(const dummy_connection& conn, unsigned int len);
-	*/
+	// override
+	int start_async_io();
 
 	void set_env(const std::string& ip, unsigned int port, unsigned int max_accepts);
-
-	int async_run();
 
   int write(const dummy_connection& conn, const std::string& msg, int len);
 	int broadcasting(const std::string& msg, int len);

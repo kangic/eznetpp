@@ -8,7 +8,7 @@
 
 namespace eznetpp {
 
-class if_event_listener;
+class if_server;
 
 class runner {
 public:
@@ -16,8 +16,8 @@ public:
   virtual ~runner(void);
 
 public:
-  void register_event_listener(if_event_listener* listener);
-  void deregister_event_listener(if_event_listener* listener);
+  void register_server(if_server* listener);
+  void deregister_server(if_server* listener);
   void run(void);
 
 private:

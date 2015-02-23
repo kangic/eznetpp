@@ -2,43 +2,43 @@
 
 #include <cstdio>
 
-#include "../include/if_event_listener.h"
+#include "../include/if_server.h"
 
 namespace eznetpp {
 
 event_dispatcher::event_dispatcher(void) {
-  listener_container_.clear();
+  server_container_.clear();
 }
 
 event_dispatcher::~event_dispatcher(void) {
-  listener_container_.clear();
+  server_container_.clear();
 }
 
-bool event_dispatcher::reg_event_listener(
-    if_event_listener* listener) {
+bool event_dispatcher::reg_server(
+    if_server* server) {
   // step 1. check to exist object.
-  std::vector<if_event_listener*>::iterator iter;
-  for (iter = listener_container_.begin();
-       iter != listener_container_.end();
+  std::vector<if_server*>::iterator iter;
+  for (iter = server_container_.begin();
+       iter != server_container_.end();
        ++iter) {
-    if (*iter == listener)
+    if (*iter == server)
       return false;
   }
 
-  // step 2. add listener to the listener_container
-  listener_container_.push_back(listener);
+  // step 2. add listener to the server_container
+  server_container_.push_back(server);
 
   return true;
 }
 
-bool event_dispatcher::dereg_event_listener(
-    if_event_listener* listener) {
-  std::vector<if_event_listener*>::iterator iter;
-  for (iter = listener_container_.begin();
-       iter != listener_container_.end();
+bool event_dispatcher::dereg_server(
+    if_server* server) {
+  std::vector<if_server*>::iterator iter;
+  for (iter = server_container_.begin();
+       iter != server_container_.end();
        ++iter) {
-    if (*iter == listener) {
-      iter = listener_container_.erase(iter);
+    if (*iter == server) {
+      iter = server_container_.erase(iter);
       return true;
     }
   }

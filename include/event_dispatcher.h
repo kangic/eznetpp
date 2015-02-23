@@ -6,21 +6,21 @@
 #include "./macros.h"
 
 namespace eznetpp {
-class if_event_listener;
+class if_server;
 class event_dispatcher {
 public:
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
   
 public:
-  bool reg_event_listener(if_event_listener* listener);
-  bool dereg_event_listener(if_event_listener* listener);
+  bool reg_server(if_server* server);
+  bool dereg_server(if_server* server);
 
   void push_event(const char* buffer, int len);
 
   // variables
 private:
-  std::vector<if_event_listener*> listener_container_;
+  std::vector<if_server*> server_container_;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);

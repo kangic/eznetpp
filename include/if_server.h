@@ -17,7 +17,7 @@ public:
                      , int len) {}
   virtual void on_write(const dummy_connection& conn, unsigned int len) {}
 
-	virtual bool start_async_io() {}
+	virtual int start_async_io() {}
 };
   
 }  // namespace eznetpp
