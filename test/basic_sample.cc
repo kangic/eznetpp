@@ -1,13 +1,15 @@
 #include "../include/runner.h"
 
+#include "./usr_server.h"
+
 // first, I write to example code for making library API concenpt.
 // And then I will write to library codes.
 int main(void) {
   // it's user class for server
-  eznetpp::usr_server s(ip_addr, port_num, max_accept_nums);
+  usr_server s("192.168.1.23", 6666, 5);
   eznetpp::runner r;
 
-  r.add_event_listener(s);
+  r.register_event_listener(&s);
 
   r.run();
 
