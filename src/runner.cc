@@ -29,8 +29,15 @@ void runner::deregister_server(if_server* listener) {
 }
 
 void runner::run(void) {
-	// step 1. 
-	
+	printf("runner::run() ->\n");
+	if (evt_dispatcher.start_loop() == false) {
+		printf("runner::run() <- evt_dispatcher.start_loop() failed..\n");
+		return;
+	}
+
+	while(true) {
+	}
+	printf("runner::run() <-\n");
 }
 
 }  // namespace eznetpp
