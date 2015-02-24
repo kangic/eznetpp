@@ -16,6 +16,8 @@ public:
   bool reg_server(if_server* server);
   bool dereg_server(if_server* server);
 
+	bool start_loop();
+
   void push_event(const char* buffer, int len);
 
   // variables

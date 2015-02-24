@@ -25,7 +25,7 @@ bool event_dispatcher::reg_server(
       return false;
   }
 
-  // step 2. add listener to the server_container
+  // step 2. add server to the server_container
   server_container_.push_back(server);
 
   return true;
@@ -46,6 +46,16 @@ bool event_dispatcher::dereg_server(
   return false;
 }
 
+bool event_dispatcher::start_loop() {
+  std::vector<if_server*>::iterator iter;
+  for (iter = server_container_.begin();
+       iter != server_container_.end();
+       ++iter) {
+		if( 0 != (*iter)->start_async_io() )
+			return false;
+	}
 
+	return true;
+}
 
 }  // namespace eznetpp
