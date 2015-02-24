@@ -12,12 +12,12 @@ public:
   virtual ~if_server() {}
   
 public:
-  virtual void on_accept(const dummy_connection& conn) {}
+  virtual void on_accept(const dummy_connection& conn) = 0;
   virtual void on_read(const dummy_connection& conn, const std::string& msg
-                     , int len) {}
-  virtual void on_write(const dummy_connection& conn, unsigned int len) {}
+                     , int len) = 0;
+  virtual void on_write(const dummy_connection& conn, unsigned int len) = 0;
 
-	virtual int start_async_io() {}
+	virtual int start_async_io() = 0;
 };
   
 }  // namespace eznetpp
