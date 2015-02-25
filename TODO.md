@@ -5,19 +5,22 @@ Build Env
 
 Tester
 ======
-- [ ] Make a usr_server class.
+- [x] Make a usr_server class.
 
 Runner
 ======
-- [ ] Implement the register/deregister function for listener class.
-- [ ] Implement the run() function.
+- [x] Implement the register/deregister function for listener class.
+- [x] Implement the run() function.
 
 Event Dispatcher
 ================
 - [ ] Define necessary events for communicating lib between app.
 - [ ] Make a event queue and a work thread for dispatching event.
 
-Dummy Server Socket
-===================
-- [ ] Send a mock event for testing.
+Dummy Server
+============
+- [x] Make a accept thread for testing.
 
+Dummy Connection
+===
+- [ ] Send a mock event for testing.
