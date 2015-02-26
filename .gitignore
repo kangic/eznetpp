@@ -1,0 +1,12 @@
+*~
+\#*\#
+.\#*
+*.o
+*.swp
+cscope*
+tags
+Makefile
+*.cmake
+CMakeCache.txt
+CMakeFiles/
+build/
