@@ -1,6 +1,7 @@
+// Copyright [2015] <kangic21@gmail.com>
+
 #include "../include/event_dispatcher.h"
 #include "../include/logger.h"
-
 #include "../include/if_server.h"
 
 namespace eznetpp {
@@ -50,11 +51,11 @@ bool event_dispatcher::start_loop() {
   for (iter = server_container_.begin();
        iter != server_container_.end();
        ++iter) {
-		if( 0 != (*iter)->start_async_io() )
-			return false;
-	}
+    if (0 != (*iter)->start_async_io())
+      return false;
+  }
 
-	return true;
+  return true;
 }
 
 }  // namespace eznetpp

@@ -1,5 +1,7 @@
-#ifndef _EZNETPP_SRC_EVENT_DISPATCHER_H_
-#define _EZNETPP_SRC_EVENT_DISPATCHER_H_
+// Copyright[2015] <kangic21@gmail.com>
+
+#ifndef INCLUDE_EVENT_DISPATCHER_H_
+#define INCLUDE_EVENT_DISPATCHER_H_
 
 #include <vector>
 
@@ -8,26 +10,24 @@
 namespace eznetpp {
 class if_server;
 class event_dispatcher {
-public:
+ public:
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
-  
-public:
+
+ public:
   bool reg_server(if_server* server);
   bool dereg_server(if_server* server);
 
-	bool start_loop();
+  bool start_loop();
 
   void push_event(const char* buffer, int len);
 
   // variables
-private:
+ private:
   std::vector<if_server*> server_container_;
 
-private:
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
 };
-  
 }  // namespace eznetpp
 
-#endif  // _EZNETPP_SRC_EVENT_DISPATCHER_H_
+#endif  // INCLUDE_EVENT_DISPATCHER_H_

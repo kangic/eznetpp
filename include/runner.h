@@ -1,6 +1,7 @@
 // Copyright[2015] <kangic21@gmail.com>
-#ifndef SRC_RUNNER_H_
-#define SRC_RUNNER_H_
+
+#ifndef INCLUDE_RUNNER_H_
+#define INCLUDE_RUNNER_H_
 
 #include "./macros.h"
 
@@ -11,25 +12,24 @@ namespace eznetpp {
 class if_server;
 
 class runner {
-public:
+ public:
   runner(void);
   virtual ~runner(void);
 
-public:
+ public:
   void register_server(if_server* listener);
   void deregister_server(if_server* listener);
 
   void run(void);
 
-private:
-  DISALLOW_COPY_AND_ASSIGN(runner);
+  // variables
+ private:
+  event_dispatcher evt_dispatcher;
 
-	// variables
-private:
-	event_dispatcher evt_dispatcher;
+  DISALLOW_COPY_AND_ASSIGN(runner);
 };
 }  // namespace eznetpp
 
 
-#endif  // SRC_RUNNER_H_
+#endif  // INCLUDE_RUNNER_H_
 
