@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(eznetpp_build)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
