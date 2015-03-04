@@ -1,8 +1,9 @@
 // Copyright [2015] <kangic21@gmail.com>
 
-#include <cerrno>
-
 #include "../include/dummy_server.h"
+
+#include <errno.h>
+
 #include "../include/logger.h"
 
 namespace eznetpp {
