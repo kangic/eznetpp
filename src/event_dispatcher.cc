@@ -1,6 +1,5 @@
 #include "../include/event_dispatcher.h"
-
-#include <cstdio>
+#include "../include/logger.h"
 
 #include "../include/if_server.h"
 

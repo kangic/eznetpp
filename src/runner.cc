@@ -1,8 +1,7 @@
 // Copyright[2015] <kangic21@gmail.com>
 
 #include "../include/runner.h"
-
-#include <cstdio>
+#include "../include/logger.h"
 
 namespace eznetpp {
 
@@ -29,15 +28,15 @@ void runner::deregister_server(if_server* listener) {
 }
 
 void runner::run(void) {
-	printf("runner::run() ->\n");
+	logger::instance().log(logger::log_level::debug, "runner::run() ->\n");
 	if (evt_dispatcher.start_loop() == false) {
-		printf("runner::run() <- evt_dispatcher.start_loop() failed..\n");
+		logger::instance().log(logger::log_level::debug, "runner::run() <- evt_dispatcher.start_loop() failed..\n");
 		return;
 	}
 
 	while(true) {
 	}
-	printf("runner::run() <-\n");
+	logger::instance().log(logger::log_level::debug, "runner::run() <-\n");
 }
 
 }  // namespace eznetpp

@@ -1,6 +1,5 @@
 #include "../include/dummy_server.h"
-
-#include <cstdio>
+#include "../include/logger.h"
 
 #include <errno.h>
 
@@ -30,15 +29,15 @@ void dummy_server::set_env(const std::string& ip, unsigned int port
 }
 
 int dummy_server::start_async_io() {
-	printf("dummy_server::start_async_io() ->\n");
+	logger::instance().log(logger::log_level::debug, "dummy_server::start_async_io() ->\n");
 	int ret = pthread_create(&accept_th_id, NULL, accept_thread_caller, (void *)this);
 
-	printf("dummy_server::start_async_io() - ret : %d\n", ret);
 	if (ret != 0) {
-		printf("dummy_server::start_async_io() - pthread_create failed(%d)\n", errno);
+		logger::instance().log(logger::log_level::error, "dummy_server::start_async_io() - pthread_create failed(%d)\n", errno);
 		return -1;
 	}
 
+	logger::instance().log(logger::log_level::debug, "dummy_server::start_async_io() <-\n");
 	return 0;
 }
 
@@ -49,17 +48,17 @@ int dummy_server::write(const dummy_connection& conn, const std::string& msg
 
 // work thread for accepting to a client
 void* dummy_server::accept_thread_caller(void* arg) {
-	printf("dummy_server::accept_thread_caller() ->\n");
 	return ((dummy_server*)arg)->accept_thread(arg);
 }
 
 void* dummy_server::accept_thread(void* arg) {
-	printf("hello\n");
+	logger::instance().log(logger::log_level::debug, "dummy_server::accept_thread() ->\n");
 
 	while(1) {
 
 	}
 
+	logger::instance().log(logger::log_level::debug, "dummy_server::accept_thread() ->\n");
 	return NULL;
 }
 

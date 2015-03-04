@@ -21,8 +21,7 @@ public:
 
 	static logger& instance();
 
-	void log(log_level level, const std::string& msg, const std::string& file = ""
-					, unsigned int line = 0, const std::string& func = "");
+	void log(log_level level, const char* format, ...);
 	
 protected:
 	friend class cleanup;

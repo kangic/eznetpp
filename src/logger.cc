@@ -3,6 +3,7 @@
 #include "../include/logger.h"
 
 #include <cstdio>
+#include <cstdarg>
 
 namespace eznetpp {
 
@@ -35,13 +36,16 @@ logger::cleanup::~cleanup() {
 	}
 }
 
-void logger::log(log_level level, const std::string& msg, const std::string& file
-								, unsigned int line, const std::string& func) {
+void logger::log(log_level level, const char* format, ...) {
 	std::lock_guard<std::mutex> guard(log_mutex);
-	printf("[%s] %s", log_level_str[level], msg.c_str());
+	printf("[%s] ", log_level_str[level]);
 
-	if (file != "")
-		printf("\t => occured at %s() - %d line in %s\n", func.c_str(), line, file.c_str());
+	va_list arg;
+	int count;
+
+	va_start(arg, format);
+	count = vprintf(format, arg);
+	va_end(arg);
 }
 
 

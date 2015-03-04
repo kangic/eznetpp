@@ -21,3 +21,6 @@ eznetpp todo list
 
 ### Dummy Connection
 - [ ] Send a mock event for testing.
+
+### Logger Class
+- [x] make a logger class using by singleton pattern.
