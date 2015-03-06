@@ -7,8 +7,8 @@
 
 namespace eznetpp {
 
-logger* logger::inst;
-std::mutex logger::log_mutex;
+logger* logger::_inst;
+std::mutex logger::_log_mutex;
 
 const char* log_level_str[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG", };
 
@@ -19,23 +19,23 @@ logger::~logger() {
 }
 
 logger& logger::instance() {
-  std::lock_guard<std::mutex> guard(log_mutex);
-  if (inst == nullptr)
-    inst = new logger();
+  std::lock_guard<std::mutex> guard(_log_mutex);
+  if (_inst == nullptr)
+    _inst = new logger();
 
-  return *inst;
+  return *_inst;
 }
 
 logger::cleanup::~cleanup() {
-  std::lock_guard<std::mutex> guard(logger::log_mutex);
-  if (logger::inst != nullptr) {
-    delete logger::inst;
-    logger::inst = nullptr;
+  std::lock_guard<std::mutex> guard(logger::_log_mutex);
+  if (logger::_inst != nullptr) {
+    delete logger::_inst;
+    logger::_inst = nullptr;
   }
 }
 
 void logger::log(log_level level, const char* format, ...) {
-  std::lock_guard<std::mutex> guard(log_mutex);
+  std::lock_guard<std::mutex> guard(_log_mutex);
   printf("[%s] ", log_level_str[level]);
 
   va_list arg;
@@ -45,6 +45,4 @@ void logger::log(log_level level, const char* format, ...) {
   count = vprintf(format, arg);
   va_end(arg);
 }
-
-
 }  // namespace eznetpp

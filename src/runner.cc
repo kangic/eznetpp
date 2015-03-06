@@ -12,7 +12,7 @@ runner::~runner(void) {
 }
 
 void runner::register_server(if_server* listener) {
-  bool ret = evt_dispatcher.reg_server(listener);
+  bool ret = _evt_dispatcher.reg_server(listener);
 
   if (ret == false) {
     // todo : print error log
@@ -20,7 +20,7 @@ void runner::register_server(if_server* listener) {
 }
 
 void runner::deregister_server(if_server* listener) {
-  bool ret = evt_dispatcher.dereg_server(listener);
+  bool ret = _evt_dispatcher.dereg_server(listener);
 
   if (ret == false) {
     // todo : print error log
@@ -29,7 +29,7 @@ void runner::deregister_server(if_server* listener) {
 
 void runner::run(void) {
   logger::instance().log(logger::log_level::debug, "runner::run() ->\n");
-  if (evt_dispatcher.start_loop() == false) {
+  if (_evt_dispatcher.start_loop() == false) {
     logger::instance().log(logger::log_level::debug
         , "runner::run() <- evt_dispatcher.start_loop() failed..\n");
     return;

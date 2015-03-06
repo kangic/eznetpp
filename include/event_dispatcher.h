@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "./macros.h"
+#include "./event.h"
 
 namespace eznetpp {
 class if_server;
@@ -24,7 +25,8 @@ class event_dispatcher {
 
   // variables
  private:
-  std::vector<if_server*> server_container_;
+  std::vector<if_server*> _server_container;
+  std::vector<event*> _evt_container;
 
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
 };

@@ -24,7 +24,7 @@ class runner {
 
   // variables
  private:
-  event_dispatcher evt_dispatcher;
+  event_dispatcher _evt_dispatcher;
 
   DISALLOW_COPY_AND_ASSIGN(runner);
 };

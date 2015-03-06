@@ -13,10 +13,12 @@ class usr_server : public eznetpp::dummy_server {
 
  public:
   // override
-  void on_accept(const eznetpp::dummy_connection& conn);
+  void on_accept(const eznetpp::dummy_connection& conn, int err_no);
   void on_read(const eznetpp::dummy_connection& conn, const std::string& msg
-                     , int len);
-  void on_write(const eznetpp::dummy_connection& conn, unsigned int len);
+      , int len, int err_no);
+  void on_write(const eznetpp::dummy_connection& conn, unsigned int len
+      , int err_no);
+  void on_close(const eznetpp::dummy_connection& conn, int err_no);
 };
 
 #endif  // TEST_USR_SERVER_H_

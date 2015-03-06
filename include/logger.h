@@ -32,13 +32,13 @@ class logger {
     ~cleanup();
   };
 
-  static logger* inst;
+  static logger* _inst;
 
  private:
   logger(void);
   virtual ~logger(void);
 
-  static std::mutex log_mutex;
+  static std::mutex _log_mutex;
 
   DISALLOW_COPY_AND_ASSIGN(logger);
 };

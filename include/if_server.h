@@ -14,10 +14,12 @@ class if_server {
   virtual ~if_server() {}
 
  public:
-  virtual void on_accept(const dummy_connection& conn) = 0;
+  virtual void on_accept(const dummy_connection& conn, int err_no) = 0;
   virtual void on_read(const dummy_connection& conn, const std::string& msg
-                     , int len) = 0;
-  virtual void on_write(const dummy_connection& conn, unsigned int len) = 0;
+      , int len, int err_no) = 0;
+  virtual void on_write(const dummy_connection& conn, unsigned int len
+      , int err_no) = 0;
+  virtual void on_close(const dummy_connection& conn, int err_no) = 0;
 
   virtual int start_async_io() = 0;
 };
