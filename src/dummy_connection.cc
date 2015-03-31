@@ -21,4 +21,15 @@ int dummy_connection::socket() {
   return sock_id;
 }
 
+int dummy_connection::read(std::string data, int received_len) {
+  data = "ok read it!";
+  received_len = data.length();
+
+  return 0;
+}
+
+int dummy_connection::write(const std::string& data, int len) {
+  return 0;
+}
+
 }  // namespace eznetpp

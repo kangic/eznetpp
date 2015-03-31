@@ -5,13 +5,13 @@
 
 #include <string>
 #include <vector>
-#include <thread>
 
 #include "./macros.h"
 #include "./if_server.h"
 #include "./event_dispatcher.h"
 
 namespace eznetpp {
+class dummy_connection;
 class dummy_server : public if_server {
  public:
   dummy_server();
@@ -30,9 +30,8 @@ class dummy_server : public if_server {
   const std::vector<dummy_connection*>& get_connection_list();
 
  protected:
-  // static void* accept_thread_caller(void* arg);
-  // void* accept_thread(void* arg);
-  void* accept_thread(void);
+  static void* accept_thread_caller(void* arg);
+  void* accept_thread(void* arg);
 
  private:
   std::string host_ip;
@@ -41,8 +40,7 @@ class dummy_server : public if_server {
 
   int server_socket;
 
-  // pthread_t accept_th_id;
-  std::thread accept_th;
+  pthread_t accept_th_id;
 
   std::vector<dummy_connection*> connections;
 };

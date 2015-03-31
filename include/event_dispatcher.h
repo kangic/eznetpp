@@ -4,6 +4,7 @@
 #define INCLUDE_EVENT_DISPATCHER_H_
 
 #include <vector>
+#include <string>
 
 #include "./macros.h"
 #include "./event.h"
@@ -21,9 +22,6 @@ class event_dispatcher {
 
   bool start_loop();
 
-  void push_event(const char* buffer, int len);
-
-  // variables
  private:
   std::vector<if_server*> _server_container;
   std::vector<event*> _evt_container;

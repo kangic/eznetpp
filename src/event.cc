@@ -18,8 +18,20 @@ void event::set(event_type type, const std::string& data, int data_len
   _err_no = err_no;
 }
 
-event_type type()
-const std::string& data()
-int data_length()
-int err_no()
+event_type event::type() {
+  return type;
+}
+
+const std::string& event::data() {
+  return data;
+}
+
+int event::data_length() {
+  return data_len;
+}
+
+int event::err_no() {
+  return err_no;
+}
+
 }  // namespace eznetpp

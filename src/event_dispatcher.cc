@@ -54,6 +54,4 @@ bool event_dispatcher::start_loop() {
   return true;
 }
 
-void event_dispatcher::push_event(const char* buffer, int len) {
-}
 }  // namespace eznetpp
