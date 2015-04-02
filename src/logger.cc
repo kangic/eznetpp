@@ -8,7 +8,6 @@
 namespace eznetpp {
 
 logger* logger::_inst;
-std::mutex logger::_log_mutex;
 
 const char* log_level_str[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG", };
 
@@ -19,7 +18,7 @@ logger::~logger() {
 }
 
 logger& logger::instance() {
-  std::lock_guard<std::mutex> guard(_log_mutex);
+  // TODO(kangic) lock
   if (_inst == nullptr)
     _inst = new logger();
 
@@ -27,7 +26,7 @@ logger& logger::instance() {
 }
 
 logger::cleanup::~cleanup() {
-  std::lock_guard<std::mutex> guard(logger::_log_mutex);
+  // TODO(kangic) lock
   if (logger::_inst != nullptr) {
     delete logger::_inst;
     logger::_inst = nullptr;
@@ -35,7 +34,7 @@ logger::cleanup::~cleanup() {
 }
 
 void logger::log(log_level level, const char* format, ...) {
-  std::lock_guard<std::mutex> guard(_log_mutex);
+  // TODO(kangic) lock
   printf("[%s] ", log_level_str[level]);
 
   va_list arg;
