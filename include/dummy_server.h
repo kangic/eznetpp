@@ -8,7 +8,6 @@
 
 #include "./macros.h"
 #include "./if_server.h"
-#include "./event_dispatcher.h"
 
 namespace eznetpp {
 class dummy_connection;
@@ -21,11 +20,7 @@ class dummy_server : public if_server {
   // override
   int start_async_io();
 
-  void set_env(const std::string& ip, unsigned int port
-      , unsigned int max_accepts);
-
-  int write(const dummy_connection& conn, const std::string& msg, int len);
-  int broadcasting(const std::string& msg, int len);
+  void set_env(int port, int max_accepts);
 
   const std::vector<dummy_connection*>& get_connection_list();
 
@@ -34,7 +29,6 @@ class dummy_server : public if_server {
   void* accept_thread(void* arg);
 
  private:
-  std::string host_ip;
   int host_port;
   int max_accepts_cnt;
 
