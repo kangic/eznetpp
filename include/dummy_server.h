@@ -10,7 +10,6 @@
 #include "./if_server.h"
 
 namespace eznetpp {
-class dummy_connection;
 class dummy_server : public if_server {
  public:
   dummy_server();
@@ -22,7 +21,7 @@ class dummy_server : public if_server {
 
   void set_env(int port, int max_accepts);
 
-  const std::vector<dummy_connection*>& get_connection_list();
+  const std::vector<connection*>& get_connection_list();
 
  protected:
   static void* accept_thread_caller(void* arg);
@@ -36,7 +35,7 @@ class dummy_server : public if_server {
 
   pthread_t accept_th_id;
 
-  std::vector<dummy_connection*> connections;
+  std::vector<connection*> connections;
 };
 }  // namespace eznetpp
 

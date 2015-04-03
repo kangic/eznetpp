@@ -64,7 +64,7 @@ void* dummy_server::accept_thread(void* arg) {
     // todo : wait for accepting a client
     ++local_sock_id;
 
-    dummy_connection* dc = new dummy_connection();
+    connection* dc = new dummy_connection();
     connections.push_back(dc);
 
     on_accept(*dc, 0);
