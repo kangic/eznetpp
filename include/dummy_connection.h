@@ -6,22 +6,17 @@
 #include <string>
 
 #include "./macros.h"
+#include "./connection.h"
 
 namespace eznetpp {
-class dummy_connection {
+class dummy_connection : public connection {
  public:
   dummy_connection();
   virtual ~dummy_connection();
 
  public:
-  void socket(int id);
-  int socket();
-
-  int read(std::string data, int received_len);
+  int read(std::string data, int* received_len);
   int write(const std::string& data, int len);
-
- private:
-  int sock_id;
 };
 }  // namespace eznetpp
 

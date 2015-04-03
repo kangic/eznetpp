@@ -6,24 +6,15 @@ namespace eznetpp {
 
 const int MAX_SOCK_ID = 0xFFFF;
 
-dummy_connection::dummy_connection()
-: sock_id(-1) {
+dummy_connection::dummy_connection() {
 }
 
 dummy_connection::~dummy_connection() {
 }
 
-void dummy_connection::socket(int id) {
-  sock_id = id;
-}
-
-int dummy_connection::socket() {
-  return sock_id;
-}
-
-int dummy_connection::read(std::string data, int received_len) {
+int dummy_connection::read(std::string data, int* received_len) {
   data = "ok read it!";
-  received_len = data.length();
+  *received_len = data.length();
 
   return 0;
 }
