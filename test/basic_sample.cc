@@ -6,7 +6,7 @@
 // And then I will write to library codes.
 int main(void) {
   // it's user class for server
-  usr_server s("192.168.1.23", 6666, 5);
+  usr_server s(6666, 5);
   eznetpp::runner r;
 
   r.register_server(&s);

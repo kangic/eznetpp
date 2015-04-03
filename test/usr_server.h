@@ -3,22 +3,22 @@
 
 #include <string>
 
-#include "../include/dummy_server.h"
+#include "../include/tcp_server.h"
 
-class usr_server : public eznetpp::dummy_server {
+class usr_server : public eznetpp::tcp_server {
  public:
   usr_server();
-  usr_server(const std::string ip, unsigned int port, unsigned int max_accepts);
+  usr_server(int port, int max_accepts);
   virtual ~usr_server();
 
  public:
   // override
-  void on_accept(const eznetpp::dummy_connection& conn, int err_no);
-  void on_read(const eznetpp::dummy_connection& conn, const std::string& msg
+  void on_accept(const eznetpp::connection& conn, int err_no);
+  void on_read(const eznetpp::connection& conn, const std::string& msg
       , int len, int err_no);
-  void on_write(const eznetpp::dummy_connection& conn, unsigned int len
+  void on_write(const eznetpp::connection& conn, unsigned int len
       , int err_no);
-  void on_close(const eznetpp::dummy_connection& conn, int err_no);
+  void on_close(const eznetpp::connection& conn, int err_no);
 };
 
 #endif  // TEST_USR_SERVER_H_
