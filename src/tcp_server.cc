@@ -11,6 +11,8 @@
 
 #include "../include/logger.h"
 
+#include "../include/dummy_connection.h"
+
 namespace eznetpp {
 
 const int default_port_num = 6666;
@@ -60,18 +62,25 @@ void* tcp_server::accept_thread_caller(void* arg) {
   return (reinterpret_cast<tcp_server*>(arg))->accept_thread(arg);
 }
 
+
 void* tcp_server::accept_thread(void* arg) {
   logger::instance().log(logger::log_level::debug
       , "tcp_server::accept_thread() ->\n");
 
   struct sockaddr_in client_addr;
+  socklen_t client_addr_len = sizeof(client_addr);
 
   while (1) {
     // todo : wait for accepting a client
     int client_sock = accept(server_socket, (struct sockaddr *)&client_addr
-        , sizeof(client_addr));
+        , &client_addr_len);
 
-    sleep(10);
+    logger::instance().log(logger::log_level::debug
+        , "tcp_server::accept_thread() - client socket id : %d\n", client_sock);
+
+    connection* dc = new dummy_connection();
+
+    on_accept(*dc, 0);
   }
 
   logger::instance().log(logger::log_level::debug
@@ -91,7 +100,7 @@ int tcp_server::setup_server_socket() {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = host_port;
+  server_addr.sin_port = htons(host_port);
 
   int ret;
   ret = bind(server_socket, (struct sockaddr *)&server_addr
@@ -112,6 +121,9 @@ int tcp_server::setup_server_socket() {
 
     return errno;
   }
+
+  logger::instance().log(logger::log_level::debug
+      , "tcp_server::setup_server_socket() <-\n");
 
   return 0;
 }
