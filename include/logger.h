@@ -3,6 +3,10 @@
 #ifndef INCLUDE_LOGGER_H_
 #define INCLUDE_LOGGER_H_
 
+#ifdef __cplusplus > 199711L
+#include <mutex>
+#endif
+
 #include "./macros.h"
 
 namespace eznetpp {
@@ -35,6 +39,10 @@ class logger {
  private:
   logger(void);
   virtual ~logger(void);
+
+#ifdef __cplusplus > 199711L
+  static std::mutex _log_mutex;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(logger);
 };
