@@ -10,8 +10,8 @@
 namespace eznetpp {
 class connection {
  public:
-  connection() {};
-  virtual ~connection() {};
+  connection() {}
+  virtual ~connection() {}
 
  public:
   void socket(int id) { sock_id = id; }
@@ -19,6 +19,7 @@ class connection {
 
   virtual int read(std::string data, int* received_len) = 0;
   virtual int write(const std::string& data, int len) = 0;
+  virtual int close() = 0;
 
  protected:
   int sock_id;
