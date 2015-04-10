@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include "./macros.h"
+
 namespace eznetpp {
 class event {
  public:
@@ -31,6 +33,8 @@ class event {
   std::string _data;
   int _data_len;
   int _err_no;
+
+  DISALLOW_COPY_AND_ASSIGN(event);
 };
 }  // namespace eznetpp
 
