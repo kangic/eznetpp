@@ -67,7 +67,7 @@ void* dummy_server::accept_thread(void* arg) {
     connection* dc = new dummy_connection();
     connections.push_back(dc);
 
-    on_accept(*dc, 0);
+    on_accept(dc, 0);
 
     sleep(10);
   }

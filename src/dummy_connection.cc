@@ -23,4 +23,8 @@ int dummy_connection::write(const std::string& data, int len) {
   return 0;
 }
 
+int dummy_connection::close() {
+  return 0;
+}
+
 }  // namespace eznetpp
