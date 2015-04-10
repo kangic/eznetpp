@@ -13,12 +13,12 @@ class usr_server : public eznetpp::tcp_server {
 
  public:
   // override
-  void on_accept(const eznetpp::connection& conn, int err_no);
-  void on_read(const eznetpp::connection& conn, const std::string& msg
+  void on_accept(eznetpp::connection* conn, int err_no);
+  void on_read(eznetpp::connection* conn, const std::string& msg
       , int len, int err_no);
-  void on_write(const eznetpp::connection& conn, unsigned int len
+  void on_write(eznetpp::connection* conn, unsigned int len
       , int err_no);
-  void on_close(const eznetpp::connection& conn, int err_no);
+  void on_close(eznetpp::connection* conn, int err_no);
 };
 
 #endif  // TEST_USR_SERVER_H_
