@@ -3,7 +3,7 @@
 #ifndef INCLUDE_LOGGER_H_
 #define INCLUDE_LOGGER_H_
 
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
 #include <mutex>
 #endif
 
@@ -40,7 +40,7 @@ class logger {
   logger(void);
   virtual ~logger(void);
 
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
   static std::mutex _log_mutex;
 #endif
 

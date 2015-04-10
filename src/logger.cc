@@ -8,7 +8,7 @@
 namespace eznetpp {
 
 logger* logger::_inst;
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
 std::mutex logger::_log_mutex;
 #endif
 
@@ -22,7 +22,7 @@ logger::~logger() {
 
 logger& logger::instance() {
   // TODO(kangic) lock : pthread_mutex
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
   std::lock_guard<std::mutex> guard(logger::_log_mutex);
 #endif
 
@@ -34,7 +34,7 @@ logger& logger::instance() {
 
 logger::cleanup::~cleanup() {
   // TODO(kangic) lock : pthread_mutex
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
   std::lock_guard<std::mutex> guard(logger::_log_mutex);
 #endif
 
@@ -46,7 +46,7 @@ logger::cleanup::~cleanup() {
 
 void logger::log(log_level level, const char* format, ...) {
   // TODO(kangic) lock : pthread_mutex
-#ifdef __cplusplus > 199711L
+#if __cplusplus > 199711L
   std::lock_guard<std::mutex> guard(logger::_log_mutex);
 #endif
 
