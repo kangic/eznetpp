@@ -17,11 +17,16 @@ class connection {
   void socket(int id) { sock_id = id; }
   int socket() { return sock_id; }
 
-  virtual int read(std::string data, int* received_len) = 0;
-  virtual int write(const std::string& data, int len) = 0;
+  // override by user
+  virtual void on_read(const std::string& msg, int len, int err_no) = 0;
+  virtual void on_write(unsigned int len, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
+
+  // override by lib
+  virtual int read(std::string msg, int* received_len) = 0;
+  virtual int write(const std::string& msg, int len) = 0;
   virtual int close() = 0;
 
- protected:
   int sock_id;
 };
 }  // namespace eznetpp

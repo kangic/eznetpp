@@ -16,10 +16,6 @@ class if_server {
  public:
   // override
   virtual void on_accept(connection* conn, int err_no) = 0;
-  virtual void on_read(connection* conn, const std::string& msg, int len
-      , int err_no) = 0;
-  virtual void on_write(connection* conn, unsigned int len, int err_no) = 0;
-  virtual void on_close(connection* conn, int err_no) = 0;
 
   virtual int start_async_io() = 0;
 };
