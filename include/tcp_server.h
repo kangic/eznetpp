@@ -3,7 +3,17 @@
 #ifndef INCLUDE_TCP_SERVER_H_
 #define INCLUDE_TCP_SERVER_H_
 
+#include <sys/epoll.h>
+
+#if __cplusplus <= 199711L
 #include <pthread.h>
+#else
+#include <thread>
+#include <mutex>
+#endif
+
+#include <string>
+#include <map>
 
 #include "./macros.h"
 #include "./if_server.h"
@@ -15,30 +25,54 @@ class tcp_server : public if_server {
   virtual ~tcp_server();
 
   // override
+  virtual void on_accept(connection* conn, int err_no) = 0;
+
   int start_async_io();
 
-  void set_env(int port, int max_accepts);
+  void set_env(int port, int max_connections, bool nonblock);
 
  protected:
-  static void* accept_thread_caller(void* arg);
-  void* accept_thread(void* arg);
-
-  static void* read_thread_caller(void* arg);
-  void* read_thread(void* arg);
+#if __cplusplus <= 199711L
+  static void* work_thread_caller(void* arg);
+  void* work_thread(void* arg);
+#else
+  void* work_thread(void);
+#endif
 
  private:
   int setup_server_socket();
+  int create_epoll_fd_and_events();
 
+  int add_fd(int efd, int cfd);
+
+  int set_nonblock(int sock);
+  int set_tcpnodelay(int sock);
+  int set_reuseaddr(int sock);
+  
+  void process_epoll_event(int efd, struct epoll_event* ev, int ev_cnt);
+  int do_accept();
+  int do_read(struct epoll_event ev);
 
   ///////////////////////////////////
   // variables
-  int host_port;
-  int max_accepts_cnt;
+  int _host_port;
+  int _max_connections_cnt;
+  bool _use_nonblock_opt;
 
-  int server_socket;
+  int _server_socket;
 
-  pthread_t accept_th_id;
-  pthread_t read_th_id;
+  int _epoll_fd;
+  struct epoll_event* _events;
+
+#if __cplusplus <= 199711L
+  pthread_t _work_th_id;
+#else
+  std::thread _work_th;
+#endif
+
+  std::map<int, connection*> _conn_maps;
+
+  DISALLOW_COPY_AND_ASSIGN(tcp_server);
 };
 }  // namespace eznetpp
 
