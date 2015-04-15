@@ -7,8 +7,8 @@ SET(eznetpplib_srcs
 ${PROJECT_SOURCE_DIR}/logger.cc
 ${PROJECT_SOURCE_DIR}/runner.cc
 ${PROJECT_SOURCE_DIR}/event_dispatcher.cc
-${PROJECT_SOURCE_DIR}/dummy_server.cc
-${PROJECT_SOURCE_DIR}/dummy_connection.cc
+#${PROJECT_SOURCE_DIR}/dummy_server.cc
+#${PROJECT_SOURCE_DIR}/dummy_connection.cc
 ${PROJECT_SOURCE_DIR}/tcp_server.cc
 ${PROJECT_SOURCE_DIR}/tcp_connection.cc
 )

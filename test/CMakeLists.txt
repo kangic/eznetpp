@@ -6,6 +6,7 @@ set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 SET(eznetpptest_srcs
 ${PROJECT_SOURCE_DIR}/basic_sample.cc
 ${PROJECT_SOURCE_DIR}/usr_server.cc
+${PROJECT_SOURCE_DIR}/usr_connection.cc
 )
 
 find_package(Threads)
