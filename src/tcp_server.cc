@@ -211,6 +211,10 @@ int tcp_server::add_fd(int efd, int cfd) {
   return epoll_ctl(efd, EPOLL_CTL_ADD, cfd, &ev);
 }
 
+int tcp_server::del_fd(int efd, int cfd) {
+  return epoll_ctl(efd, EPOLL_CTL_DEL, cfd, NULL);
+}
+
 int tcp_server::set_nonblock(int sock) {
   int flags = fcntl(sock, F_GETFL);
   flags |= O_NONBLOCK;
@@ -233,7 +237,14 @@ int tcp_server::set_reuseaddr(int sock) {
 
 void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
                                      , int ev_cnt) {
+  logger::instance().log(logger::log_level::debug
+      , "tcp_server::process_epoll_event() ->\n");
+  
   int changed_events = epoll_wait(efd, ev, ev_cnt, -1);
+  logger::instance().log(logger::log_level::debug
+      , "tcp_server::process_epoll_event() - changed_events : %d\n"
+      , changed_events);
+
   for (int i = 0; i < changed_events; i++) {
     if (ev[i].data.fd == _server_socket) {
       do_accept();
@@ -241,6 +252,9 @@ void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
       do_read(ev[i]);
     }
   }
+
+  logger::instance().log(logger::log_level::debug
+      , "tcp_server::process_epoll_event() <-\n");
 }
 
 int tcp_server::do_accept() {
@@ -293,7 +307,7 @@ int tcp_server::do_read(struct epoll_event ev) {
   connection* dc = _conn_maps[client_fd];
   std::string msg = "";
   int len;
-  int ret = dc->read_from_socket(msg, &len);
+  int ret = dc->read_from_socket();
 
   if (ret <= 0) {
     // TODO(kangic) : delete the fd, do_del_fd(efd,cfd);
@@ -303,7 +317,7 @@ int tcp_server::do_read(struct epoll_event ev) {
                            , client_fd);
 
     _conn_maps.erase(client_fd);
-    epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+    del_fd(_epoll_fd, client_fd);
   } else {
     logger::instance().log(logger::log_level::debug
                            , "tcp_server::do_read() - read %d bytes\n"

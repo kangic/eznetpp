@@ -47,6 +47,7 @@ class tcp_server : public if_server {
   int create_epoll_fd_and_events();
 
   int add_fd(int efd, int cfd);
+  int del_fd(int efd, int cfd);
 
   int set_nonblock(int sock);
   int set_tcpnodelay(int sock);
