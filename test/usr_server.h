@@ -13,7 +13,7 @@ class usr_server : public eznetpp::tcp_server {
 
  public:
   // override
-  void on_accept(eznetpp::connection* conn, int err_no);
+  void on_accept(int client_id);
 };
 
 #endif  // TEST_USR_SERVER_H_
