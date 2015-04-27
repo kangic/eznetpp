@@ -6,6 +6,7 @@
 #include <string>
 
 #include "./macros.h"
+#include "./common.h"
 #include "./connection.h"
 
 namespace eznetpp {
@@ -19,10 +20,9 @@ class tcp_connection : public connection {
   virtual void on_close(int err_no) {}
 
  protected:
-  // override
-  int read(std::string data, int* received_len);
-  int write(const std::string& data, int len);
-  int close();
+  int read_from_socket(void);
+  int write_to_socket(const std::string& data, int len);
+  int close_socket(void);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(tcp_connection);
