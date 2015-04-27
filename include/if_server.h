@@ -15,7 +15,7 @@ class if_server {
 
  public:
   // override
-  virtual void on_accept(connection* conn, int err_no) = 0;
+  virtual void on_accept(int client_id) = 0;
 
   virtual int start_async_io() = 0;
 };
