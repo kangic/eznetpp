@@ -8,6 +8,7 @@ usr_connection::~usr_connection() {
 
 void usr_connection::on_read(const std::string& msg, int len, int err_no) {
   printf("recieved %d bytes\n", len);
+  write_to_socket(msg, len);
 }
 
 void usr_connection::on_write(unsigned int len, int err_no) {
