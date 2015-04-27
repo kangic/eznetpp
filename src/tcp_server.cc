@@ -20,7 +20,7 @@ namespace eznetpp {
 const int default_port_num = 6666;
 const int default_max_conn_cnt = 5000;
 const int default_max_accept_cnt = 15;
-const int max_transfer_bytes = 4096;
+
 bool use_oneshot_opt = false;
 
 
@@ -89,6 +89,10 @@ int tcp_server::start_async_io() {
       , "tcp_server::start_async_io() <-\n");
 
   return 0;
+}
+
+void tcp_server::add_to_polling_list(connection* dc) {
+  _conn_maps[dc->socket_id()] = dc;
 }
 
 // work thread for accepting to a client
@@ -269,33 +273,41 @@ int tcp_server::do_accept() {
     return -1;
   }
 
+  /*
   connection* dc = new tcp_connection();
 
   // TODO(kangic) : save the client's info(addr, port...)
-  dc->socket(client_sock);
+  dc->socket_id(client_sock);
   _conn_maps[client_sock] = dc;
 
-  on_accept(dc, 0);
+  on_accept(dc);
+  */
+  on_accept(client_sock);
 
   return 0;
 }
 
 int tcp_server::do_read(struct epoll_event ev) {
   int client_fd = ev.data.fd;
-  char read_buf[max_transfer_bytes + 1] = {0, };
 
-  int read_bytes = read(client_fd, read_buf, max_transfer_bytes);
+  connection* dc = _conn_maps[client_fd];
+  std::string msg = "";
+  int len;
+  int ret = dc->read_from_socket(msg, &len);
 
-  if (read_bytes <= 0) {
-    //do_del_fd(efd,cfd);
-    close(client_fd);
-    logger::instance().log(logger::log_level::debug, "Close fd %d\n", client_fd);
+  if (ret <= 0) {
+    // TODO(kangic) : delete the fd, do_del_fd(efd,cfd);
+    dc->close_socket();
+    logger::instance().log(logger::log_level::debug
+                           , "tcp_server::do_read() - Close fd %d\n"
+                           , client_fd);
+
+    _conn_maps.erase(client_fd);
+    epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
   } else {
     logger::instance().log(logger::log_level::debug
-                           , "read %d bytes\n", read_bytes);
-
-    connection* dc = _conn_maps[client_fd];
-    dc->on_read(read_buf, read_bytes, 0);
+                           , "tcp_server::do_read() - read %d bytes\n"
+                           , ret);
   }
   
   return 0;

@@ -16,6 +16,7 @@
 #include <map>
 
 #include "./macros.h"
+#include "./common.h"
 #include "./if_server.h"
 
 namespace eznetpp {
@@ -25,11 +26,13 @@ class tcp_server : public if_server {
   virtual ~tcp_server();
 
   // override
-  virtual void on_accept(connection* conn, int err_no) = 0;
+  virtual void on_accept(int client_id) = 0;
 
   int start_async_io();
 
   void set_env(int port, int max_connections, bool nonblock);
+
+  void add_to_polling_list(connection* dc);
 
  protected:
 #if __cplusplus <= 199711L
