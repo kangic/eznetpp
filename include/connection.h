@@ -14,8 +14,8 @@ class connection {
   virtual ~connection() {}
 
  public:
-  void socket(int id) { sock_id = id; }
-  int socket() { return sock_id; }
+  void socket_id(int id) { sock_id = id; }
+  int socket_id() { return sock_id; }
 
   // override by user
   virtual void on_read(const std::string& msg, int len, int err_no) = 0;
@@ -23,10 +23,11 @@ class connection {
   virtual void on_close(int err_no) = 0;
 
   // override by lib
-  virtual int read(std::string msg, int* received_len) = 0;
-  virtual int write(const std::string& msg, int len) = 0;
-  virtual int close() = 0;
+  virtual int read_from_socket(void) = 0;
+  virtual int write_to_socket(const std::string& msg, int len) = 0;
+  virtual int close_socket(void) = 0;
 
+ protected:
   int sock_id;
 };
 }  // namespace eznetpp
