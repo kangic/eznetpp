@@ -4,7 +4,17 @@
 #define INCLUDE_COMMON_H_
 
 namespace eznetpp {
-const int max_transfer_bytes = 4096;
+
+namespace opt {
+  const int max_transfer_bytes = 4096;
+}  // namespace opt
+
+namespace errcode {
+  enum errcode_table {
+    success = 0,
+    
+  };
+}  // namespace errcode
 
 }  // namespace eznetpp
 
