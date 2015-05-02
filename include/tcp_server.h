@@ -5,18 +5,13 @@
 
 #include <sys/epoll.h>
 
-#if __cplusplus <= 199711L
-#include <pthread.h>
-#else
 #include <thread>
 #include <mutex>
-#endif
 
 #include <string>
 #include <map>
 
-#include "./macros.h"
-#include "./common.h"
+#include "./eznetpp.h"
 #include "./if_server.h"
 
 namespace eznetpp {
@@ -35,25 +30,26 @@ class tcp_server : public if_server {
   void add_to_polling_list(connection* dc);
 
  protected:
-#if __cplusplus <= 199711L
-  static void* work_thread_caller(void* arg);
-  void* work_thread(void* arg);
-#else
   void* work_thread(void);
-#endif
 
  private:
   int setup_server_socket();
+
+  // epoll
   int create_epoll_fd_and_events();
 
   int add_fd(int efd, int cfd);
   int del_fd(int efd, int cfd);
 
+  // set to socket options
   int set_nonblock(int sock);
   int set_tcpnodelay(int sock);
   int set_reuseaddr(int sock);
-  
+
+  // call to epoll functions
   void process_epoll_event(int efd, struct epoll_event* ev, int ev_cnt);
+
+  // call to socket functions
   int do_accept();
   int do_read(struct epoll_event ev);
 
@@ -68,12 +64,9 @@ class tcp_server : public if_server {
   int _epoll_fd;
   struct epoll_event* _events;
 
-#if __cplusplus <= 199711L
-  pthread_t _work_th_id;
-#else
   std::thread _work_th;
-#endif
 
+  // socket_id<key>, connection_class<value>
   std::map<int, connection*> _conn_maps;
 
   DISALLOW_COPY_AND_ASSIGN(tcp_server);

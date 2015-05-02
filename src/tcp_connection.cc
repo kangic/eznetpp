@@ -17,8 +17,8 @@ tcp_connection::~tcp_connection() {
 }
 
 int tcp_connection::read_from_socket(void) {
-  char read_buf[max_transfer_bytes + 1] = {0, };
-  int read_bytes = read(sock_id, read_buf, max_transfer_bytes);
+  char read_buf[opt::max_transfer_bytes + 1] = {0, };
+  int read_bytes = read(sock_id, read_buf, opt::max_transfer_bytes);
   // TODO(kangic) : error code 추가
   on_read(read_buf, read_bytes, 0);
   return read_bytes;

@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#include "../include/logger.h"
+#include "../include/eznetpp.h"
 
 #include "../include/tcp_connection.h"
 
@@ -39,11 +39,7 @@ tcp_server::tcp_server(void)
 }
 
 tcp_server::~tcp_server(void) {
-#if __cplusplus <= 199711L
-  pthread_join(_work_th_id, 0);
-#else
   _work_th.join();
-#endif
 }
 
 void tcp_server::set_env(int port, int max_connections, bool nonblock) {
@@ -67,18 +63,9 @@ int tcp_server::start_async_io() {
     return ret;
   }
 
-#if __cplusplus <= 199711L
-  ret = pthread_create(&_work_th_id, nullptr, work_thread_caller
-      , reinterpret_cast<void *>(this));
-#else
   _work_th = std::thread(&tcp_server::work_thread, this);
-#endif
 
-#if __cplusplus <= 199711L
-  if (ret != 0) {
-#else
   if (!_work_th.joinable()) {
-#endif
     logger::instance().log(logger::log_level::error
         , "tcp_server::start_async_io() - accept thread failed to create(%d)\n"
         , errno);
@@ -96,15 +83,7 @@ void tcp_server::add_to_polling_list(connection* dc) {
 }
 
 // work thread for accepting to a client
-#if __cplusplus <= 199711L
-void* tcp_server::work_thread_caller(void* arg) {
-  return (reinterpret_cast<tcp_server*>(arg))->work_thread(arg);
-}
-
-void* tcp_server::work_thread(void* arg) {
-#else
 void* tcp_server::work_thread(void) {
-#endif
   logger::instance().log(logger::log_level::debug
       , "tcp_server::work_thread() ->\n");
 
