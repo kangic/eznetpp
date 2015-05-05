@@ -25,7 +25,7 @@ class tcp_server : public if_server {
 
   int start_async_io();
 
-  void set_env(int port, int max_connections, bool nonblock);
+  void set_env(int port, int max_connections);
 
   void add_to_polling_list(connection* dc);
 
@@ -35,29 +35,32 @@ class tcp_server : public if_server {
  private:
   int setup_server_socket();
 
-  // epoll
+  // functions to the epoll functions
   int create_epoll_fd_and_events();
 
   int add_fd(int efd, int cfd);
   int del_fd(int efd, int cfd);
 
-  // set to socket options
+  // functions to set the socket options
   int set_nonblock(int sock);
   int set_tcpnodelay(int sock);
   int set_reuseaddr(int sock);
 
-  // call to epoll functions
+  // function to call the epoll functions
   void process_epoll_event(int efd, struct epoll_event* ev, int ev_cnt);
 
-  // call to socket functions
+  // functions to call the socket functions
   int do_accept();
   int do_read(struct epoll_event ev);
+
+  // connection map functions
+  void add_to_conn_maps(connection *dc);
+  void del_from_conn_maps(connection *dc);
 
   ///////////////////////////////////
   // variables
   int _host_port;
   int _max_connections_cnt;
-  bool _use_nonblock_opt;
 
   int _server_socket;
 
@@ -68,6 +71,7 @@ class tcp_server : public if_server {
 
   // socket_id<key>, connection_class<value>
   std::map<int, connection*> _conn_maps;
+  std::mutex _conn_maps_mutex;
 
   DISALLOW_COPY_AND_ASSIGN(tcp_server);
 };

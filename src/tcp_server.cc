@@ -21,13 +21,9 @@ const int default_port_num = 6666;
 const int default_max_conn_cnt = 5000;
 const int default_max_accept_cnt = 15;
 
-bool use_oneshot_opt = false;
-
-
 tcp_server::tcp_server(void)
 : _host_port(default_port_num)
 , _max_connections_cnt(default_max_conn_cnt)
-, _use_nonblock_opt(false)
 , _server_socket(-1)
 , _epoll_fd(-1)
 , _events(nullptr) {
@@ -42,10 +38,9 @@ tcp_server::~tcp_server(void) {
   _work_th.join();
 }
 
-void tcp_server::set_env(int port, int max_connections, bool nonblock) {
+void tcp_server::set_env(int port, int max_connections) {
   _host_port = port;
   _max_connections_cnt = max_connections;
-  _use_nonblock_opt = nonblock;
 }
 
 int tcp_server::start_async_io() {
@@ -79,7 +74,17 @@ int tcp_server::start_async_io() {
 }
 
 void tcp_server::add_to_polling_list(connection* dc) {
+  add_to_conn_maps(dc);
+}
+
+void tcp_server::add_to_conn_maps(connection *dc) {
+  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
   _conn_maps[dc->socket_id()] = dc;
+}
+
+void tcp_server::del_from_conn_maps(connection *dc) {
+  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
+  _conn_maps.erase(dc->socket_id());
 }
 
 // work thread for accepting to a client
@@ -178,15 +183,8 @@ int tcp_server::add_fd(int efd, int cfd) {
   struct epoll_event ev;
 
   ev.events = EPOLLIN;
-
-  if (_use_nonblock_opt) {
-    ev.events |= EPOLLET;
-#ifdef USE_ONESHOT_OPT
-  ev.events |= EPOLLONESHOT;
-#endif  // USE_ONESHOT_OPT
-  }
-
   ev.data.fd = cfd;
+
   return epoll_ctl(efd, EPOLL_CTL_ADD, cfd, &ev);
 }
 
@@ -254,9 +252,6 @@ int tcp_server::do_accept() {
   logger::instance().log(logger::log_level::debug
     , "tcp_server::do_accept() - client socket id : %d\n", client_sock);
 
-  if (_use_nonblock_opt)
-    set_nonblock(client_sock);
-
   set_tcpnodelay(client_sock);
 
   if (add_fd(_epoll_fd, client_sock) != 0) {
@@ -266,15 +261,6 @@ int tcp_server::do_accept() {
     return -1;
   }
 
-  /*
-  connection* dc = new tcp_connection();
-
-  // TODO(kangic) : save the client's info(addr, port...)
-  dc->socket_id(client_sock);
-  _conn_maps[client_sock] = dc;
-
-  on_accept(dc);
-  */
   on_accept(client_sock);
 
   return 0;
@@ -289,14 +275,18 @@ int tcp_server::do_read(struct epoll_event ev) {
   int ret = dc->read_from_socket();
 
   if (ret <= 0) {
-    // TODO(kangic) : delete the fd, do_del_fd(efd,cfd);
     dc->close_socket();
     logger::instance().log(logger::log_level::debug
                            , "tcp_server::do_read() - Close fd %d\n"
                            , client_fd);
 
-    _conn_maps.erase(client_fd);
+    del_from_conn_maps(dc);
     del_fd(_epoll_fd, client_fd);
+
+    if (dc != nullptr) {
+      delete dc;
+      dc = nullptr;
+    }
   } else {
     logger::instance().log(logger::log_level::debug
                            , "tcp_server::do_read() - read %d bytes\n"
