@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "./macros.h"
+#include "./eznetpp.h"
 #include "./connection.h"
 
 namespace eznetpp {
