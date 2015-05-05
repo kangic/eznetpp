@@ -16,6 +16,8 @@ event_dispatcher::~event_dispatcher(void) {
 
 bool event_dispatcher::reg_server(if_server* server) {
   std::vector<if_server*>::iterator iter;
+
+  std::lock_guard<std::mutex> guard(_server_container_mutex);
   for (iter = _server_container.begin();
        iter != _server_container.end();
        ++iter) {
@@ -30,6 +32,8 @@ bool event_dispatcher::reg_server(if_server* server) {
 
 bool event_dispatcher::dereg_server(if_server* server) {
   std::vector<if_server*>::iterator iter;
+
+  std::lock_guard<std::mutex> guard(_server_container_mutex);
   for (iter = _server_container.begin();
        iter != _server_container.end();
        ++iter) {
@@ -44,6 +48,8 @@ bool event_dispatcher::dereg_server(if_server* server) {
 
 bool event_dispatcher::start_loop() {
   std::vector<if_server*>::iterator iter;
+
+  std::lock_guard<std::mutex> guard(_server_container_mutex);
   for (iter = _server_container.begin();
        iter != _server_container.end();
        ++iter) {

@@ -5,9 +5,10 @@
 
 #include <vector>
 #include <string>
+#include <mutex>
 
 #include "./macros.h"
-#include "./event.h"
+//#include "./event.h"
 
 namespace eznetpp {
 class if_server;
@@ -24,7 +25,9 @@ class event_dispatcher {
 
  private:
   std::vector<if_server*> _server_container;
-  std::vector<event*> _evt_container;
+  //std::vector<event*> _evt_container;
+
+  std::mutex _server_container_mutex;
 
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
 };
