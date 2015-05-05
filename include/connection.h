@@ -4,6 +4,7 @@
 #define INCLUDE_CONNECTION_H_
 
 #include <string>
+#include <mutex>
 
 #include "./macros.h"
 
@@ -14,8 +15,8 @@ class connection {
   virtual ~connection() {}
 
  public:
-  void socket_id(int id) { sock_id = id; }
-  int socket_id() { return sock_id; }
+  void socket_id(int id) { _sock_id = id; }
+  int socket_id() { return _sock_id; }
 
   // override by user
   virtual void on_read(const std::string& msg, int len, int err_no) = 0;
@@ -28,7 +29,8 @@ class connection {
   virtual int close_socket(void) = 0;
 
  protected:
-  int sock_id;
+  int _sock_id;
+  std::mutex _sock_mutex;
 };
 }  // namespace eznetpp
 
