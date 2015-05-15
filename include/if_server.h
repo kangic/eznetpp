@@ -6,7 +6,6 @@
 #include <string>
 
 #include "./eznetpp.h"
-#include "./connection.h"
 
 namespace eznetpp {
 class if_server {
