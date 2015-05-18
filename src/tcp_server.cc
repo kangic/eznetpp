@@ -27,10 +27,6 @@ tcp_server::tcp_server(void)
 , _server_socket(-1)
 , _epoll_fd(-1)
 , _events(nullptr) {
-#if __cplusplus <= 199711L
-  _work_th_id = -1;
-#endif
-
   _conn_maps.clear();
 }
 
