@@ -15,9 +15,14 @@ class dummy_connection : public connection {
   virtual ~dummy_connection();
 
  public:
+  virtual void on_read(const std::string& msg, int len, int err_no) = 0;
+  virtual void on_write(unsigned int len, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
+
+ protected:
   // override
-  int read(std::string data, int* received_len);
-  int write(const std::string& data, int len);
+  int read(std::string msg, int* received_len);
+  int write(const std::string& msg, int len);
   int close();
 
  private:
