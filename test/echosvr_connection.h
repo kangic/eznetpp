@@ -1,14 +1,14 @@
-#ifndef TEST_USR_CONNECTION_H_
-#define TEST_USR_CONNECTION_H_
+#ifndef TEST_ECHOSVR_CONNECTION_H_
+#define TEST_ECHOSVR_CONNECTION_H_
 
 #include <string>
 
 #include "../include/tcp_connection.h"
 
-class usr_connection : public eznetpp::tcp_connection {
+class echosvr_connection : public eznetpp::tcp_connection {
  public:
-  usr_connection();
-  virtual ~usr_connection();
+  echosvr_connection();
+  virtual ~echosvr_connection();
 
  public:
   // override
@@ -17,4 +17,4 @@ class usr_connection : public eznetpp::tcp_connection {
   void on_close(int err_no);
 };
 
-#endif  // TEST_USR_CONNECTION_H_
+#endif  // TEST_ECHOSVR_CONNECTION_H_
