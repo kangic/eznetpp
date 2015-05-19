@@ -2,10 +2,6 @@
 
 #include "../include/tcp_connection.h"
 
-#include <unistd.h>
-#include <sys/socket.h>
-#include <errno.h>
-
 namespace eznetpp {
 
 const int MAX_SOCK_ID = 0xFFFF;
@@ -28,7 +24,7 @@ int tcp_connection::read_from_socket(void) {
 
 int tcp_connection::write_to_socket(const std::string& data, int len) {
   std::lock_guard<std::mutex> guard(_sock_mutex);
-  int send_bytes = send(_sock_id, data.c_str(), len, 0);
+  int send_bytes = write(_sock_id, data.c_str(), len);
   // TODO(kangic) : error code 추가
   on_write(send_bytes, 0);
   return send_bytes;

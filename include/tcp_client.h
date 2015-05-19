@@ -3,10 +3,7 @@
 #ifndef INCLUDE_TCP_CLIENT_H_
 #define INCLUDE_TCP_CLIENT_H_
 
-#include <sys/epoll.h>
-
-#include <thread>
-#include <mutex>
+#include <eznetpp.h>
 
 namespace eznetpp {
 class tcp_client {
@@ -14,8 +11,13 @@ class tcp_client {
   tcp_client();
   virtual ~tcp_client();
 
+  // override
+  virtual void on_connect(int client_id) = 0;
+
+  int start_async_io();
+
  private:
-  DISALLOW_COPY_AND_ASSIGN(tcp_server);
+  DISALLOW_COPY_AND_ASSIGN(tcp_client);
 };
 }  // namespace eznetpp
 

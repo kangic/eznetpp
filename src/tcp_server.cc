@@ -2,15 +2,6 @@
 
 #include "../include/tcp_server.h"
 
-#include <errno.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-
 #include "../include/eznetpp.h"
 
 #include "../include/tcp_connection.h"

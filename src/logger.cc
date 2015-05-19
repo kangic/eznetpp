@@ -5,8 +5,6 @@
 
 #include "../include/logger.h"
 
-#include "../include/common.h"
-
 namespace eznetpp {
 
 logger* logger::_inst;

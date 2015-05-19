@@ -2,14 +2,6 @@
 
 #include "../include/tcp_client.h"
 
-#include <errno.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
 
 #include "../include/eznetpp.h"
 
@@ -23,6 +15,10 @@ tcp_client::tcp_client(void) {
 
 tcp_client::~tcp_client(void) {
 
+}
+
+int tcp_client::start_async_io() {
+  return 0;
 }
 
 }  // namespace eznetpp

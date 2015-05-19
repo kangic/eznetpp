@@ -3,18 +3,11 @@
 #ifndef INCLUDE_TCP_SERVER_H_
 #define INCLUDE_TCP_SERVER_H_
 
-#include <sys/epoll.h>
-
-#include <thread>
-#include <mutex>
-
-#include <string>
-#include <map>
-
 #include "./eznetpp.h"
 #include "./if_server.h"
 
 namespace eznetpp {
+class connection;
 class tcp_server : public if_server {
  public:
   tcp_server();

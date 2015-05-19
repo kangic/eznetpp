@@ -3,12 +3,7 @@
 #ifndef INCLUDE_TCP_CONNECTION_H_
 #define INCLUDE_TCP_CONNECTION_H_
 
-#include <string>
-#include <mutex>
-
 #include "./eznetpp.h"
-#include "./macros.h"
-#include "./common.h"
 #include "./connection.h"
 
 namespace eznetpp {
