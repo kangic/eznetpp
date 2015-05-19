@@ -3,10 +3,7 @@
 #ifndef INCLUDE_CONNECTION_H_
 #define INCLUDE_CONNECTION_H_
 
-#include <string>
-#include <mutex>
-
-#include "./macros.h"
+#include <eznetpp.h>
 
 namespace eznetpp {
 class connection {
@@ -30,7 +27,6 @@ class connection {
 
  protected:
   int _sock_id;
-  std::mutex _sock_mutex;
 };
 }  // namespace eznetpp
 
