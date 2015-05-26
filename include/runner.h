@@ -3,9 +3,9 @@
 #ifndef INCLUDE_RUNNER_H_
 #define INCLUDE_RUNNER_H_
 
-#include "./macros.h"
+#include <eznetpp.h>
 
-#include "../include/event_dispatcher.h"
+//#include "../include/event_dispatcher.h"
 
 namespace eznetpp {
 
@@ -24,7 +24,10 @@ class runner {
 
   // variables
  private:
-  event_dispatcher _evt_dispatcher;
+  //event_dispatcher _evt_dispatcher;
+  std::vector<if_server*> _server_container;
+  std::mutex _server_container_mutex;
+
 
   DISALLOW_COPY_AND_ASSIGN(runner);
 };
