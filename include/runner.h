@@ -5,11 +5,10 @@
 
 #include <eznetpp.h>
 
-//#include "../include/event_dispatcher.h"
-
 namespace eznetpp {
 
 class if_server;
+class if_client;
 
 class runner {
  public:
@@ -17,17 +16,18 @@ class runner {
   virtual ~runner(void);
 
  public:
-  void register_server(if_server* listener);
-  void deregister_server(if_server* listener);
+  void register_server(if_server* server);
+  void deregister_server(if_server* server);
+
+  void register_client(if_client* client);
+  void deregister_client(if_client* client);
 
   void run(void);
 
   // variables
  private:
-  //event_dispatcher _evt_dispatcher;
   std::vector<if_server*> _server_container;
-  std::mutex _server_container_mutex;
-
+  std::vector<if_client*> _client_container;
 
   DISALLOW_COPY_AND_ASSIGN(runner);
 };
