@@ -3,14 +3,13 @@
 #ifndef INCLUDE_IF_CLIENT_H_
 #define INCLUDE_IF_CLIENT_H_
 
-#include <string>
-
-#include "./eznetpp.h"
+#include <eznetpp.h>
 
 namespace eznetpp {
 class if_client {
  public:
-  virtual ~if_client() {}
+  if_client() = default;
+  virtual ~if_client() = default;
 
  public:
   // override
