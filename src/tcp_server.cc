@@ -8,8 +8,6 @@
 
 namespace eznetpp {
 
-const int default_port_num = 6666;
-const int default_max_conn_cnt = 5000;
 const int default_max_accept_cnt = 15;
 
 tcp_server::tcp_server(void) {
@@ -26,9 +24,6 @@ void tcp_server::set_env(int port, int max_connections) {
 }
 
 int tcp_server::start_async_io() {
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::start_async_io() ->\n");
-
   // initialization
   int ret = setup_server_socket();
   if (ret != 0) {
@@ -44,13 +39,11 @@ int tcp_server::start_async_io() {
 
   if (!_work_th.joinable()) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::start_async_io() - accept thread failed to create(%d)\n"
-        , errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "accept thread failed to create(%d)"
+                           , errno);
     return -1;
   }
-
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::start_async_io() <-\n");
 
   return 0;
 }
@@ -72,7 +65,8 @@ void tcp_server::del_from_conn_maps(connection *dc) {
 // work thread for accepting to a client
 void* tcp_server::work_thread(void) {
   logger::instance().log(logger::log_level::debug
-      , "tcp_server::work_thread() ->\n");
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "start work_thread");
 
   while (1) {
     process_epoll_event(_epoll_fd, _events, _max_connections_cnt);
@@ -80,17 +74,11 @@ void* tcp_server::work_thread(void) {
     usleep(10);
   }
 
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::work_thread() <-\n");
-
   return nullptr;
 }
 
 // create server socket and initialize for accepting
 int tcp_server::setup_server_socket() {
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::setup_server_socket() ->\n");
-
   // TODO(kangic) : AF_INET6
   _server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -107,7 +95,8 @@ int tcp_server::setup_server_socket() {
 
   if (ret != 0) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::setup_server_socket() - bind error(%d)\n", errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "bind error(%d)", errno);
 
     return errno;
   }
@@ -116,13 +105,11 @@ int tcp_server::setup_server_socket() {
 
   if (ret != 0) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::setup_server_socket() - listen error(%d)\n", errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "listen error(%d)", errno);
 
     return errno;
   }
-
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::setup_server_socket() <-\n");
 
   return 0;
 }
@@ -133,8 +120,9 @@ int tcp_server::create_epoll_fd_and_events() {
   _epoll_fd = epoll_create(_max_connections_cnt);
   if (_epoll_fd == -1) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::setup_server_socket() - epoll_create error(%d)\n"
-        , errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "epoll_create error(%d)"
+                           , errno);
   
     return errno;
   }
@@ -142,8 +130,9 @@ int tcp_server::create_epoll_fd_and_events() {
   _events = new epoll_event[_max_connections_cnt];
   if (_events == nullptr) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::setup_server_socket() - failed to create events(%d)\n"
-        , errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "failed to create events(%d)"
+                           , errno);
 
     return errno;
   }
@@ -152,8 +141,9 @@ int tcp_server::create_epoll_fd_and_events() {
   int ret = add_fd(_epoll_fd, _server_socket);
   if (ret != 0) {
     logger::instance().log(logger::log_level::error
-        , "tcp_server::setup_server_socket() - add_fd(ret : %d, errno : %d)\n"
-        , ret, errno);
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "add_fd(ret : %d, errno : %d)"
+                           , ret, errno);
 
     return ret;
   }
@@ -196,13 +186,11 @@ int tcp_server::set_reuseaddr(int sock) {
 
 void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
                                      , int ev_cnt) {
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::process_epoll_event() ->\n");
-  
   int changed_events = epoll_wait(efd, ev, ev_cnt, -1);
   logger::instance().log(logger::log_level::debug
-      , "tcp_server::process_epoll_event() - changed_events : %d\n"
-      , changed_events);
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "changed_events : %d"
+                         , changed_events);
 
   for (int i = 0; i < changed_events; i++) {
     if (ev[i].data.fd == _server_socket) {
@@ -211,9 +199,6 @@ void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
       do_read(ev[i]);
     }
   }
-
-  logger::instance().log(logger::log_level::debug
-      , "tcp_server::process_epoll_event() <-\n");
 }
 
 int tcp_server::do_accept() {
@@ -226,19 +211,22 @@ int tcp_server::do_accept() {
 
   if (client_sock < 0) {
     logger::instance().log(logger::log_level::error
-      , "tcp_server::do_accept() - failed accept()\n");
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "failed accept()");
 
     return -1;
   }
 
   logger::instance().log(logger::log_level::debug
-    , "tcp_server::do_accept() - client socket id : %d\n", client_sock);
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "client socket id : %d", client_sock);
 
   set_tcpnodelay(client_sock);
 
   if (add_fd(_epoll_fd, client_sock) != 0) {
     logger::instance().log(logger::log_level::error
-      , "tcp_server::do_accept() - failed add_fd()\n");
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "failed add_fd()");
 
     return -1;
   }
@@ -259,7 +247,8 @@ int tcp_server::do_read(struct epoll_event ev) {
   if (ret <= 0) {
     dc->close_socket();
     logger::instance().log(logger::log_level::debug
-                           , "tcp_server::do_read() - Close fd %d\n"
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "Close fd %d"
                            , client_fd);
 
     del_from_conn_maps(dc);
@@ -271,7 +260,8 @@ int tcp_server::do_read(struct epoll_event ev) {
     }
   } else {
     logger::instance().log(logger::log_level::debug
-                           , "tcp_server::do_read() - read %d bytes\n"
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "read %d bytes"
                            , ret);
   }
   

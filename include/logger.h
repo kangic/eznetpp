@@ -23,7 +23,8 @@ class logger {
 
   static logger& instance();
 
-  void log(log_level level, const char* format, ...);
+  void log(log_level level, const char* file, const char* func, int line
+           , const char* format, ...);
 
  protected:
   friend class cleanup;

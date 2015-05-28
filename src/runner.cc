@@ -80,8 +80,6 @@ void runner::deregister_client(if_client* client) {
 }
 
 void runner::run(void) {
-  logger::instance().log(logger::log_level::debug, "runner::run() ->\n");
-
   std::vector<if_server*>::iterator iter_server;
   std::vector<if_client*>::iterator iter_client;
 
@@ -104,7 +102,6 @@ void runner::run(void) {
   while (true) {
     // todo : catch for interrupting stop signal
   }
-  logger::instance().log(logger::log_level::debug, "runner::run() <-\n");
 }
 
 }  // namespace eznetpp

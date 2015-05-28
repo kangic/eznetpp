@@ -36,7 +36,8 @@ logger::cleanup::~cleanup() {
   }
 }
 
-void logger::log(log_level level, const char* format, ...) {
+void logger::log(log_level level, const char* file, const char* func, int line
+                 , const char* format, ...) {
   std::lock_guard<std::mutex> guard(logger::_log_mutex);
 
   printf("[%s] ", log_level_str[level]);
@@ -47,5 +48,7 @@ void logger::log(log_level level, const char* format, ...) {
   va_start(arg, format);
   count = vprintf(format, arg);
   va_end(arg);
+
+  printf("(%s::%s::%d)\n", file, func, line);
 }
 }  // namespace eznetpp
