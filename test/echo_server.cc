@@ -7,9 +7,6 @@
 echo_server::echo_server(void) {
 }
 
-echo_server::echo_server(int port, int max_accepts) {
-}
-
 echo_server::~echo_server(void) {
 }
 

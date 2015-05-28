@@ -8,7 +8,6 @@
 class echo_server : public eznetpp::tcp_server {
  public:
   echo_server();
-  echo_server(int port, int max_accepts);
   virtual ~echo_server();
 
  public:
