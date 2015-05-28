@@ -18,6 +18,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <string.h>
 
 // c++ headers
 #include <string>
