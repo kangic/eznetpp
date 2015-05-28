@@ -52,13 +52,13 @@ class tcp_server : public if_server {
 
   ///////////////////////////////////
   // variables
-  int _host_port;
-  int _max_connections_cnt;
+  int _host_port = 6666;
+  int _max_connections_cnt = 1000;
 
-  int _server_socket;
+  int _server_socket = -1;
 
-  int _epoll_fd;
-  struct epoll_event* _events;
+  int _epoll_fd = -1;
+  struct epoll_event* _events = nullptr;
 
   std::thread _work_th;
 

@@ -12,12 +12,7 @@ const int default_port_num = 6666;
 const int default_max_conn_cnt = 5000;
 const int default_max_accept_cnt = 15;
 
-tcp_server::tcp_server(void)
-: _host_port(default_port_num)
-, _max_connections_cnt(default_max_conn_cnt)
-, _server_socket(-1)
-, _epoll_fd(-1)
-, _events(nullptr) {
+tcp_server::tcp_server(void) {
   _conn_maps.clear();
 }
 
