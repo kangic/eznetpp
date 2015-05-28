@@ -81,10 +81,18 @@ void* tcp_server::work_thread(void) {
 int tcp_server::setup_server_socket() {
   // TODO(kangic) : AF_INET6
   _server_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (_server_socket == -1) {
+    logger::instance().log(logger::log_level::error
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "socket() error(%d)", errno);
+
+    return -1;
+  }
 
   set_reuseaddr(_server_socket);
 
   struct sockaddr_in server_addr;
+  bzero(&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   server_addr.sin_port = htons(_host_port);
