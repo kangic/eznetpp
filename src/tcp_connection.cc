@@ -31,6 +31,7 @@ int tcp_connection::write_to_socket(const std::string& data, int len) {
 int tcp_connection::close_socket(void) {
   int ret = 0;
   ret = close(_sock_id);
+  on_close(ret);
   return ret;
 }
 
