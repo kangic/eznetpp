@@ -16,7 +16,7 @@ runner::~runner(void) {
 }
 
 // not thread safe
-void runner::register_server(if_server* server) {
+void runner::add_to_list(if_server* server) {
   std::vector<if_server*>::iterator iter;
 
   for (iter = _server_container.begin();
@@ -31,7 +31,7 @@ void runner::register_server(if_server* server) {
 }
 
 // not thread safe
-void runner::deregister_server(if_server* server) {
+void runner::del_from_list(if_server* server) {
   std::vector<if_server*>::iterator iter;
 
   for (iter = _server_container.begin();
@@ -48,7 +48,7 @@ void runner::deregister_server(if_server* server) {
 }
 
 // not thread safe
-void runner::register_client(if_client* client) {
+void runner::add_to_list(if_client* client) {
   std::vector<if_client*>::iterator iter;
 
   for (iter = _client_container.begin();
@@ -63,7 +63,7 @@ void runner::register_client(if_client* client) {
 }
 
 // not thread safe
-void runner::deregister_client(if_client* client) {
+void runner::del_from_list(if_client* client) {
   std::vector<if_client*>::iterator iter;
 
   for (iter = _client_container.begin();

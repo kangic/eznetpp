@@ -16,11 +16,11 @@ class runner {
   virtual ~runner(void);
 
  public:
-  void register_server(if_server* server);
-  void deregister_server(if_server* server);
+  void add_to_list(if_server* server);
+  void del_from_list(if_server* server);
 
-  void register_client(if_client* client);
-  void deregister_client(if_client* client);
+  void add_to_list(if_client* client);
+  void del_from_list(if_client* client);
 
   void run(void);
 
