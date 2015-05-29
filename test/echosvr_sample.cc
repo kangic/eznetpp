@@ -8,7 +8,7 @@ int main(void) {
   s.set_env(6666, 5);
   eznetpp::runner r;
 
-  r.register_server(&s);
+  r.add_to_list(&s);
 
   r.run();
 
