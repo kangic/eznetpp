@@ -3,8 +3,8 @@
 #ifndef INCLUDE_TCP_SERVER_H_
 #define INCLUDE_TCP_SERVER_H_
 
-#include "./eznetpp.h"
-#include "./if_server.h"
+#include <eznetpp.h>
+#include <if_server.h>
 
 namespace eznetpp {
 class connection;
@@ -20,7 +20,7 @@ class tcp_server : public if_server {
 
   void set_env(int port, int max_connections);
 
-  void add_to_polling_list(connection* dc);
+  void add_to_polling_list(connection* conn);
 
  protected:
   void* work_thread(void);
@@ -47,8 +47,8 @@ class tcp_server : public if_server {
   int do_read(struct epoll_event ev);
 
   // connection map functions
-  void add_to_conn_maps(connection *dc);
-  void del_from_conn_maps(connection *dc);
+  void add_to_conn_maps(connection *conn);
+  void del_from_conn_maps(connection *conn);
 
   ///////////////////////////////////
   // variables

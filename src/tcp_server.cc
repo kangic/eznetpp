@@ -1,10 +1,8 @@
 //  Copyright [2015] <kangic21@gmail.com>
 
-#include "../include/tcp_server.h"
+#include <tcp_server.h>
 
-#include "../include/eznetpp.h"
-
-#include "../include/tcp_connection.h"
+#include <tcp_connection.h>
 
 namespace eznetpp {
 
@@ -40,7 +38,7 @@ int tcp_server::start_async_io() {
   if (!_work_th.joinable()) {
     logger::instance().log(logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "accept thread failed to create(%d)"
+                           , "failed to create accept thread(%d)"
                            , errno);
     return -1;
   }
@@ -48,18 +46,18 @@ int tcp_server::start_async_io() {
   return 0;
 }
 
-void tcp_server::add_to_polling_list(connection* dc) {
-  add_to_conn_maps(dc);
+void tcp_server::add_to_polling_list(connection* conn) {
+  add_to_conn_maps(conn);
 }
 
-void tcp_server::add_to_conn_maps(connection *dc) {
+void tcp_server::add_to_conn_maps(connection *conn) {
   std::lock_guard<std::mutex> guard(_conn_maps_mutex);
-  _conn_maps[dc->socket_id()] = dc;
+  _conn_maps[conn->socket_id()] = conn;
 }
 
-void tcp_server::del_from_conn_maps(connection *dc) {
+void tcp_server::del_from_conn_maps(connection *conn) {
   std::lock_guard<std::mutex> guard(_conn_maps_mutex);
-  _conn_maps.erase(dc->socket_id());
+  _conn_maps.erase(conn->socket_id());
 }
 
 // work thread for accepting to a client
@@ -247,24 +245,23 @@ int tcp_server::do_accept() {
 int tcp_server::do_read(struct epoll_event ev) {
   int client_fd = ev.data.fd;
 
-  connection* dc = _conn_maps[client_fd];
-  std::string msg = "";
-  int len;
-  int ret = dc->read_from_socket();
+  connection* conn = _conn_maps[client_fd];
+
+  int ret = conn->read_from_socket();
 
   if (ret <= 0) {
-    dc->close_socket();
+    conn->close_socket();
     logger::instance().log(logger::log_level::debug
                            , __FILE__, __FUNCTION__, __LINE__
                            , "Close fd %d"
                            , client_fd);
 
-    del_from_conn_maps(dc);
+    del_from_conn_maps(conn);
     del_fd(_epoll_fd, client_fd);
 
-    if (dc != nullptr) {
-      delete dc;
-      dc = nullptr;
+    if (conn != nullptr) {
+      delete conn;
+      conn = nullptr;
     }
   } else {
     logger::instance().log(logger::log_level::debug
