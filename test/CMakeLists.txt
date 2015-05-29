@@ -3,16 +3,25 @@ project(eznetpptest)
 
 set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(eznetpptest_srcs
+SET(eznetpp_echo_server_sample_srcs
 ${PROJECT_SOURCE_DIR}/echosvr_sample.cc
 ${PROJECT_SOURCE_DIR}/echo_server.cc
 ${PROJECT_SOURCE_DIR}/echosvr_connection.cc
 )
 
+SET(eznetpp_echo_client_sample_srcs
+${PROJECT_SOURCE_DIR}/echoclient_sample.cc
+${PROJECT_SOURCE_DIR}/echo_client.cc
+${PROJECT_SOURCE_DIR}/echoclient_connection.cc
+)
+
 find_package(Threads)
 include_directories(${PROJECT_BINARY_DIR})
-add_executable(echosvr_sample ${eznetpptest_srcs})
+add_executable(echosvr_sample ${eznetpp_echo_server_sample_srcs})
 target_link_libraries(echosvr_sample ${CMAKE_CURRENT_SOURCE_DIR}/../build/libeznetpp.a)
 target_link_libraries(echosvr_sample ${CMAKE_THREAD_LIBS_INIT})
+add_executable(echoclient_sample ${eznetpp_echo_client_sample_srcs})
+target_link_libraries(echoclient_sample ${CMAKE_CURRENT_SOURCE_DIR}/../build/libeznetpp.a)
+target_link_libraries(echoclient_sample ${CMAKE_THREAD_LIBS_INIT})
 include_directories(${PROJECT_INCLUDE_DIR})
 
