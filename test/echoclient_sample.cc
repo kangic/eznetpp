@@ -8,7 +8,7 @@ int main(void) {
   c.set_server_info("127.0.0.1", 6666);
   eznetpp::runner r;
 
-  r.add_to_list(&c);
+  r.add_to_running_list(&c);
 
   r.run();
 
