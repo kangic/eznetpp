@@ -35,8 +35,8 @@ This is a network library for C++. It was developed by using C++11.
     - Override a `on_connect` function and implement it.
 	- Create a connection class and push it to the list.
   2. Make a connection class. It should be inherite a `tcp_connection` class.
-    - Override `on_recv` `on_send` `on_close` functions and implement them.
-  3. Add a server class to the `runner` and then call the `run` function in your main program. That's it.
+- Override `on_recv` `on_send` `on_close` functions and implement them.
+  3. Add a client class to the `runner` and then call the `run` function in your main program. That's it.
 
 
 ## Examples List
