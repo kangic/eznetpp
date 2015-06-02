@@ -16,13 +16,13 @@ class connection {
   int socket_id() { return _sock_id; }
 
   // override by user
-  virtual void on_read(const std::string& msg, int len, int err_no) = 0;
-  virtual void on_write(unsigned int len, int err_no) = 0;
+  virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
+  virtual void on_send(unsigned int len, int err_no) = 0;
   virtual void on_close(int err_no) = 0;
 
   // override by lib
-  virtual int read_from_socket(void) = 0;
-  virtual int write_to_socket(const std::string& msg, int len) = 0;
+  virtual int recv_from_socket(void) = 0;
+  virtual int send_to_socket(const std::string& msg, int len) = 0;
   virtual int close_socket(void) = 0;
 
  protected:

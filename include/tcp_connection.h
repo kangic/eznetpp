@@ -12,13 +12,13 @@ class tcp_connection : public connection {
   tcp_connection();
   virtual ~tcp_connection();
 
-  virtual void on_read(const std::string& msg, int len, int err_no) {}
-  virtual void on_write(unsigned int len, int err_no) {}
+  virtual void on_recv(const std::string& msg, int len, int err_no) {}
+  virtual void on_send(unsigned int len, int err_no) {}
   virtual void on_close(int err_no) {}
 
  protected:
-  int read_from_socket(void);
-  int write_to_socket(const std::string& data, int len);
+  int recv_from_socket(void);
+  int send_to_socket(const std::string& data, int len);
   int close_socket(void);
 
  private:

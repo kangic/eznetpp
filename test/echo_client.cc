@@ -18,5 +18,5 @@ void echo_client::on_connect(int client_id) {
   printf("received event - on_connect() : socket id %d\n", conn->socket_id());
 
   std::string hellomsg = "hello eznetpp";
-  conn->write_to_socket(hellomsg, hellomsg.length());
+  conn->send_to_socket(hellomsg, hellomsg.length());
 }

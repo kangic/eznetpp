@@ -86,7 +86,7 @@ void* tcp_client::work_thread(void) {
                          , "start work_thread");
 
   while (1) {
-    int ret = _connection->read_from_socket();
+    int ret = _connection->recv_from_socket();
 
     if (ret <= 0) {
       _connection->close_socket();

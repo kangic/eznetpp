@@ -247,7 +247,7 @@ int tcp_server::do_read(struct epoll_event ev) {
 
   connection* conn = _conn_maps[client_fd];
 
-  int ret = conn->read_from_socket();
+  int ret = conn->recv_from_socket();
 
   if (ret <= 0) {
     conn->close_socket();

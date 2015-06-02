@@ -12,8 +12,8 @@ class echoclient_connection : public eznetpp::tcp_connection {
 
  public:
   // override
-  void on_read(const std::string& msg, int len, int err_no);
-  void on_write(unsigned int len, int err_no);
+  void on_recv(const std::string& msg, int len, int err_no);
+  void on_send(unsigned int len, int err_no);
   void on_close(int err_no);
 };
 
