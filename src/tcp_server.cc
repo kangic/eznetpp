@@ -34,7 +34,7 @@ int tcp_server::start_async_io() {
   }
 
   // add server_socket for listening epoll event
-  int ret = add_fd(_epoll_fd, _server_socket);
+  ret = add_fd(_epoll_fd, _server_socket);
   if (ret != 0) {
     logger::instance().log(logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
