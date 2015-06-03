@@ -4,15 +4,15 @@ project(eznetpptest)
 set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 SET(eznetpp_echo_server_sample_srcs
-${PROJECT_SOURCE_DIR}/echosvr_sample.cc
-${PROJECT_SOURCE_DIR}/echo_server.cc
-${PROJECT_SOURCE_DIR}/echosvr_connection.cc
+${PROJECT_SOURCE_DIR}/echo_server/echosvr_sample.cc
+${PROJECT_SOURCE_DIR}/echo_server/echo_server.cc
+${PROJECT_SOURCE_DIR}/echo_server/echosvr_connection.cc
 )
 
 SET(eznetpp_echo_client_sample_srcs
-${PROJECT_SOURCE_DIR}/echoclient_sample.cc
-${PROJECT_SOURCE_DIR}/echo_client.cc
-${PROJECT_SOURCE_DIR}/echoclient_connection.cc
+${PROJECT_SOURCE_DIR}/echo_client/echoclient_sample.cc
+${PROJECT_SOURCE_DIR}/echo_client/echo_client.cc
+${PROJECT_SOURCE_DIR}/echo_client/echoclient_connection.cc
 )
 
 find_package(Threads)
