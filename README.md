@@ -8,7 +8,7 @@ This is a network library for C++. It was developed by using C++11.
 ## Purpose
 
 * Can develop a network application easy.
-* Can concentrate to develop own business logic.
+* Can concentrate to make your business logic.
 
 
 ## Getting started
