@@ -23,7 +23,8 @@ class tcp_server : public if_server {
   void add_to_polling_list(connection* conn);
 
  protected:
-  void* work_thread(void);
+  void* poller_thread(void);
+  void* worker_thread(void);
 
  private:
   int setup_server_socket();
@@ -60,7 +61,8 @@ class tcp_server : public if_server {
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
 
-  std::thread _work_th;
+  std::thread _poller_th;
+  std::thread _worker_th;  // TODO(kangic) : distribute to work
 
   // socket_id<key>, connection_class<value>
   std::map<int, connection*> _conn_maps;

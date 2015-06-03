@@ -13,7 +13,7 @@ tcp_server::tcp_server(void) {
 }
 
 tcp_server::~tcp_server(void) {
-  _work_th.join();
+  _poller_th.join();
 }
 
 void tcp_server::set_env(int port, int max_connections) {
@@ -33,9 +33,20 @@ int tcp_server::start_async_io() {
     return ret;
   }
 
-  _work_th = std::thread(&tcp_server::work_thread, this);
+  // add server_socket for listening epoll event
+  int ret = add_fd(_epoll_fd, _server_socket);
+  if (ret != 0) {
+    logger::instance().log(logger::log_level::error
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "add_fd(ret : %d, errno : %d)"
+                           , ret, errno);
 
-  if (!_work_th.joinable()) {
+    return ret;
+  }
+
+  _poller_th = std::thread(&tcp_server::poller_thread, this);
+
+  if (!_poller_th.joinable()) {
     logger::instance().log(logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
                            , "failed to create accept thread(%d)"
@@ -60,8 +71,8 @@ void tcp_server::del_from_conn_maps(connection *conn) {
   _conn_maps.erase(conn->socket_id());
 }
 
-// work thread for accepting to a client
-void* tcp_server::work_thread(void) {
+// poller thread for polling to fds
+void* tcp_server::poller_thread(void) {
   logger::instance().log(logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
                          , "start work_thread");
@@ -141,17 +152,6 @@ int tcp_server::create_epoll_fd_and_events() {
                            , errno);
 
     return errno;
-  }
-
-  // add server_socket for listening epoll event
-  int ret = add_fd(_epoll_fd, _server_socket);
-  if (ret != 0) {
-    logger::instance().log(logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "add_fd(ret : %d, errno : %d)"
-                           , ret, errno);
-
-    return ret;
   }
 
   return 0;
