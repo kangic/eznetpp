@@ -59,7 +59,7 @@ void tcp_server::set_env(int port, int max_connections) {
   _max_connections_cnt = max_connections;
 }
 
-void tcp_server::add_to_polling_list(connection* conn) {
+void tcp_server::add_to_connection_list(connection* conn) {
   add_to_conn_maps(conn);
 }
 

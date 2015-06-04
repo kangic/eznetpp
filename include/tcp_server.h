@@ -20,10 +20,11 @@ class tcp_server : public if_server {
 
   void set_env(int port, int max_connections);
 
-  void add_to_polling_list(connection* conn);
+  void add_to_connection_list(connection* conn);
 
  protected:
   void* poller_thread(void);
+  void* acceptor_thread(void);
   void* worker_thread(void);
 
  private:
