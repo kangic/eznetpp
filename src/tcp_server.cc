@@ -16,11 +16,8 @@ tcp_server::~tcp_server(void) {
   _poller_th.join();
 }
 
-void tcp_server::set_env(int port, int max_connections) {
-  _host_port = port;
-  _max_connections_cnt = max_connections;
-}
-
+////////////////////////////////////////////////////////////////////////////////
+// public functions
 int tcp_server::start_async_io() {
   // initialization
   int ret = setup_server_socket();
@@ -57,20 +54,16 @@ int tcp_server::start_async_io() {
   return 0;
 }
 
+void tcp_server::set_env(int port, int max_connections) {
+  _host_port = port;
+  _max_connections_cnt = max_connections;
+}
+
 void tcp_server::add_to_polling_list(connection* conn) {
   add_to_conn_maps(conn);
 }
 
-void tcp_server::add_to_conn_maps(connection *conn) {
-  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
-  _conn_maps[conn->socket_id()] = conn;
-}
-
-void tcp_server::del_from_conn_maps(connection *conn) {
-  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
-  _conn_maps.erase(conn->socket_id());
-}
-
+////////////////////////////////////////////////////////////////////////////////
 // poller thread for polling to fds
 void* tcp_server::poller_thread(void) {
   logger::instance().log(logger::log_level::debug
@@ -86,7 +79,8 @@ void* tcp_server::poller_thread(void) {
   return nullptr;
 }
 
-// create server socket and initialize for accepting
+////////////////////////////////////////////////////////////////////////////////
+// create server socket and initialize to accept the client
 int tcp_server::setup_server_socket() {
   // TODO(kangic) : AF_INET6
   _server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -131,6 +125,7 @@ int tcp_server::setup_server_socket() {
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 // create epoll file descriptor and events
 int tcp_server::create_epoll_fd_and_events() {
   // create epoll fd and event structures
@@ -157,6 +152,8 @@ int tcp_server::create_epoll_fd_and_events() {
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// add / delete fd to epoll_ctl
 int tcp_server::add_fd(int efd, int cfd) {
   struct epoll_event ev;
 
@@ -170,6 +167,8 @@ int tcp_server::del_fd(int efd, int cfd) {
   return epoll_ctl(efd, EPOLL_CTL_DEL, cfd, NULL);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// set socket options
 int tcp_server::set_nonblock(int sock) {
   int flags = fcntl(sock, F_GETFL);
   flags |= O_NONBLOCK;
@@ -190,6 +189,8 @@ int tcp_server::set_reuseaddr(int sock) {
   return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// observe to the epoll file descriptor and call the functions
 void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
                                      , int ev_cnt) {
   int changed_events = epoll_wait(efd, ev, ev_cnt, -1);
@@ -207,6 +208,8 @@ void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// functions to call the socket functions
 int tcp_server::do_accept() {
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
@@ -272,4 +275,17 @@ int tcp_server::do_read(struct epoll_event ev) {
   
   return 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// connection map functions
+void tcp_server::add_to_conn_maps(connection *conn) {
+  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
+  _conn_maps[conn->socket_id()] = conn;
+}
+
+void tcp_server::del_from_conn_maps(connection *conn) {
+  std::lock_guard<std::mutex> guard(_conn_maps_mutex);
+  _conn_maps.erase(conn->socket_id());
+}
+
 }  // namespace eznetpp
