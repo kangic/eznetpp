@@ -21,11 +21,15 @@
 #include <string.h>
 
 // c++ headers
+#include <algorithm>
+#include <atomic>
 #include <string>
+#include <memory>
 #include <vector>
 #include <map>
 #include <thread>
 #include <mutex>
-
+#include <condition_variable>
+#include <chrono>
 
 #endif  // INCLUDE_EZNETPP_H_
