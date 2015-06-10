@@ -18,7 +18,7 @@ class tcp_server : public if_server {
 
   int start_async_io();
 
-  void set_env(int port, int max_connections);
+  void set_env(int port, int max_connections, int num_of_worker_threads);
 
   void add_to_connection_list(connection* conn);
 
@@ -46,7 +46,8 @@ class tcp_server : public if_server {
 
   // functions to call the socket functions
   int do_accept();
-  int do_read(struct epoll_event ev);
+  //int do_read(struct epoll_event ev);
+  int do_read(int client_fd);
 
   // connection map functions
   void add_to_conn_maps(connection *conn);
@@ -56,15 +57,24 @@ class tcp_server : public if_server {
   // variables
   int _host_port = 6666;
   int _max_connections_cnt = 1000;
+  int _num_of_worker_threads = 2;
 
   int _server_socket = -1;
 
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
+  int _received_event_fd = -1;
 
   std::thread _poller_th;
-  std::thread _worker_th;  // TODO(kangic) : distribute to work
-
+  std::thread _acceptor_th;  // TODO(kangic) : accept to client connection
+  std::vector<std::thread> _worker_th_vec{};
+  
+  std::condition_variable _acceptor_cv;
+  std::mutex _acceptor_mutex;
+  
+  std::condition_variable _worker_cv;
+  std::mutex _worker_mutex;
+  
   // socket_id<key>, connection_class<value>
   std::map<int, connection*> _conn_maps;
   std::mutex _conn_maps_mutex;

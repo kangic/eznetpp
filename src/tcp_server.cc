@@ -14,6 +14,12 @@ tcp_server::tcp_server(void) {
 
 tcp_server::~tcp_server(void) {
   _poller_th.join();
+  _acceptor_th.join();
+
+  std::for_each(_worker_th_vec.begin(), _worker_th_vec.end()
+                , [](std::thread& thr) {
+    thr.join();
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,17 +52,35 @@ int tcp_server::start_async_io() {
   if (!_poller_th.joinable()) {
     logger::instance().log(logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "failed to create accept thread(%d)"
+                           , "failed to create poller thread(%d)"
                            , errno);
     return -1;
+  }
+
+  _acceptor_th = std::thread(&tcp_server::acceptor_thread, this);
+
+  if (!_acceptor_th.joinable()) {
+    logger::instance().log(logger::log_level::error
+                           , __FILE__, __FUNCTION__, __LINE__
+                           , "failed to create acceptor thread(%d)"
+                           , errno);
+    return -1;
+  }
+
+  // TODO(kangic) : measure number of worker threads(from user?)
+  for (int i = 0; i < _num_of_worker_threads; ++i) {
+    _worker_th_vec.emplace_back(std::thread(&tcp_server::worker_thread, this));
   }
 
   return 0;
 }
 
-void tcp_server::set_env(int port, int max_connections) {
+void tcp_server::set_env(int port, int max_connections
+                         , int num_of_worker_threads) {
   _host_port = port;
   _max_connections_cnt = max_connections;
+  _num_of_worker_threads = num_of_worker_threads;
+  
 }
 
 void tcp_server::add_to_connection_list(connection* conn) {
@@ -68,16 +92,54 @@ void tcp_server::add_to_connection_list(connection* conn) {
 void* tcp_server::poller_thread(void) {
   logger::instance().log(logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start work_thread");
+                         , "start poller_thread");
 
   while (1) {
     process_epoll_event(_epoll_fd, _events, _max_connections_cnt);
 
-    usleep(10);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 
   return nullptr;
 }
+
+void* tcp_server::acceptor_thread(void) {
+  logger::instance().log(logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "start acceptor_thread");
+
+  while (1) {
+    std::unique_lock<std::mutex> lk(_acceptor_mutex);
+    _acceptor_cv.wait(lk);
+
+    do_accept();
+  }
+
+  return nullptr;
+}
+
+void* tcp_server::worker_thread(void) {
+  logger::instance().log(logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "start worker_thread");
+
+  int event_fd = -1;
+  while (1) {
+    {
+      std::unique_lock<std::mutex> lk(_worker_mutex);
+      _worker_cv.wait(lk);
+
+      // pop event fd number from the vector
+      //do_read(ev[i]);
+      event_fd = _received_event_fd;
+    }
+
+    do_read(event_fd);
+  }
+
+  return nullptr;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // create server socket and initialize to accept the client
@@ -201,9 +263,18 @@ void tcp_server::process_epoll_event(int efd, struct epoll_event* ev
 
   for (int i = 0; i < changed_events; i++) {
     if (ev[i].data.fd == _server_socket) {
-      do_accept();
+      //do_accept();
+      {
+        std::unique_lock<std::mutex> lk(_worker_mutex);
+      }
+      _acceptor_cv.notify_one();
     } else {
-      do_read(ev[i]);
+      //do_read(ev[i]);
+      {
+        std::unique_lock<std::mutex> lk(_worker_mutex);
+        _received_event_fd = ev[i].data.fd;
+      }
+      _worker_cv.notify_one();
     }
   }
 }
@@ -214,7 +285,7 @@ int tcp_server::do_accept() {
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
 
-  // todo : wait for accepting a client
+  // todo : wait to accept a client connection
   int client_sock = accept(_server_socket, (struct sockaddr *)&client_addr
     , &client_addr_len);
 
@@ -245,8 +316,9 @@ int tcp_server::do_accept() {
   return 0;
 }
 
-int tcp_server::do_read(struct epoll_event ev) {
-  int client_fd = ev.data.fd;
+//int tcp_server::do_read(struct epoll_event ev) {
+int tcp_server::do_read(int client_fd) {
+  //int client_fd = ev.data.fd;
 
   connection* conn = _conn_maps[client_fd];
 
