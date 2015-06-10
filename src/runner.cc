@@ -27,7 +27,7 @@ void runner::add_to_running_list(if_server* server) {
     }
   }
 
-  _server_container.push_back(server);
+  _server_container.emplace_back(server);
 }
 
 // not thread safe
