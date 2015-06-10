@@ -3,6 +3,7 @@
 #include "./echosvr_connection.h"
 
 #include <cstdio>
+#include <memory>
 
 echo_server::echo_server(void) {
 }
@@ -15,5 +16,5 @@ void echo_server::on_accept(int client_id) {
   conn->socket_id(client_id);
   add_to_connection_list(conn);
 
-  printf("received event - on_accpet() : socket id %d\n", conn->socket_id());
+  printf("received event - on_accept() : socket id %d\n", conn->socket_id());
 }
