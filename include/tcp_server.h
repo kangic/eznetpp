@@ -13,7 +13,7 @@ class tcp_server : public if_server {
   tcp_server();
   virtual ~tcp_server();
 
-  // override
+  // override by user
   virtual void on_accept(int client_id) = 0;
 
   int start_async_io();

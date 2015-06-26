@@ -13,8 +13,6 @@ class if_server {
 
  public:
   // override
-  virtual void on_accept(int client_id) = 0;
-
   virtual int start_async_io() = 0;
 };
 }  // namespace eznetpp

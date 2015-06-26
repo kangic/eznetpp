@@ -31,6 +31,7 @@ int tcp_client::start_async_io() {
                            , __FILE__, __FUNCTION__, __LINE__
                            , "failed to create work thread(%d)\n"
                            , errno);
+    
     return -1;
   }
 
@@ -99,6 +100,8 @@ void* tcp_client::work_thread(void) {
         delete _connection;
         _connection = nullptr;
       }
+
+      break;
     } else {
       logger::instance().log(logger::log_level::debug
                              , __FILE__, __FUNCTION__, __LINE__
@@ -106,7 +109,7 @@ void* tcp_client::work_thread(void) {
                              , ret);
     }
 
-    usleep(10);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 
   return nullptr;

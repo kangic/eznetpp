@@ -80,7 +80,6 @@ void tcp_server::set_env(int port, int max_connections
   _host_port = port;
   _max_connections_cnt = max_connections;
   _num_of_worker_threads = num_of_worker_threads;
-  
 }
 
 void tcp_server::add_to_connection_list(connection* conn) {

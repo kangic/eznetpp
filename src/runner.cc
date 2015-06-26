@@ -87,7 +87,7 @@ void runner::run(void) {
        iter_server != _server_container.end();
        ++iter_server) {
     if (0 != (*iter_server)->start_async_io())
-      // todo : all stop to run the server already, print error log
+      // todo : all stop to server
       return;
   }
 
@@ -95,7 +95,7 @@ void runner::run(void) {
        iter_client != _client_container.end();
        ++iter_client) {
     if (0 != (*iter_client)->start_async_io())
-      // todo : all stop to run the server already, print error log
+      // todo : all stop to client
       return;
   }
 
