@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(eznetpptest)
+project(eznetpp_examples)
 
 set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
