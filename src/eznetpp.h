@@ -3,11 +3,6 @@
 #ifndef INCLUDE_EZNETPP_H_
 #define INCLUDE_EZNETPP_H_
 
-// eznetpp headers
-#include <common.h>
-#include <logger.h>
-#include <macros.h>
-
 // c headers
 #include <errno.h>
 #include <unistd.h>
@@ -31,5 +26,11 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+
+// eznetpp headers
+#include "common.h"
+#include "logger.h"
+#include "macros.h"
+
 
 #endif  // INCLUDE_EZNETPP_H_

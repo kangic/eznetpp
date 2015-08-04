@@ -3,8 +3,8 @@
 #ifndef INCLUDE_TCP_CONNECTION_H_
 #define INCLUDE_TCP_CONNECTION_H_
 
-#include <eznetpp.h>
-#include <connection.h>
+#include "eznetpp.h"
+#include "connection.h"
 
 namespace eznetpp {
 class tcp_connection : public connection {

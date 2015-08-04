@@ -13,14 +13,22 @@ class io_manager {
   io_manager(void);
   virtual ~io_manager(void);
 
-  void add_to_polling_list(int fd);
-  void del_from_polling_list(int fd);
+  void add_fd(int fd);
+  void del_fd(int fd);
+
+  int send_data(int fd, const char* data, int len);
+
+  void loop(void);
 
  protected:
-  void* poller_thread(void);
+  void* read_loop(void);
  
  private:
-  std::thread _poller_th;
+  int _epoll_fd = -1;
+  struct epoll_event* _events = nullptr;
+  int _received_event_fd = -1;
+
+  std::thread _read_th;
 
   std::vector<int> _polling_list;
 

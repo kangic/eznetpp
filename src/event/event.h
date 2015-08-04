@@ -12,7 +12,7 @@ class event {
   event(void);
   virtual ~event(void);
 
-  enum event_type : { on_accept, on_read, on_write, on_close };
+  enum event_type : { on_accept = 0x01, on_recv = 0x02, on_send = 0x04, on_close = 0x08};
 
   void set_event(event_type type, int result, void* data);
 

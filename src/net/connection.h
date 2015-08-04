@@ -3,7 +3,7 @@
 #ifndef INCLUDE_CONNECTION_H_
 #define INCLUDE_CONNECTION_H_
 
-#include <eznetpp.h>
+#include "eznetpp.h"
 
 namespace eznetpp {
 class connection {

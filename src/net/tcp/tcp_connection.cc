@@ -1,6 +1,6 @@
 // Copyright [2015] <kangic21@gmail.com>
 
-#include "../include/tcp_connection.h"
+#include "tcp_connection.h"
 
 namespace eznetpp {
 

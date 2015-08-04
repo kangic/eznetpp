@@ -3,7 +3,7 @@
 #ifndef INCLUDE_IF_SERVER_H_
 #define INCLUDE_IF_SERVER_H_
 
-#include <eznetpp.h>
+#include "eznetpp.h"
 
 namespace eznetpp {
 class if_server {

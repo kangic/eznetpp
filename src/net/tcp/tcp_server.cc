@@ -1,8 +1,8 @@
 //  Copyright [2015] <kangic21@gmail.com>
 
-#include <tcp_server.h>
+#include "tcp_server.h"
 
-#include <tcp_connection.h>
+#include "tcp_connection.h"
 
 namespace eznetpp {
 
@@ -310,7 +310,8 @@ int tcp_server::do_accept() {
     return -1;
   }
 
-  on_accept(client_sock);
+  //on_accept(client_sock);
+  // post an accept event to event_dispatcher
 
   return 0;
 }

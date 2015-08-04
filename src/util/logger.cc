@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdarg>
 
-#include "../include/logger.h"
+#include "logger.h"
 
 namespace eznetpp {
 

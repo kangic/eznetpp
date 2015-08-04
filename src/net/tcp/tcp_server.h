@@ -3,18 +3,17 @@
 #ifndef INCLUDE_TCP_SERVER_H_
 #define INCLUDE_TCP_SERVER_H_
 
-#include <eznetpp.h>
-#include <if_server.h>
+#include "eznetpp.h"
+#include "if_server.h"
+#include "event/event_handler.h"
 
 namespace eznetpp {
+namespace net {
 class connection;
-class tcp_server : public if_server {
+class tcp_server : public if_server, public event_handler {
  public:
   tcp_server();
   virtual ~tcp_server();
-
-  // override by user
-  virtual void on_accept(int client_id) = 0;
 
   int start_async_io();
 
@@ -81,6 +80,7 @@ class tcp_server : public if_server {
 
   DISALLOW_COPY_AND_ASSIGN(tcp_server);
 };
+}  // namespace net
 }  // namespace eznetpp
 
 #endif  // INCLUDE_TCP_SERVER_H_
