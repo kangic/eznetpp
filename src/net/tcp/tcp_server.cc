@@ -31,32 +31,8 @@ int tcp_server::start_async_io() {
     return ret;
   }
 
-  ret = create_epoll_fd_and_events();
-  if (ret != 0) {
-    return ret;
-  }
-
-  // add server_socket for listening epoll event
-  ret = add_fd(_epoll_fd, _server_socket);
-  if (ret != 0) {
-    logger::instance().log(logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "add_fd(ret : %d, errno : %d)"
-                           , ret, errno);
-
-    return ret;
-  }
-
-  _poller_th = std::thread(&tcp_server::poller_thread, this);
-
-  if (!_poller_th.joinable()) {
-    logger::instance().log(logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "failed to create poller thread(%d)"
-                           , errno);
-    return -1;
-  }
-
+  // add server socket's fd to io_manager
+  
   _acceptor_th = std::thread(&tcp_server::acceptor_thread, this);
 
   if (!_acceptor_th.joinable()) {
@@ -186,47 +162,6 @@ int tcp_server::setup_server_socket() {
   return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// create epoll file descriptor and events
-int tcp_server::create_epoll_fd_and_events() {
-  // create epoll fd and event structures
-  _epoll_fd = epoll_create(_max_connections_cnt);
-  if (_epoll_fd == -1) {
-    logger::instance().log(logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "epoll_create error(%d)"
-                           , errno);
-  
-    return errno;
-  }
-
-  _events = new epoll_event[_max_connections_cnt];
-  if (_events == nullptr) {
-    logger::instance().log(logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "failed to create events(%d)"
-                           , errno);
-
-    return errno;
-  }
-
-  return 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// add / delete fd to epoll_ctl
-int tcp_server::add_fd(int efd, int cfd) {
-  struct epoll_event ev;
-
-  ev.events = EPOLLIN;
-  ev.data.fd = cfd;
-
-  return epoll_ctl(efd, EPOLL_CTL_ADD, cfd, &ev);
-}
-
-int tcp_server::del_fd(int efd, int cfd) {
-  return epoll_ctl(efd, EPOLL_CTL_DEL, cfd, NULL);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // set socket options

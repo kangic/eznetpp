@@ -3,7 +3,7 @@
 #ifndef INCLUDE_EVENT_DISPATCHER_H_
 #define INCLUDE_EVENT_DISPATCHER_H_
 
-#include <eznetpp.h>
+#include "eznetpp.h"
 
 namespace eznetpp {
 namespace event {
@@ -17,11 +17,6 @@ class event_dispatcher {
     return *_evt_dispatcher;
   }
 
- private:
-  event_dispatcher(void);
-  virtual ~event_dispatcher(void);
-
- public:
   void init(void);
 
   bool register_handler(event_handler* handler);
@@ -31,6 +26,9 @@ class event_dispatcher {
   void* loop();
 
  private:
+  event_dispatcher(void);
+  virtual ~event_dispatcher(void);
+
   static event_dispatcher* _evt_dispatcher = null;
 
   std::thread _dispatch_th;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../include/tcp_connection.h"
+#include "../src/tcp_connection.h"
 
 class echosvr_connection : public eznetpp::tcp_connection {
  public:

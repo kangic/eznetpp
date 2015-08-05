@@ -4,9 +4,11 @@
 #define INCLUDE_TCP_CONNECTION_H_
 
 #include "eznetpp.h"
-#include "connection.h"
+#include "net/connection.h"
 
 namespace eznetpp {
+namespace net {
+namespace tcp {
 class tcp_connection : public connection {
  public:
   tcp_connection();
@@ -24,6 +26,9 @@ class tcp_connection : public connection {
  private:
   DISALLOW_COPY_AND_ASSIGN(tcp_connection);
 };
+
+}  // namespace tcp
+}  // namespace net
 }  // namespace eznetpp
 
 #endif  // INCLUDE_TCP_CONNECTION_H_

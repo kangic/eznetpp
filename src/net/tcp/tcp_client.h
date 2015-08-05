@@ -3,8 +3,8 @@
 #ifndef INCLUDE_TCP_CLIENT_H_
 #define INCLUDE_TCP_CLIENT_H_
 
-#include <eznetpp.h>
-#include <if_client.h>
+#include "eznetpp.h"
+#include "net/if_client.h"
 
 namespace eznetpp {
 class connection;

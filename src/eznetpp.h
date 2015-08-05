@@ -29,8 +29,8 @@
 
 // eznetpp headers
 #include "common.h"
-#include "logger.h"
 #include "macros.h"
+#include "util/logger.h"
 
 
 #endif  // INCLUDE_EZNETPP_H_

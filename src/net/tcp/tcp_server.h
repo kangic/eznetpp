@@ -4,8 +4,9 @@
 #define INCLUDE_TCP_SERVER_H_
 
 #include "eznetpp.h"
-#include "if_server.h"
 #include "event/event_handler.h"
+#include "net/if_server.h"
+#include "sys/io_manager.h"
 
 namespace eznetpp {
 namespace net {
@@ -22,18 +23,11 @@ class tcp_server : public if_server, public event_handler {
   void add_to_connection_list(connection* conn);
 
  protected:
-  void* poller_thread(void);
   void* acceptor_thread(void);
   void* worker_thread(void);
 
  private:
   int setup_server_socket();
-
-  // functions to the epoll functions
-  int create_epoll_fd_and_events();
-
-  int add_fd(int efd, int cfd);
-  int del_fd(int efd, int cfd);
 
   // functions to set the socket options
   int set_nonblock(int sock);
@@ -55,16 +49,10 @@ class tcp_server : public if_server, public event_handler {
   ///////////////////////////////////
   // variables
   int _host_port = 6666;
-  int _max_connections_cnt = 1000;
   int _num_of_worker_threads = 2;
 
   int _server_socket = -1;
 
-  int _epoll_fd = -1;
-  struct epoll_event* _events = nullptr;
-  int _received_event_fd = -1;
-
-  std::thread _poller_th;
   std::thread _acceptor_th;  // TODO(kangic) : accept to client connection
   std::vector<std::thread> _worker_th_vec{};
   

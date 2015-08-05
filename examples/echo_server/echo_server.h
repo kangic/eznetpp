@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../include/tcp_server.h"
+#include "../src/tcp_server.h"
 
 class echo_server : public eznetpp::tcp_server {
  public:

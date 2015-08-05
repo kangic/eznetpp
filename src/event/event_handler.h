@@ -6,8 +6,8 @@
 #include <eznetpp.h>
 
 namespace eznetpp {
-class net::connection;
 namespace event {
+class eznetpp::net::connection;
 class event;
 class event_handler {
  public:
@@ -30,5 +30,4 @@ class event_handler {
 };
 }  // namespace event
 }  // namespace eznetpp
-
 #endif INCLUDE_EVENT_HANDLER_H_

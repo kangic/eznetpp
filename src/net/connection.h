@@ -6,6 +6,7 @@
 #include "eznetpp.h"
 
 namespace eznetpp {
+namespace net {
 class connection {
  public:
   connection() {}
@@ -28,6 +29,8 @@ class connection {
  protected:
   int _sock_id;
 };
+
+}  // namespace net
 }  // namespace eznetpp
 
 #endif  // INCLUDE_CONNECTION_H_

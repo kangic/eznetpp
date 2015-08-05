@@ -15,4 +15,5 @@ GPATH
 GRTAGS
 GTAGS
 GSYMS
-.cs_files
+.cs_*
+
