@@ -8,6 +8,7 @@
 #include "./macros.h"
 
 namespace eznetpp {
+namespace util {
 class logger {
  public:
   // log level
@@ -43,6 +44,7 @@ class logger {
 
   DISALLOW_COPY_AND_ASSIGN(logger);
 };
+}  // namespace util
 }  // namespace eznetpp
 
 #endif  // INCLUDE_LOGGER_H_

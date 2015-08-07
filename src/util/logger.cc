@@ -6,6 +6,7 @@
 #include "logger.h"
 
 namespace eznetpp {
+namespace util {
 
 logger* logger::_inst;
 std::mutex logger::_log_mutex;
@@ -51,4 +52,6 @@ void logger::log(log_level level, const char* file, const char* func, int line
 
   printf("(%s::%s::%d)\n", file, func, line);
 }
+
+}  // namespace util
 }  // namespace eznetpp
