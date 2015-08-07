@@ -5,39 +5,55 @@
 namespace eznetpp {
 namespace net {
 
-////////////////////////////////////////////////////////////////////////////////
-// set socket options
+socket::socket(void) {
+
+}
+
+socket::socket(int sd)
+: _sd(sd) {
+}
+
+socket::~socket(void) {
+
+}
+
+socket::socket_domain socket::domain(void) {
+  return _sock_domain;
+}
+
 socket::socket_type socket::type(void) {
   return _sock_type;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// set socket options
 int socket::set_nonblock(bool flag) {
-  if (_sock_fd == -1)
-    return _sock_fd;
+  if (_sd == -1)
+    return _sd;
 
-  int flags = fcntl(_sock_fd, F_GETFL);
+  int flags = fcntl(_sd, F_GETFL);
 
   if (flag)
     flags |= O_NONBLOCK;
   else
     flags |= ~O_NONBLOCK;
 
-  return fcntl(_sock_fd, F_SETFL, flags);
+  return fcntl(_sd, F_SETFL, flags);
 }
 
 int socket::set_tcpnodelay(bool flag) {
-  if (_sock_fd == -1)
-    return _sock_fd;
+  if (_sd == -1)
+    return _sd;
 
-  return setsockopt(_sock_fd, IPPROTO_TCP, TCP_NODELAY
+  return setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY
                     , reinterpret_cast<char*>(&flag), sizeof(int));
 }
 
 int socket::set_reuseaddr(bool flag) {
-  if (_sock_fd == -1)
-    return _sock_fd;
+  if (_sd == -1)
+    return _sd;
 
-  return setsockopt(_sock_fd, SOL_SOCKET, SO_REUSEADDR
+  return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR
                     , reinterpret_cast<char*>(&flag), sizeof(int));
 }
 

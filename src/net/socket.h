@@ -6,34 +6,45 @@
 #include "eznetpp.h"
 #include "event/event_handler.h"
 
+/*
+ * Socket Interface Class
+ */
 namespace eznetpp {
 namespace net {
 class socket {
  public:
-  socket();
-  virtual ~socket();
+  socket(void);
+  socket(int sd);
+  virtual ~socket(void);
 
  public:
-  enum socket_type { raw = 0, acceptor = 1 };
+  enum socket_domain { inet = 0, unix = 1 };
+  enum socket_type { stream = 0, dgram = 1 };
 
-  void fd(int fd) { _sock_fd = fd; }
-  int fd(void) const { return _sock_fd; }
+  // socket descriptor
+  int descriptor(void) const { return _sd; }
 
+  socket_domain domain(void);
   socket_type type(void);
 
   int set_nonblock(bool flag);
   int set_tcpnodelay(bool flag);
   int set_reuseaddr(bool flag);
 
+  /*
+   * below functions are implemented by the inherited class.
+   */
   virtual int initialize() = 0;
   virtual int accept(eznetpp::event::event_handler* handler) = 0;
+  virtual int connect(eznetpp::event::event_handler* handler) = 0;
   virtual int send(eznetpp::event::event_handler* handler) = 0;
   virtual int recv(eznetpp::event::event_handler* handler) = 0; 
   virtual int close(eznetpp::event::event_handler* handler) = 0;
 
  protected:
-  socket_type _sock_type = socket_type::raw;
-  int _sock_fd = -1;
+  socket_domain _sock_domain = socket_domain::inet;
+  socket_type _sock_type = socket_type::stream;
+  int _sd = -1;
 };
 
 }  // namespace net
