@@ -4,6 +4,8 @@
 #define INCLUDE_IO_MANAGER_H_
 
 #include "eznetpp.h"
+#include "event/event_dispatcher.h"
+#include "net/socket.h"
 
 namespace eznetpp {
 namespace sys {
@@ -16,18 +18,18 @@ class io_manager {
    * After the class declaration, must be called this function for preparing 
    * to work epoll* functions.
    */
-  int init(int max_fds_cnt = 1000); // TODO(kangic) : define a value
+  int init(int max_descs_cnt = 1024); // TODO(kangic) : define the value
 
   /*
-   * Add(delete) the descriptor to observe by epoll descriptor.
+   * Add(delete) the socket's descriptor to observe by epoll descriptor.
    */
-  int add_fd(int fd);
-  int del_fd(int fd);
+  int add_socket(const eznetpp::net::socket& sock);
+  int del_socket(const eznetpp::net::socket& sock);
 
   /*
    * Send the data through the fd.
    */
-  int send_data(int fd, const std::string& data, int len);
+  int send_data(const eznetpp::net::socket& sock, const std::string& data, int len);
 
   /*
    * Create the read_loop thread in this function.
@@ -36,18 +38,24 @@ class io_manager {
 
  protected:
   /*
-   * 
+   * This function works to poll descriptors in _epoll_fd.
+   * If exists a changed descriptor, read data and pass to event_dispatcher for
+   * queueing.
    */
-  void* read_loop(void);
+  void read_loop(void);
  
  private:
-  int create_epoll_fd_and_events(int _max_fds_cnt);
-
   // variables
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
   int _received_event_fd = -1;
+  int _max_descs_cnt = 1024;
 
+  // socket_id<key>, connection_class<value>
+  std::map<int, eznetpp::net::socket*> _conn_maps;
+  std::mutex _conn_maps_mutex;
+
+  // event_dispatcher _dispatcher;
   std::thread _read_th;
 
   DISALLOW_COPY_AND_ASSIGN(io_manager);

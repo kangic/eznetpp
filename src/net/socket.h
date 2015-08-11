@@ -42,9 +42,9 @@ class socket {
   /*
    * below functions are implemented by the inherited class.
    */
-  virtual int bind_and_listen(int port, int max_accept_cnt = 5) = 0;
+  virtual int bind_and_listen(const char* ip, int port, int max_accept_cnt = 5) = 0;
   virtual int accept(void) = 0;
-  virtual int connect(const std::string& ip, int port) = 0;
+  virtual int connect(const char* ip, int port) = 0;
   virtual int send(const char* msg, int len) = 0;
   virtual int recv(char* msg, int len) = 0; 
   virtual int close(void) = 0;

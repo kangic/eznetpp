@@ -25,11 +25,11 @@ tcp_socket::~tcp_socket(void) {
 
 }
 
-int tcp_socket::bind_and_listen(int port, int max_accept_cnt) {
+int tcp_socket::bind_and_listen(const char* ip, int port, int max_accept_cnt) {
   struct sockaddr_in server_addr;
   bzero(&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_addr.s_addr = inet_addr(ip); 
   server_addr.sin_port = htons(port);
 
   int ret;
@@ -38,8 +38,9 @@ int tcp_socket::bind_and_listen(int port, int max_accept_cnt) {
   if (ret != 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "bind error(%d)", errno);
+                           , "::bind() error(%d)", errno);
 
+    this->close();
     return errno;
   }
 
@@ -48,8 +49,9 @@ int tcp_socket::bind_and_listen(int port, int max_accept_cnt) {
   if (ret != 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "listen error(%d)", errno);
+                           , "::listen() error(%d)", errno);
 
+    this->close();
     return errno;
   }
 
@@ -67,7 +69,7 @@ int tcp_socket::accept(void) {
   if (client_sock < 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "failed accept()");
+                           , "::accept() error(%d)", errno);
 
     return -1;
   }
@@ -80,11 +82,11 @@ int tcp_socket::accept(void) {
   return 0;
 }
 
-int tcp_socket::connect(const std::string& ip, int port) {
+int tcp_socket::connect(const char* ip, int port) {
   struct sockaddr_in server_addr;
   bzero(&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+  server_addr.sin_addr.s_addr = inet_addr(ip);
   server_addr.sin_port = htons(port);
 
   // connect to server(on_connect event)
@@ -93,7 +95,7 @@ int tcp_socket::connect(const std::string& ip, int port) {
   if (ret == -1) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "connect error : %d", errno);
+                           , "::connect() error(%d)", errno);
 
     this->close();
     return errno;
@@ -106,13 +108,11 @@ int tcp_socket::connect(const std::string& ip, int port) {
 }
 
 int tcp_socket::send(const char* msg, int len) {
-  int send_bytes = ::send(_sd, msg, len, MSG_NOSIGNAL);
+  return ::send(_sd, msg, len, MSG_NOSIGNAL);
 }
 
 int tcp_socket::recv(char* msg, int len) {
- int read_bytes = ::recv(_sd, msg, len, MSG_NOSIGNAL);
-
- return read_bytes;
+ return ::recv(_sd, msg, len, MSG_NOSIGNAL);
 }
 
 int tcp_socket::close(void) {

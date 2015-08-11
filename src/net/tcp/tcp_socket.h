@@ -16,9 +16,9 @@ class tcp_socket
   tcp_socket(void);
   virtual ~tcp_socket(void);
 
-  int bind_and_listen(int port, int max_accept_cnt);
+  int bind_and_listen(const char* ip, int port, int max_accept_cnt);
   int accept(void);
-  int connect(const std::string& ip, int port);
+  int connect(const char* ip, int port);
   int send(const char* msg, int len);
   int recv(char* msg, int len); 
   int close(void);
