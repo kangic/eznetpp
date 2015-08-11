@@ -6,15 +6,9 @@ namespace eznetpp {
 namespace net {
 
 socket::socket(void) {
-
-}
-
-socket::socket(int sd)
-: _sd(sd) {
 }
 
 socket::~socket(void) {
-
 }
 
 socket::socket_domain socket::domain(void) {
