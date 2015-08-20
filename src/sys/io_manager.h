@@ -21,15 +21,10 @@ class io_manager {
   int init(int max_descs_cnt = 1024); // TODO(kangic) : define the value
 
   /*
-   * Add(delete) the socket's descriptor to observe by epoll descriptor.
+   * Add(delete) the socket to observe by epoll descriptor.
    */
-  int add_socket(const eznetpp::net::socket& sock);
-  int del_socket(const eznetpp::net::socket& sock);
-
-  /*
-   * Send the data through the fd.
-   */
-  int send_data(const eznetpp::net::socket& sock, const std::string& data, int len);
+  int add_socket(eznetpp::net::socket* sock);
+  int del_socket(eznetpp::net::socket* sock);
 
   /*
    * Create the read_loop thread in this function.
@@ -51,9 +46,9 @@ class io_manager {
   int _received_event_fd = -1;
   int _max_descs_cnt = 1024;
 
-  // socket_id<key>, connection_class<value>
-  std::map<int, eznetpp::net::socket*> _conn_maps;
-  std::mutex _conn_maps_mutex;
+  // socket_id<key>, socket_class<value>
+  std::map<int, eznetpp::net::socket*> _sock_maps;
+  std::mutex _sock_maps_mutex;
 
   // event_dispatcher _dispatcher;
   std::thread _read_th;

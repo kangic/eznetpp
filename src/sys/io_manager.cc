@@ -49,22 +49,26 @@ int io_manager::init(int max_descs_cnt) {
 
 }
 
-int io_manager::add_socket(const eznetpp::net::socket& sock) {
-  struct epoll_event ev;
+int io_manager::add_socket(eznetpp::net::socket* sock) {
+  static struct epoll_event ev;
 
   ev.events = EPOLLIN;
-  ev.data.fd = sock.descriptor();
+  ev.data.fd = sock->descriptor();
 
-  return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock.descriptor(), &ev);
+  {
+    std::lock_guard<std::mutex> guard(_sock_maps_mutex);
+    _sock_maps[sock->descriptor()] = sock;
+  }
+
+  return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
 }
 
-int io_manager::del_socket(const eznetpp::net::socket& sock) {
-  return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock.descriptor(), NULL);
-}
-
-int io_manager::send_data(const eznetpp::net::socket& sock
-                         , const std::string& data, int len) {
-  int send_bytes = send(sock.descriptor(), data.c_str(), len, MSG_NOSIGNAL);
+int io_manager::del_socket(eznetpp::net::socket* sock) {
+  {
+    std::lock_guard<std::mutex> guard(_sock_maps_mutex);
+    _sock_maps.erase(sock->descriptor()];
+  }
+  return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
 int io_manager::loop(void) {
@@ -96,6 +100,15 @@ void io_manager::read_loop(void) {
                           , changed_events);
 
     for (int i = 0; i < changed_events; i++) {
+      int fd = _events[i].data.fd;
+      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                          , __FILE__, __FUNCTION__, __LINE__
+                          , "descriptor : %d"
+                          , fd);
+      if (_events[i].events & EPOLLIN) {
+        // send the descriptor to event_dispatcher
+      }
+
       /*
       // 
       if (_events[i].data.fd == _server_socket) {
