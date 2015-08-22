@@ -8,6 +8,10 @@ namespace net {
 socket::socket(void) {
 }
 
+socket::socket(int sd) 
+: _sd(sd) {
+}
+
 socket::~socket(void) {
 }
 
