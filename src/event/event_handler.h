@@ -19,6 +19,12 @@ class event_handler {
   };
   event_handler_type handler_type() { return _handler_type; };
 
+  virtual void on_accept(int fd, int err_no) = 0;
+  virtual void on_connect(int err_no) = 0;
+  virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
+  virtual void on_send(unsigned int len, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
+
  protected:
   event_handler_type _handler_type;
 };
@@ -32,6 +38,10 @@ class acceptor_event_handler : public event_handler {
 
   virtual void on_accept(int fd, int err_no) = 0;
   virtual void on_close(int err_no) = 0;
+
+  void on_connect(int err_no){};
+  void on_recv(const std::string& msg, int len, int err_no){};
+  void on_send(unsigned int len, int err_no){};
 };
 
 class connector_event_handler : public event_handler {
@@ -45,6 +55,8 @@ class connector_event_handler : public event_handler {
   virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
   virtual void on_send(unsigned int len, int err_no) = 0;
   virtual void on_close(int err_no) = 0;
+
+  void on_accept(int fd, int err_no){};
 };
 
 }  // namespace event
