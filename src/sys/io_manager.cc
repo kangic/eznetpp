@@ -1,16 +1,15 @@
 //  Copyright [2015] <kangic21@gmail.com>
 
 #include "io_manager.h"
+#include "event/event_dispatcher.h"
 
 namespace eznetpp {
 namespace sys {
 
 io_manager::io_manager(void) {
-
 }
 
 io_manager::~io_manager(void) {
-
 }
 
 /*
@@ -49,32 +48,30 @@ int io_manager::init(int max_descs_cnt) {
 
 }
 
-int io_manager::add_socket(eznetpp::net::socket* sock) {
+int io_manager::register_socket_event_handler(eznetpp::net::socket* sock
+      , eznetpp::event::event_handler* handler) {
+  // Find the socket class in the event_dispatcher's handlers map to check
+  // to register already.
   static struct epoll_event ev;
 
-  ev.events = EPOLLIN;
+  ev.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
   ev.data.fd = sock->descriptor();
-
-  {
-    std::lock_guard<std::mutex> guard(_sock_maps_mutex);
-    _sock_maps[sock->descriptor()] = sock;
-  }
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
 }
 
-int io_manager::del_socket(eznetpp::net::socket* sock) {
-  {
-    std::lock_guard<std::mutex> guard(_sock_maps_mutex);
-    _sock_maps.erase(sock->descriptor()];
-  }
+int io_manager::deregister_socket_event_handler(eznetpp::net::socket* sock) {
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
 int io_manager::loop(void) {
-  _read_th = std::thread(&io_manager::read_loop, this);
+  if (eznetpp::event::event_dispatcher::instance().init() == -1) {
+    return -1;
+  }
 
-  if (!_read_th.joinable()) {
+  _loop_th = std::thread(&io_manager::read_loop, this);
+
+  if (!_loop_th.joinable()) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
                            , "failed to create read thread(%d)"
@@ -82,7 +79,8 @@ int io_manager::loop(void) {
     return -1;
   }
 
-  _read_th.join();
+
+  _loop_th.join();
 
   return 0;
 }
@@ -107,6 +105,7 @@ void io_manager::read_loop(void) {
                           , fd);
       if (_events[i].events & EPOLLIN) {
         // send the descriptor to event_dispatcher
+        
       }
 
       /*

@@ -4,7 +4,7 @@
 #define INCLUDE_IO_MANAGER_H_
 
 #include "eznetpp.h"
-#include "event/event_dispatcher.h"
+#include "event/event_handler.h"
 #include "net/socket.h"
 
 namespace eznetpp {
@@ -21,10 +21,12 @@ class io_manager {
   int init(int max_descs_cnt = 1024); // TODO(kangic) : define the value
 
   /*
-   * Add(delete) the socket to observe by epoll descriptor.
+   * Register/Unregister the socket class and the event handler to recieve the
+   * event.
    */
-  int add_socket(eznetpp::net::socket* sock);
-  int del_socket(eznetpp::net::socket* sock);
+  int register_socket_event_handler(eznetpp::net::socket* sock
+      , eznetpp::event::event_handler* handler);
+  int deregister_socket_event_handler(eznetpp::net::socket* sock);
 
   /*
    * Create the read_loop thread in this function.
@@ -40,21 +42,14 @@ class io_manager {
   void read_loop(void);
  
  private:
-  // variables
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
   int _received_event_fd = -1;
   int _max_descs_cnt = 1024;
 
-  // socket_id<key>, socket_class<value>
-  std::map<int, eznetpp::net::socket*> _sock_maps;
-  std::mutex _sock_maps_mutex;
-
-  // event_dispatcher _dispatcher;
-  std::thread _read_th;
-
-  DISALLOW_COPY_AND_ASSIGN(io_manager);
+  std::thread _loop_th;
 };
+
 }  // namespace sys
 }  // namespace eznetpp
 
