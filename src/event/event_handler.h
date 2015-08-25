@@ -4,6 +4,8 @@
 #define INCLUDE_EVENT_HANDLER_H_
 
 #include "eznetpp.h"
+#include "net/socket.h"
+#include "net/tcp/tcp_socket.h"
 
 namespace eznetpp {
 namespace event {
@@ -17,9 +19,9 @@ class event_handler {
     acceptor = 0,
     connector,
   };
-  event_handler_type handler_type() { return _handler_type; };
+  event_handler_type type() { return _handler_type; };
 
-  virtual void on_accept(int fd, int err_no) = 0;
+  virtual void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no) = 0;
   virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
   virtual void on_send(unsigned int len, int err_no) = 0;
@@ -36,9 +38,10 @@ class acceptor_event_handler : public event_handler {
   };
   virtual ~acceptor_event_handler(void) = default;
 
-  virtual void on_accept(int fd, int err_no) = 0;
-  virtual void on_close(int err_no) = 0;
+  virtual void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no){};
+  virtual void on_close(int err_no){};
 
+ protected:
   void on_connect(int err_no){};
   void on_recv(const std::string& msg, int len, int err_no){};
   void on_send(unsigned int len, int err_no){};
@@ -51,12 +54,13 @@ class connector_event_handler : public event_handler {
   };
   virtual ~connector_event_handler(void) = default;
 
-  virtual void on_connect(int err_no) = 0;
-  virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
-  virtual void on_send(unsigned int len, int err_no) = 0;
-  virtual void on_close(int err_no) = 0;
+  virtual void on_connect(int err_no){};
+  virtual void on_recv(const std::string& msg, int len, int err_no){};
+  virtual void on_send(unsigned int len, int err_no){};
+  virtual void on_close(int err_no){};
 
-  void on_accept(int fd, int err_no){};
+ protected:
+  void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no){};
 };
 
 }  // namespace event
