@@ -5,26 +5,21 @@
 
 #include "eznetpp.h"
 #include "net/socket.h"
-#include "event/event_handler.h"
 
 namespace eznetpp {
 namespace net {
 namespace tcp {
-class tcp_socket
-: public eznetpp::net::socket {
+class tcp_socket : public eznetpp::net::socket {
  public:
   tcp_socket(void);
+  tcp_socket(int sd);
   virtual ~tcp_socket(void);
 
-  int bind_and_listen(const char* ip, int port, int max_accept_cnt);
-  int accept(void);
-  int connect(const char* ip, int port);
-  int send(const char* msg, int len);
+  //int connect(const char* ip, int port);
+  int send(const std::string& msg, int len);
   int recv(char* msg, int len); 
-  int close(void);
 
-
-
+  virtual void read_operation();
 };
 
 }  // namespace tcp
