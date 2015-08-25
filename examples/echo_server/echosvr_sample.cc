@@ -1,11 +1,14 @@
-#include "./echo_server.h"
+#include "echo_server.h"
+#include "sys/io_manager.h"
 
 int main(void) {
-  // it's user class for server
-  echo_server s;
-  s.set_env(6666, 5, 4);
+  eznetpp::sys::io_manager io_mgr;
+  io_mgr.init();
 
-  s.start_async_io();
+  echo_server server(&io_mgr);
+  server.open(56789, 5);
+  
+  io_mgr.loop();
 
   return 0;
 }
