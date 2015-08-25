@@ -8,10 +8,6 @@ namespace net {
 socket::socket(void) {
 }
 
-socket::socket(int sd) 
-: _sd(sd) {
-}
-
 socket::~socket(void) {
 }
 
@@ -25,7 +21,7 @@ socket::socket_type socket::type(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // set socket options
-int socket::set_nonblock(bool flag) {
+int socket::set_nonblocking(bool flag) {
   if (_sd == -1)
     return _sd;
 
@@ -54,6 +50,13 @@ int socket::set_reuseaddr(bool flag) {
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR
                     , reinterpret_cast<char*>(&flag), sizeof(int));
 }
+
+int socket::close(void) {
+  int ret = ::close(_sd);
+  _sd = -1;
+  return ret;
+}
+
 
 }  // namespace net
 }  // namespace eznetpp
