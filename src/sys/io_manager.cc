@@ -52,15 +52,20 @@ int io_manager::register_socket_event_handler(eznetpp::net::socket* sock
       , eznetpp::event::event_handler* handler) {
   // Find the socket class in the event_dispatcher's handlers map to check
   // to register already.
-  static struct epoll_event ev;
+  if (!eznetpp::event::event_dispatcher::instance().register_socket_event_handler(sock, handler)) {
+    return -1;
+  }
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-  ev.data.fd = sock->descriptor();
+  struct epoll_event ev;
+
+  ev.events = EPOLLIN;
+  ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
 }
 
 int io_manager::deregister_socket_event_handler(eznetpp::net::socket* sock) {
+  deregister_socket_event_handler(sock);
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
@@ -69,7 +74,7 @@ int io_manager::loop(void) {
     return -1;
   }
 
-  _loop_th = std::thread(&io_manager::read_loop, this);
+  _loop_th = std::thread(&io_manager::epoll_loop, this);
 
   if (!_loop_th.joinable()) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
@@ -85,7 +90,7 @@ int io_manager::loop(void) {
   return 0;
 }
 
-void io_manager::read_loop(void) {
+void io_manager::epoll_loop(void) {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
                          , "start read_loop");
@@ -97,34 +102,31 @@ void io_manager::read_loop(void) {
                           , "changed_events : %d"
                           , changed_events);
 
-    for (int i = 0; i < changed_events; i++) {
-      int fd = _events[i].data.fd;
+    if (changed_events < 0) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
-                          , "descriptor : %d"
-                          , fd);
+                          , "epoll failed");
+
+      // TODO(kangic) : decide to the action
+      break;
+    }
+
+    for (int i = 0; i < changed_events; ++i) {
+      eznetpp::net::socket* sock = reinterpret_cast<eznetpp::net::socket*>(_events[i].data.ptr);
+
+      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                          , __FILE__, __FUNCTION__, __LINE__
+                          , "changed descriptor : %d"
+                          , sock->descriptor());
+
       if (_events[i].events & EPOLLIN) {
         // send the descriptor to event_dispatcher
-        
+        sock->read_operation();
+      } else if (_events[i].events & EPOLLHUP || _events[i].events & EPOLLERR) {
+        // TODO
+        epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
+        sock->close();
       }
-
-      /*
-      // 
-      if (_events[i].data.fd == _server_socket) {
-        //do_accept();
-        {
-          std::unique_lock<std::mutex> lk(_worker_mutex);
-        }
-        _acceptor_cv.notify_one();
-      } else {
-        //do_read(_events[i]);
-        {
-          std::unique_lock<std::mutex> lk(_worker_mutex);
-          _received_event_fd = _events[i].data.fd;
-        }
-        _worker_cv.notify_one();
-      }
-      */
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));

@@ -39,12 +39,11 @@ class io_manager {
    * If exists a changed descriptor, read data and pass to event_dispatcher for
    * queueing.
    */
-  void read_loop(void);
+  void epoll_loop(void);
  
  private:
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
-  int _received_event_fd = -1;
   int _max_descs_cnt = 1024;
 
   std::thread _loop_th;
