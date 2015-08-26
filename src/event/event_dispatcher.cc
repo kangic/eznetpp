@@ -13,18 +13,24 @@ event_dispatcher::event_dispatcher(void) {
 }
 
 event_dispatcher::~event_dispatcher(void) {
-  _dispatch_th.join();
+  for (auto& th : _disp_ths_vec) {
+    th.join();
+  }
+  //_dispatch_th.join();
 }
 
-int event_dispatcher::init(void) {
-  _dispatch_th = std::thread(&event_dispatcher::dispatch_loop, this);
+int event_dispatcher::init(int num_of_disp_threads) {
+  for (int i = 0; i < num_of_disp_threads; ++i) {
+    std::thread disp_th = std::thread(&event_dispatcher::dispatch_loop, this, i);
 
-  if (!_dispatch_th.joinable()) {
-    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+    if (!disp_th.joinable()) {
+      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
                            , "failed to create dispatch thread(%d)"
                            , errno);
-    return -1;
+    }
+
+    _disp_ths_vec.emplace_back(std::move(disp_th));
   }
 }
 
@@ -41,96 +47,134 @@ bool event_dispatcher::deregister_socket_event_handler(eznetpp::net::socket* soc
     return false;
 
   _handlers_map.erase(sock);
+
   return true;
 }
 
 void event_dispatcher::push_event(io_event* evt) {
+  std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
   _ioevents_vec.emplace_back(evt);
-  // notify to wake the loop
+  _disp_th_cv.notify_one();
 }
 
-void event_dispatcher::dispatch_loop() {
+void event_dispatcher::dispatch_loop(int id) {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start dispatch_loop");
+                         , "start dispatch_loop(id : %d)"
+                         , id);
+  bool socket_closed = false;
 
   while (1) {
-    // step 1. wait for signal
-    
-    // step 2. check the mutex
-    // pop from the vector and then erase the iterator from the vector
-    
+    io_event* evt = nullptr;
+
+    {
+      // step 1. wait for signal
+      std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
+      while (_ioevents_vec.empty()) {
+        _disp_th_cv.wait(lk);
+      }
+
+      // step 2. pop from the vector and then erase the iterator from the vector
+      evt = _ioevents_vec.front();
+      _ioevents_vec.erase(_ioevents_vec.begin());
+    }
+       
     // step 3. process the ioevent to the its handler
+    eznetpp::net::socket* sock = evt->publisher();
+    event_handler* handler = _handlers_map[sock];
 
-    // step 4. delete ioevent
-    if (!_ioevents_vec.empty()) {
-      io_event* evt = _ioevents_vec.front();
-      eznetpp::net::socket* sock = reinterpret_cast<eznetpp::net::socket*>(evt->publisher());
-      event_handler* handler = _handlers_map[sock];
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+        , __FILE__, __FUNCTION__, __LINE__
+        , "id(%d), io_event : %p(type : %d), socket : %p, handler : %p"
+        , id, evt, evt->type(), sock, handler);
 
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
-                         , __FILE__, __FUNCTION__, __LINE__
-                         , "io_event : %p(type : %d), socket : %p, handler : %p"
-                         , evt, evt->type(), sock, handler);
-
-      switch (evt->type()) {
-        case event::event_type::on_close:
+    socket_closed = false;
+    switch (evt->type()) {
+      case event::event_type::close:
         {
-          handler->on_close(evt->err_code());
-          deregister_socket_event_handler(sock);
-
-          if (handler != nullptr) {
-            delete handler;
-            handler = nullptr;
-          }
-
-          if (sock != nullptr) {
-            delete sock;
-            sock = nullptr;
-          }
-
+          // Delete the socket descriptor from epoll descriptor automatically
+          // when the socket is closed.
+          int ret = ::close(sock->descriptor());
+          sock->descriptor(-1);
+          socket_closed = true;
           break;
         }
-        case event::event_type::on_accept:
+      case event::event_type::accept:
         {
-          // TODO(kangic) : Convert data to connector class.
-          int sock_fd = evt->result();
+          int sock_fd = sock->accept();
+          if (sock_fd == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+              // descriptor is empty.
+            } else {
+              // TODO : implement the error case
+            }
+            break;
+          } 
           eznetpp::net::tcp::tcp_socket* sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
-          register_socket_event_handler(sock, nullptr);
+          sock->set_nonblocking(true);
           handler->on_accept(*sock, evt->err_code());
           break;
         }
-        case event::event_type::on_connect:
+      case event::event_type::connect:
         {
-          //handler->
           break;
         }
-        case event::event_type::on_recv:
+      case event::event_type::recv:
         {
-          handler->on_recv(evt->data(), evt->result(), evt->err_code());
+          // TODO : implement recv for epoll et mode
+          std::string data(eznetpp::opt::max_transfer_bytes, '\0');
+          int len = ::recv(sock->descriptor(), &data[0], eznetpp::opt::max_transfer_bytes, MSG_NOSIGNAL);
+          if (len == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+              // descriptor is empty.
+            } else {
+              // TODO : implement the error case
+            }
+          } else if (len == 0) {
+            // socket is closed gracefully.
+            int ret = ::close(sock->descriptor());
+            sock->descriptor(-1);
+            socket_closed = true;
+          } else {
+            handler->on_recv(data, len, errno);
+          }
           break;
         }
-        case event::event_type::on_send:
+      case event::event_type::send:
         {
-          handler->on_send(evt->result(), evt->err_code());
+          int len = ::send(sock->descriptor(), evt->data().c_str(), evt->data_length(), MSG_NOSIGNAL);
+          handler->on_send(len, errno);
           break;
         }
       }
 
+      if (socket_closed) {
+        handler->on_close(0);
+        deregister_socket_event_handler(sock);
+
+        if (handler != nullptr) {
+          delete handler;
+          handler = nullptr;
+        }
+
+        if (sock != nullptr) {
+          delete sock;
+          sock = nullptr;
+        }
+      }
+
+      // step 4. delete ioevent
       if (evt != nullptr) {
         delete evt;
         evt = nullptr;
       }
 
-      _ioevents_vec.erase(_ioevents_vec.begin());
-
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
                          , "process a event from this");
-    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  }
+    } // while-loop
+
 }
 
 }  // namespace event

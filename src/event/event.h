@@ -4,42 +4,48 @@
 #define INCLUDE_IO_EVENT_H_
 
 #include "eznetpp.h"
+#include "net/socket.h"
 
 namespace eznetpp {
 namespace event {
 
   enum event_type { 
-    on_close = 0,
-    on_accept,
-    on_connect,
-    on_recv,
-    on_send,
+    close = 0,
+    accept,
+    connect,
+    recv,
+    send,
   };
 
 class io_event {
  public:
   io_event(void) = delete;
-  io_event(event_type type, int result, int err_code, const char* data, void* publisher) {
+
+  io_event(event_type type, eznetpp::net::socket* publisher) {
    _type = type;
-   _result = result;
-   _err_code = err_code;
-   _data = (char*)data;
    _publisher = publisher;
   };
-  virtual ~io_event(void) = default; 
+
+  io_event(event_type type, const std::string& data, int len, eznetpp::net::socket* publisher) {
+   _type = type;
+   _data = data;
+   _data_len = len;
+   _publisher = publisher;
+  };
+
+  virtual ~io_event(void) {
+  }
 
   event_type type(void) { return _type; };
-  int result(void) { return _result; };
-  int err_code(void) { return _err_code; };
-  const char* data(void) { return _data; };
-  void* publisher(void) { return _publisher; };
+  const std::string& data(void) { return _data; };
+  int data_length(void) { return _data_len; };
+  eznetpp::net::socket* publisher(void) { return _publisher; };
 
  private:
-  event_type _type;
-  int _result;
-  int _err_code;
-  char* _data;
-  void* _publisher;
+  event_type _type = event_type::close;
+  std::string _data = "";
+  int _data_len = 0;
+  eznetpp::net::socket* _publisher;
 };
 
 }  // namespace event
