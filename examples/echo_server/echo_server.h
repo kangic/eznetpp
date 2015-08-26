@@ -22,6 +22,7 @@ class echo_server : public eznetpp::event::acceptor_event_handler {
  private:
   eznetpp::sys::io_manager* _io_mgr = nullptr;
   eznetpp::net::tcp::tcp_acceptor _acceptor;
+  unsigned long _conns = 0;
 };
 
 #endif  // TEST_ECHO_SERVER_H_

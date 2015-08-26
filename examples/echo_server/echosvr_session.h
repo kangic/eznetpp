@@ -19,7 +19,9 @@ class echosvr_session : public eznetpp::event::connector_event_handler {
   void on_close(int err_no);
 
  private:
-  eznetpp::net::tcp::tcp_socket _socket;
+  eznetpp::net::tcp::tcp_socket& _socket;
+  unsigned long _recv_cnt = 0;
+  unsigned long _send_cnt = 0;
 };
 
 #endif  // TEST_ECHOSVR_SESSION_H_

@@ -2,8 +2,8 @@
 #include "sys/io_manager.h"
 
 int main(void) {
-  eznetpp::sys::io_manager io_mgr;
-  io_mgr.init();
+  eznetpp::sys::io_manager io_mgr(1, false);
+  io_mgr.init(4096);
 
   echo_server server(&io_mgr);
   server.open(56789, 5);
