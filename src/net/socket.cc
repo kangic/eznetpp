@@ -51,12 +51,5 @@ int socket::set_reuseaddr(bool flag) {
                     , reinterpret_cast<char*>(&flag), sizeof(int));
 }
 
-int socket::close(void) {
-  int ret = ::close(_sd);
-  _sd = -1;
-  return ret;
-}
-
-
 }  // namespace net
 }  // namespace eznetpp

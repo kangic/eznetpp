@@ -25,6 +25,7 @@ class socket {
 
   // socket descriptor
   int descriptor(void) const { return _sd; }
+  void descriptor(int sd) { _sd = sd; }
 
   socket_domain domain(void);
   socket_type type(void);
@@ -33,13 +34,15 @@ class socket {
   int set_tcpnodelay(bool flag);
   int set_reuseaddr(bool flag);
 
-  int close(void);
-
   /*
    * This function will implemented by each inherited class.(acceptor, connector)
    */
-  virtual void read_operation() = 0;
+  //virtual int connect(const std::string& ip, int port){}; // TODO : move to connector
+  virtual void recv(void){};
+  virtual void send(const std::string& data, int len){};
+  virtual void close(void){};
 
+ protected:
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;

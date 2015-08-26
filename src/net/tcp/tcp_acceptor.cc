@@ -16,20 +16,25 @@ tcp_acceptor::~tcp_acceptor(void) {
 }
 
 int tcp_acceptor::open(int port, int backlog) {
+  int ret = this->bind_and_listen(port, backlog);
+
+  if (ret != 0)
+    return -1;
+
   set_nonblocking(true);
   set_reuseaddr(true);
 
-  return this->bind_and_listen(port, backlog);
+  return 0;
 }
 
-void tcp_acceptor::read_operation() {
-  int sock_fd = this->accept();
+void tcp_acceptor::recv(void) {
+  eznetpp::event::event_dispatcher::instance().push_event(new eznetpp::event::io_event
+      (eznetpp::event::event_type::accept, this));
+}
 
-  eznetpp::event::io_event* evt = new eznetpp::event::io_event
-      (eznetpp::event::event_type::on_accept
-       , sock_fd, errno, "", this);
-
-  eznetpp::event::event_dispatcher::instance().push_event(evt);
+void tcp_acceptor::close(void) {
+  eznetpp::event::event_dispatcher::instance().push_event(
+      new eznetpp::event::io_event(eznetpp::event::event_type::close, this));
 }
 
 int tcp_acceptor::bind_and_listen(int port, int backlog) {
@@ -63,30 +68,6 @@ int tcp_acceptor::bind_and_listen(int port, int backlog) {
   }
 
   return 0;
-}
-
-int tcp_acceptor::accept(void) {
-  struct sockaddr_in client_addr;
-  socklen_t client_addr_len = sizeof(client_addr);
-
-  // todo : wait to accept a client connection
-  int client_sock = ::accept(_sd, (struct sockaddr *)&client_addr
-                          , &client_addr_len);
-
-  if (client_sock < 0) {
-    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "::accept() error(%d)", errno);
-
-    return -1;
-  }
-
-  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
-                         , __FILE__, __FUNCTION__, __LINE__
-                         , "client socket id : %d", client_sock);
-
-
-  return client_sock;
 }
 
 

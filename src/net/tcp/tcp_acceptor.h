@@ -19,7 +19,8 @@ class tcp_acceptor : public tcp_socket {
 
   int open(int port, int backlog = 5);
 
-  void read_operation();
+  void recv(void);
+  void close(void);
 
  private:
   int bind_and_listen(int port, int backlog);
