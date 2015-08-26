@@ -3,10 +3,13 @@
 #include "io_manager.h"
 #include "event/event_dispatcher.h"
 
+
 namespace eznetpp {
 namespace sys {
 
-io_manager::io_manager(void) {
+io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
+  _num_of_disp_threads = num_of_disp_threads;
+  eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
 io_manager::~io_manager(void) {
@@ -58,19 +61,20 @@ int io_manager::register_socket_event_handler(eznetpp::net::socket* sock
 
   struct epoll_event ev;
 
-  ev.events = EPOLLIN;
+  ev.events = EPOLLIN | EPOLLET; // | EPOLLONESHOT;
+
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
 }
 
 int io_manager::deregister_socket_event_handler(eznetpp::net::socket* sock) {
-  deregister_socket_event_handler(sock);
+  eznetpp::event::event_dispatcher::instance().deregister_socket_event_handler(sock);
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
 int io_manager::loop(void) {
-  if (eznetpp::event::event_dispatcher::instance().init() == -1) {
+  if (eznetpp::event::event_dispatcher::instance().init(_num_of_disp_threads) == -1) {
     return -1;
   }
 
@@ -107,7 +111,7 @@ void io_manager::epoll_loop(void) {
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");
 
-      // TODO(kangic) : decide to the action
+      // TODO : decide to the action
       break;
     }
 
@@ -120,16 +124,13 @@ void io_manager::epoll_loop(void) {
                           , sock->descriptor());
 
       if (_events[i].events & EPOLLIN) {
-        // send the descriptor to event_dispatcher
-        sock->read_operation();
+        sock->recv();
       } else if (_events[i].events & EPOLLHUP || _events[i].events & EPOLLERR) {
-        // TODO
-        epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
+        // TODO : add log
+        printf("epollhup or epollerr\n");
         sock->close();
       }
     }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
 

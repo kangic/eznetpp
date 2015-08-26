@@ -11,7 +11,7 @@ namespace eznetpp {
 namespace sys {
 class io_manager {
  public:
-  io_manager(void);
+  io_manager(int num_of_disp_threads = 1, bool log_enable = false);
   virtual ~io_manager(void);
 
   /*
@@ -45,6 +45,7 @@ class io_manager {
   int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
   int _max_descs_cnt = 1024;
+  int _num_of_disp_threads = 1;
 
   std::thread _loop_th;
 };
