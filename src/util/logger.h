@@ -24,6 +24,8 @@ class logger {
 
   static logger& instance();
 
+  void set_enable_option(bool enable);
+
   void log(log_level level, const char* file, const char* func, int line
            , const char* format, ...);
 
@@ -41,6 +43,7 @@ class logger {
   virtual ~logger(void);
 
   static std::mutex _log_mutex;
+  bool _log_enable = false;
 
   DISALLOW_COPY_AND_ASSIGN(logger);
 };

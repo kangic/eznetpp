@@ -28,6 +28,10 @@ logger& logger::instance() {
   return *_inst;
 }
 
+void logger::set_enable_option(bool enable) {
+  _log_enable = enable;
+}
+
 logger::cleanup::~cleanup() {
   std::lock_guard<std::mutex> guard(logger::_log_mutex);
 
@@ -39,18 +43,21 @@ logger::cleanup::~cleanup() {
 
 void logger::log(log_level level, const char* file, const char* func, int line
                  , const char* format, ...) {
-  std::lock_guard<std::mutex> guard(logger::_log_mutex);
+  if (_log_enable)
+  {
+    std::lock_guard<std::mutex> guard(logger::_log_mutex);
 
-  printf("[%s] ", log_level_str[level]);
+    printf("[%s] ", log_level_str[level]);
 
-  va_list arg;
-  int count;
+    va_list arg;
+    int count;
 
-  va_start(arg, format);
-  count = vprintf(format, arg);
-  va_end(arg);
+    va_start(arg, format);
+    count = vprintf(format, arg);
+    va_end(arg);
 
-  printf("(%s::%s::%d)\n", file, func, line);
+    printf("(%s::%s::%d)\n", file, func, line);
+  }
 }
 
 }  // namespace util
