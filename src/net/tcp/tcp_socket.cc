@@ -41,12 +41,12 @@ int tcp_socket::connect(const std::string& ip, int port) {
 
 void tcp_socket::send(const std::string& msg, int len) {
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::send, msg, len, this));
+      new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, msg, len, this));
 }
 
 void tcp_socket::recv(void) {
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::recv, this));
+      new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, this));
 }
 
 void tcp_socket::close(void) {
