@@ -18,11 +18,6 @@ class socket {
   enum socket_domain { inet_v4 = PF_INET, inet_v6 = PF_INET6, unix = PF_LOCAL };
   enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
 
-  typedef struct _peer_addr {
-    std::string ip = "";
-    int port = -1;
-  } peer_addr;
-
   // socket descriptor
   int descriptor(void) const { return _sd; }
   void descriptor(int sd) { _sd = sd; }
@@ -30,9 +25,17 @@ class socket {
   socket_domain domain(void);
   socket_type type(void);
 
-  int set_nonblocking(bool flag);
-  int set_tcpnodelay(bool flag);
-  int set_reuseaddr(bool flag);
+  int set_nonblocking(void);
+  int set_tcpnodelay(void);
+  int set_reuseaddr(void);
+
+
+  typedef struct _peer_addr {
+    std::string ip = "";
+    int port = -1;
+  } peer_addr;
+  void set_peerinfo(const std::string& ip, int port);
+  struct _peer_addr& peer() { return _peer; }
 
   /*
    * This function will implemented by each inherited class.(acceptor, connector)
@@ -46,7 +49,8 @@ class socket {
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;
-  peer_addr _peer;
+
+ peer_addr _peer;
 };
 
 }  // namespace net

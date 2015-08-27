@@ -21,8 +21,8 @@ int tcp_acceptor::open(int port, int backlog) {
   if (ret != 0)
     return -1;
 
-  set_nonblocking(true);
-  set_reuseaddr(true);
+  set_nonblocking();
+  set_reuseaddr();
 
   return 0;
 }

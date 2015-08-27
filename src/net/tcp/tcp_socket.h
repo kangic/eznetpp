@@ -15,13 +15,10 @@ class tcp_socket : public eznetpp::net::socket {
   tcp_socket(int sd);
   virtual ~tcp_socket(void);
 
+  int connect(const std::string& ip, int port);
   void send(const std::string& msg, int len);
   void recv(void); 
   void close(void);
-
-  //int connect(const std::string& ip, int port);
-  //int recv(char* msg, int len); 
-  //void read_operation();
 };
 
 }  // namespace tcp

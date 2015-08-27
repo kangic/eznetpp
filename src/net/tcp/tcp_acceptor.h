@@ -24,7 +24,6 @@ class tcp_acceptor : public tcp_socket {
 
  private:
   int bind_and_listen(int port, int backlog);
-  int accept(void);
 };
 
 }  // namespace tcp

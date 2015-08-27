@@ -14,11 +14,6 @@ tcp_socket::tcp_socket(void) {
 
   // TODO : implement for PF_INET6
   _sd = ::socket(_sock_domain, _sock_type, 0);
-  if (_sd == -1) {
-    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "socket() error(%d)", errno);
-  }
 }
 
 tcp_socket::tcp_socket(int sd) {
@@ -30,32 +25,19 @@ tcp_socket::tcp_socket(int sd) {
 tcp_socket::~tcp_socket(void) {
 }
 
-/* move to tcp_connector
 int tcp_socket::connect(const std::string& ip, int port) {
-  struct sockaddr_in server_addr;
-  bzero(&server_addr, sizeof(server_addr));
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
-  server_addr.sin_port = htons(port);
-
-  // connect to server(on_connect event)
-  int ret = ::connect(_sd, (struct sockaddr *)&server_addr
-                    , sizeof(server_addr));
-  if (ret == -1) {
+  if (_sd == -1) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
-                           , "::connect() error(%d)", errno);
-
-    this->close();
-    return errno;
+                           , "socket() error(%d)", errno);
+    return -1;
   }
 
-  _peer.ip = ip;
-  _peer.port = port;
+  eznetpp::event::event_dispatcher::instance().push_event(
+      new eznetpp::event::io_event(eznetpp::event::event_type::connect, ip, port, this));
 
   return 0;
 }
-*/
 
 void tcp_socket::send(const std::string& msg, int len) {
   eznetpp::event::event_dispatcher::instance().push_event(

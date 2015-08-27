@@ -21,34 +21,36 @@ socket::socket_type socket::type(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // set socket options
-int socket::set_nonblocking(bool flag) {
+int socket::set_nonblocking(void) {
   if (_sd == -1)
     return _sd;
 
   int flags = fcntl(_sd, F_GETFL);
 
-  if (flag)
-    flags |= O_NONBLOCK;
-  else
-    flags |= ~O_NONBLOCK;
+  flags |= O_NONBLOCK;
 
   return fcntl(_sd, F_SETFL, flags);
 }
 
-int socket::set_tcpnodelay(bool flag) {
+int socket::set_tcpnodelay(void) {
   if (_sd == -1)
     return _sd;
 
-  return setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY
-                    , reinterpret_cast<char*>(&flag), sizeof(int));
+  int on = 1;
+  return setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int));
 }
 
-int socket::set_reuseaddr(bool flag) {
+int socket::set_reuseaddr(void) {
   if (_sd == -1)
     return _sd;
 
-  return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR
-                    , reinterpret_cast<char*>(&flag), sizeof(int));
+  int on = 1;
+  return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+}
+
+void socket::set_peerinfo(const std::string& ip, int port) {
+  _peer.ip = ip;
+  _peer.port = port;
 }
 
 }  // namespace net
