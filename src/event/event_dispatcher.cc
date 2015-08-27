@@ -101,22 +101,55 @@ void event_dispatcher::dispatch_loop(int id) {
         }
       case event::event_type::accept:
         {
-          int sock_fd = sock->accept();
+          struct sockaddr_in client_addr;
+          socklen_t client_addr_len = sizeof(client_addr);
+
+          int sock_fd = ::accept(sock->descriptor(), (struct sockaddr *)&client_addr
+              , &client_addr_len);
+
           if (sock_fd == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
               // descriptor is empty.
             } else {
               // TODO : implement the error case
+              handler->on_accept(nullptr, errno);
+              eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+                  , __FILE__, __FUNCTION__, __LINE__
+                  , "::accept() error(%d)", errno);
             }
             break;
           } 
           eznetpp::net::tcp::tcp_socket* sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
-          sock->set_nonblocking(true);
-          handler->on_accept(*sock, evt->err_code());
+          sock->set_peerinfo(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
+          sock->set_nonblocking();
+
+          handler->on_accept(sock, 0);
+
           break;
         }
       case event::event_type::connect:
         {
+          struct sockaddr_in server_addr;
+          bzero(&server_addr, sizeof(server_addr));
+          server_addr.sin_family = AF_INET;
+          server_addr.sin_addr.s_addr = inet_addr(evt->data().c_str());
+          server_addr.sin_port = htons(evt->opt_data());
+
+          // connect to server(on_connect event)
+          int ret = ::connect(sock->descriptor(), (struct sockaddr *)&server_addr
+              , sizeof(server_addr));
+          if (ret == -1) {
+            handler->on_connect(errno);
+            eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+                , __FILE__, __FUNCTION__, __LINE__
+                , "::connect() error(%d)", errno);
+            break;
+          }
+
+          sock->set_peerinfo(evt->data().c_str(), evt->opt_data());
+          sock->set_nonblocking();
+          handler->on_connect(0);
+
           break;
         }
       case event::event_type::recv:
@@ -142,7 +175,7 @@ void event_dispatcher::dispatch_loop(int id) {
         }
       case event::event_type::send:
         {
-          int len = ::send(sock->descriptor(), evt->data().c_str(), evt->data_length(), MSG_NOSIGNAL);
+          int len = ::send(sock->descriptor(), evt->data().c_str(), evt->opt_data(), MSG_NOSIGNAL);
           handler->on_send(len, errno);
           break;
         }

@@ -26,10 +26,10 @@ class io_event {
    _publisher = publisher;
   };
 
-  io_event(event_type type, const std::string& data, int len, eznetpp::net::socket* publisher) {
+  io_event(event_type type, const std::string& data, int opt_data, eznetpp::net::socket* publisher) {
    _type = type;
    _data = data;
-   _data_len = len;
+   _opt_data = opt_data;
    _publisher = publisher;
   };
 
@@ -38,13 +38,13 @@ class io_event {
 
   event_type type(void) { return _type; };
   const std::string& data(void) { return _data; };
-  int data_length(void) { return _data_len; };
+  int opt_data(void) { return _opt_data; };
   eznetpp::net::socket* publisher(void) { return _publisher; };
 
  private:
   event_type _type = event_type::close;
   std::string _data = "";
-  int _data_len = 0;
+  int _opt_data = 0;
   eznetpp::net::socket* _publisher;
 };
 

@@ -16,12 +16,12 @@ class event_handler {
   virtual ~event_handler(void) = default;
 
   enum event_handler_type {
-    acceptor = 0,
-    connector,
+    socket = 0,
+    acceptor,
   };
   event_handler_type type() { return _handler_type; };
 
-  virtual void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no) = 0;
+  virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
   virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
   virtual void on_send(unsigned int len, int err_no) = 0;
@@ -31,6 +31,22 @@ class event_handler {
   event_handler_type _handler_type;
 };
 
+class socket_event_handler : public event_handler {
+ public:
+  socket_event_handler(void) { 
+    _handler_type = event_handler_type::socket;
+  };
+  virtual ~socket_event_handler(void) = default;
+
+  virtual void on_connect(int err_no) = 0;
+  virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
+  virtual void on_send(unsigned int len, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
+
+ protected:
+  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no){};
+};
+
 class acceptor_event_handler : public event_handler {
  public:
   acceptor_event_handler(void) {
@@ -38,29 +54,13 @@ class acceptor_event_handler : public event_handler {
   };
   virtual ~acceptor_event_handler(void) = default;
 
-  virtual void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no){};
-  virtual void on_close(int err_no){};
+  virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
 
  protected:
   void on_connect(int err_no){};
   void on_recv(const std::string& msg, int len, int err_no){};
   void on_send(unsigned int len, int err_no){};
-};
-
-class connector_event_handler : public event_handler {
- public:
-  connector_event_handler(void) { 
-    _handler_type = event_handler_type::connector;
-  };
-  virtual ~connector_event_handler(void) = default;
-
-  virtual void on_connect(int err_no){};
-  virtual void on_recv(const std::string& msg, int len, int err_no){};
-  virtual void on_send(unsigned int len, int err_no){};
-  virtual void on_close(int err_no){};
-
- protected:
-  void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no){};
 };
 
 }  // namespace event
