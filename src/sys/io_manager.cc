@@ -116,7 +116,7 @@ void io_manager::epoll_loop(void) {
     }
 
     for (int i = 0; i < changed_events; ++i) {
-      eznetpp::net::socket* sock = reinterpret_cast<eznetpp::net::socket*>(_events[i].data.ptr);
+      eznetpp::net::socket* sock = static_cast<eznetpp::net::socket*>(_events[i].data.ptr);
 
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
