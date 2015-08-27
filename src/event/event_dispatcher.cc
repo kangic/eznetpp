@@ -152,7 +152,7 @@ void event_dispatcher::dispatch_loop(int id) {
 
           break;
         }
-      case event::event_type::recv:
+      case event::event_type::tcp_recv:
         {
           // TODO : implement recv for epoll et mode
           std::string data(eznetpp::opt::max_transfer_bytes, '\0');
@@ -173,10 +173,18 @@ void event_dispatcher::dispatch_loop(int id) {
           }
           break;
         }
-      case event::event_type::send:
+      case event::event_type::tcp_send:
         {
           int len = ::send(sock->descriptor(), evt->data().c_str(), evt->opt_data(), MSG_NOSIGNAL);
           handler->on_send(len, errno);
+          break;
+        }
+      case event::event_type::udp_recv:
+        {
+          break;
+        }
+      case event::event_type::udp_send:
+        {
           break;
         }
       }

@@ -13,8 +13,10 @@ namespace event {
     close = 0,
     accept,
     connect,
-    recv,
-    send,
+    tcp_recv,
+    tcp_send,
+    udp_recv,
+    udp_send,
   };
 
 class io_event {
