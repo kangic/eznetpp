@@ -7,9 +7,9 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echosvr_session : public eznetpp::event::connector_event_handler {
+class echosvr_session : public eznetpp::event::socket_event_handler {
  public:
-  echosvr_session(eznetpp::net::tcp::tcp_socket& sock);
+  echosvr_session(eznetpp::net::tcp::tcp_socket* sock);
   virtual ~echosvr_session();
 
  public:
@@ -18,8 +18,11 @@ class echosvr_session : public eznetpp::event::connector_event_handler {
   void on_send(unsigned int len, int err_no);
   void on_close(int err_no);
 
+  // do not need 
+  void on_connect(int err_no) {};
+
  private:
-  eznetpp::net::tcp::tcp_socket& _socket;
+  eznetpp::net::tcp::tcp_socket* _socket;
   unsigned long _recv_cnt = 0;
   unsigned long _send_cnt = 0;
 };

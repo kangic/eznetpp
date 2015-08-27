@@ -16,7 +16,7 @@ class echo_server : public eznetpp::event::acceptor_event_handler {
   int open(int port, int backlog);
 
   // override
-  void on_accept(eznetpp::net::tcp::tcp_socket& sock, int err_no);
+  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no);
   void on_close(int err_no);
 
  private:

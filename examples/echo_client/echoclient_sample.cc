@@ -1,9 +1,14 @@
 #include "./echo_client.h"
+#include "sys/io_manager.h"
 
 int main(void) {
-  // it's user class for server
-  echo_client c;
-  c.set_server_info("127.0.0.1", 6666);
+  eznetpp::sys::io_manager io_mgr(1, true);
+  io_mgr.init();
+
+  echo_client client(&io_mgr);
+  client.start();
+  
+  io_mgr.loop();
 
   return 0;
 }
