@@ -1,27 +1,27 @@
 //  Copyright [2015] <kangic21@gmail.com>
 
-#include "socket.h"
+#include "if_socket.h"
 
 namespace eznetpp {
 namespace net {
 
-socket::socket(void) {
+if_socket::if_socket(void) {
 }
 
-socket::~socket(void) {
+if_socket::~if_socket(void) {
 }
 
-socket::socket_domain socket::domain(void) {
+if_socket::socket_domain socket::domain(void) {
   return _sock_domain;
 }
 
-socket::socket_type socket::type(void) {
+if_socket::socket_type socket::type(void) {
   return _sock_type;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// set socket options
-int socket::set_nonblocking(void) {
+// set if_socket options
+int if_socket::set_nonblocking(void) {
   if (_sd == -1)
     return _sd;
 
@@ -32,7 +32,7 @@ int socket::set_nonblocking(void) {
   return fcntl(_sd, F_SETFL, flags);
 }
 
-int socket::set_tcpnodelay(void) {
+int if_socket::set_tcpnodelay(void) {
   if (_sd == -1)
     return _sd;
 
@@ -40,7 +40,7 @@ int socket::set_tcpnodelay(void) {
   return setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int));
 }
 
-int socket::set_reuseaddr(void) {
+int if_socket::set_reuseaddr(void) {
   if (_sd == -1)
     return _sd;
 
@@ -48,7 +48,7 @@ int socket::set_reuseaddr(void) {
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 }
 
-void socket::set_peerinfo(const std::string& ip, int port) {
+void if_socket::set_peer_info(const std::string& ip, int port) {
   _peer.ip = ip;
   _peer.port = port;
 }

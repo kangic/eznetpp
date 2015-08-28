@@ -10,10 +10,10 @@
  */
 namespace eznetpp {
 namespace net {
-class socket {
+class if_socket {
  public:
-  socket(void);
-  virtual ~socket(void);
+  if_socket(void);
+  virtual ~if_socket(void);
 
   enum socket_domain { inet_v4 = PF_INET, inet_v6 = PF_INET6, unix = PF_LOCAL };
   enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
@@ -34,23 +34,25 @@ class socket {
     std::string ip = "";
     int port = -1;
   } peer_addr;
-  void set_peerinfo(const std::string& ip, int port);
+  void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
 
   /*
    * This function will implemented by each inherited class.(acceptor, connector)
    */
-  //virtual int connect(const std::string& ip, int port){}; // TODO : move to connector
   virtual void recv(void){};
   virtual void send(const std::string& data, int len){};
   virtual void close(void){};
+
+  //typedef socket_ptr std::shared_ptr<socket>;
+  //using socket_ptr = std::shared_ptr<eznetpp::net::socket>;
 
  protected:
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;
 
- peer_addr _peer;
+  peer_addr _peer;
 };
 
 }  // namespace net
