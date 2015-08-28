@@ -3,8 +3,7 @@
 #ifndef INCLUDE_COMMON_H_
 #define INCLUDE_COMMON_H_
 
-#include <errno.h>
-
+#include <map>
 namespace eznetpp {
 
 namespace opt {
@@ -12,7 +11,15 @@ namespace opt {
 }  // namespace opt
 
 namespace errcode {
-  enum errcode_table {
+  std::map<int, std::string> errcode_table = {
+    {0, "success"}
+    , {EAGAIN, "EAGAIN"}
+  };
+  
+  /*
+  std::map<int, std::string> errcode_table = {
+
+    /*
     success = 0,
 
     sys_eagain = EAGAIN,
@@ -54,8 +61,8 @@ namespace errcode {
     sys_enametoolong = ENAMETOOLONG,
     sys_enoent = ENOENT,
     sys_erofs = EROFS,
-
   };
+  */
 }  // namespace errcode
 
 }  // namespace eznetpp
