@@ -3,9 +3,7 @@
 #ifndef INCLUDE_LOGGER_H_
 #define INCLUDE_LOGGER_H_
 
-#include <mutex>
-
-#include "./macros.h"
+#include "eznetpp.h"
 
 namespace eznetpp {
 namespace util {
@@ -44,8 +42,6 @@ class logger {
 
   static std::mutex _log_mutex;
   bool _log_enable = false;
-
-  DISALLOW_COPY_AND_ASSIGN(logger);
 };
 }  // namespace util
 }  // namespace eznetpp

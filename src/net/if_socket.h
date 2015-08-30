@@ -44,9 +44,6 @@ class if_socket {
   virtual void send(const std::string& data, int len){};
   virtual void close(void){};
 
-  //typedef socket_ptr std::shared_ptr<socket>;
-  //using socket_ptr = std::shared_ptr<eznetpp::net::socket>;
-
  protected:
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;

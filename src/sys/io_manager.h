@@ -5,7 +5,7 @@
 
 #include "eznetpp.h"
 #include "event/event_handler.h"
-#include "net/socket.h"
+#include "net/if_socket.h"
 
 namespace eznetpp {
 namespace sys {
@@ -24,10 +24,10 @@ class io_manager {
    * Register/Unregister the socket class and the event handler to recieve the
    * event.
    */
-  int register_socket_event_handler(eznetpp::net::socket* sock
+  int register_socket_event_handler(eznetpp::net::if_socket* sock
       , eznetpp::event::event_handler* handler);
-  int deregister_socket_event_handler(eznetpp::net::socket* sock);
-
+  int deregister_socket_event_handler(eznetpp::net::if_socket* sock);
+  
   /*
    * Create the read_loop thread in this function.
    */

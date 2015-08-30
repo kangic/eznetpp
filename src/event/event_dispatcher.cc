@@ -28,32 +28,56 @@ int event_dispatcher::init(int num_of_disp_threads) {
                            , __FILE__, __FUNCTION__, __LINE__
                            , "failed to create dispatch thread(%d)"
                            , errno);
+
+      return -1;
     }
 
-    _disp_ths_vec.emplace_back(std::move(disp_th));
+    _disp_ths_vec.push_back(std::move(disp_th));
   }
+
+  return 0;
 }
 
-bool event_dispatcher::register_socket_event_handler(eznetpp::net::socket* sock
-      , event_handler* handler) {
+bool event_dispatcher::register_socket_event_handler(eznetpp::net::if_socket* sock, event_handler* handler) {
   std::lock_guard<std::mutex> guard(_handlers_map_mutex);
   _handlers_map[sock] = handler;
   return true;
 }
 
-bool event_dispatcher::deregister_socket_event_handler(eznetpp::net::socket* sock) {
-  std::lock_guard<std::mutex> guard(_handlers_map_mutex);
-  if (_handlers_map.find(sock) == _handlers_map.end())
-    return false;
+bool event_dispatcher::deregister_socket_event_handler(eznetpp::net::if_socket* sock) {
+  // erase the handler
+  {
+    std::lock_guard<std::mutex> guard(_handlers_map_mutex);
+    if (_handlers_map.find(sock) == _handlers_map.end())
+      return false;
 
-  _handlers_map.erase(sock);
+    _handlers_map.erase(sock);
+  }
+
+  // erase the socket and then delete it
+  {
+    std::lock_guard<std::mutex> guard(_sockets_vec_mutex);
+    std::vector<eznetpp::net::if_socket*>::iterator iter = _sockets_vec.begin();
+    while (iter != _sockets_vec.end()) {
+      if ((*iter) == sock) {
+        delete *iter;
+        *iter = nullptr;
+
+        iter = _sockets_vec.erase(iter);
+
+        break;
+      } else {
+        ++iter;
+      }
+    }
+  }
 
   return true;
 }
 
 void event_dispatcher::push_event(io_event* evt) {
   std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
-  _ioevents_vec.emplace_back(evt);
+  _ioevents_vec.push_back(std::move(evt));
   _disp_th_cv.notify_one();
 }
 
@@ -80,13 +104,13 @@ void event_dispatcher::dispatch_loop(int id) {
     }
        
     // step 3. process the ioevent to the its handler
-    eznetpp::net::socket* sock = evt->publisher();
+    eznetpp::net::if_socket* sock = evt->publisher();
     event_handler* handler = _handlers_map[sock];
 
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
         , __FILE__, __FUNCTION__, __LINE__
         , "id(%d), io_event : %p(type : %d), socket : %p, handler : %p"
-        , id, evt, evt->type(), sock, handler);
+        , id, evt, evt->type(), &sock, handler);
 
     socket_closed = false;
     switch (evt->type()) {
@@ -94,7 +118,7 @@ void event_dispatcher::dispatch_loop(int id) {
         {
           // Delete the socket descriptor from epoll descriptor automatically
           // when the socket is closed.
-          int ret = ::close(sock->descriptor());
+          ::close(sock->descriptor());
           sock->descriptor(-1);
           socket_closed = true;
           break;
@@ -119,11 +143,16 @@ void event_dispatcher::dispatch_loop(int id) {
             }
             break;
           } 
-          eznetpp::net::tcp::tcp_socket* sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
-          sock->set_peerinfo(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
-          sock->set_nonblocking();
+          eznetpp::net::tcp::tcp_socket* tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
+          tcp_sock->set_peer_info(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
+          tcp_sock->set_nonblocking();
+          handler->on_accept(tcp_sock, 0);
 
-          handler->on_accept(sock, 0);
+          // TODO : push the socket to new list
+          {
+            std::lock_guard<std::mutex> lock(_sockets_vec_mutex);
+            _sockets_vec.push_back(std::move(tcp_sock));
+          }
 
           break;
         }
@@ -146,7 +175,7 @@ void event_dispatcher::dispatch_loop(int id) {
             break;
           }
 
-          sock->set_peerinfo(evt->data().c_str(), evt->opt_data());
+          sock->set_peer_info(evt->data().c_str(), evt->opt_data());
           sock->set_nonblocking();
           handler->on_connect(0);
 
@@ -165,7 +194,7 @@ void event_dispatcher::dispatch_loop(int id) {
             }
           } else if (len == 0) {
             // socket is closed gracefully.
-            int ret = ::close(sock->descriptor());
+            ::close(sock->descriptor());
             sock->descriptor(-1);
             socket_closed = true;
           } else {
@@ -198,10 +227,12 @@ void event_dispatcher::dispatch_loop(int id) {
           handler = nullptr;
         }
 
+        /*
         if (sock != nullptr) {
           delete sock;
           sock = nullptr;
         }
+        */
       }
 
       // step 4. delete ioevent

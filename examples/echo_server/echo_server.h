@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "eznetpp.h"
 #include "net/tcp/tcp_acceptor.h"
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"

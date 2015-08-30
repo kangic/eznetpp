@@ -1,7 +1,5 @@
 // Copyright[2015] <kangic21@gmail.com>
 
-#include <cstdio>
-#include <cstdarg>
 
 #include "logger.h"
 

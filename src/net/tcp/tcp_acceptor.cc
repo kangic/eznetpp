@@ -44,8 +44,7 @@ int tcp_acceptor::bind_and_listen(int port, int backlog) {
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY); 
   server_addr.sin_port = htons(port);
 
-  int ret;
-  ret = bind(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  int ret = bind(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret != 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error

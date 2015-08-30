@@ -12,15 +12,16 @@
 namespace eznetpp {
 namespace net {
 namespace tcp {
-class tcp_acceptor : public tcp_socket {
+class tcp_acceptor : public eznetpp::net::if_socket {
  public:
   tcp_acceptor(void);
   virtual ~tcp_acceptor(void);
 
   int open(int port, int backlog = 5);
-
-  void recv(void);
   void close(void);
+
+ protected:
+  void recv(void);
 
  private:
   int bind_and_listen(int port, int backlog);

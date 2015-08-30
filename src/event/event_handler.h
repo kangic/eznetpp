@@ -4,7 +4,7 @@
 #define INCLUDE_EVENT_HANDLER_H_
 
 #include "eznetpp.h"
-#include "net/socket.h"
+#include "net/if_socket.h"
 #include "net/tcp/tcp_socket.h"
 
 namespace eznetpp {
@@ -20,7 +20,6 @@ class event_handler {
     acceptor,
   };
   event_handler_type type() { return _handler_type; };
-
   virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
   virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len, int err_no) = 0;

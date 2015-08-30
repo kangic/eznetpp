@@ -11,11 +11,11 @@ if_socket::if_socket(void) {
 if_socket::~if_socket(void) {
 }
 
-if_socket::socket_domain socket::domain(void) {
+if_socket::socket_domain if_socket::domain(void) {
   return _sock_domain;
 }
 
-if_socket::socket_type socket::type(void) {
+if_socket::socket_type if_socket::type(void) {
   return _sock_type;
 }
 
