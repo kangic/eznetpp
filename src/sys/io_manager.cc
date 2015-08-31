@@ -13,6 +13,7 @@ io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
 }
 
 io_manager::~io_manager(void) {
+  ::close(_epoll_fd);
 }
 
 /*
