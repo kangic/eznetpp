@@ -26,7 +26,7 @@ class io_event {
   io_event(event_type type, eznetpp::net::if_socket* publisher) {
    _type = type;
    _publisher = publisher;
-  };
+  }
 
   io_event(event_type type, const std::string& data, int opt_data
       , eznetpp::net::if_socket* publisher) {
@@ -34,21 +34,25 @@ class io_event {
    _data = data;
    _opt_data = opt_data;
    _publisher = publisher;
-  };
-
-  virtual ~io_event(void) {
   }
 
-  event_type type(void) { return _type; };
-  const std::string& data(void) { return _data; };
-  int opt_data(void) { return _opt_data; };
-  eznetpp::net::if_socket* publisher(void) { return _publisher; };
+  virtual ~io_event(void) = default;
+
+  event_type type(void) { return _type; }
+  const std::string& data(void) { return _data; }
+  int opt_data(void) { return _opt_data; }
+  eznetpp::net::if_socket* publisher(void) { return _publisher; }
+  
+  // is work done?
+  bool is_done() { return _done; }
+  void done() { _done = true; }
 
  private:
   event_type _type = event_type::close;
   std::string _data = "";
   int _opt_data = 0;
-  eznetpp::net::if_socket* _publisher;
+  eznetpp::net::if_socket* _publisher = nullptr;
+  bool _done = false;
 };
 
 }  // namespace event

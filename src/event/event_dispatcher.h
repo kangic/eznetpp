@@ -34,6 +34,9 @@ class event_dispatcher {
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
 
+  void close_socket_and_clear_resources(eznetpp::net::if_socket* sock
+      , event_handler* handler);
+
   static event_dispatcher* _evt_dispatcher;
 
   // work threads
@@ -47,6 +50,7 @@ class event_dispatcher {
   std::mutex _sockets_vec_mutex;
 
   std::vector<io_event*> _ioevents_vec;
+  std::mutex _ioevents_vec_mutex;
 
   // condition variables
   std::condition_variable _disp_th_cv;  
