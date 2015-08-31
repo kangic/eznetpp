@@ -34,6 +34,7 @@ class event_dispatcher {
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
 
+  void process_event(io_event* evt);
   void close_socket_and_clear_resources(eznetpp::net::if_socket* sock
       , event_handler* handler);
 
