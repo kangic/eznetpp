@@ -1,3 +1,5 @@
+#include <csignal>
+
 #include "echo_server.h"
 #include "sys/io_manager.h"
 
@@ -6,7 +8,7 @@ int main(void) {
   io_mgr.init(4096);
 
   echo_server server(&io_mgr);
-  server.open(56789, 5);
+  server.open(6666, 5);
   
   io_mgr.loop();
 

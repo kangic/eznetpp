@@ -12,7 +12,12 @@ echo_server::~echo_server(void) {
 }
 
 int echo_server::open(int port, int backlog) {
-  _acceptor.open(port, backlog);
+  int ret = _acceptor.open(port, backlog);
+
+  if (ret) {
+    printf("%s\n", eznetpp::errcode::errno_to_str(ret).c_str());
+    return -1;
+  }
  
   _io_mgr->register_socket_event_handler(&_acceptor, this);
 }
