@@ -94,6 +94,10 @@ int io_manager::loop(void) {
   return 0;
 }
 
+void io_manager::stop(void) {
+  _loop_th.detach();
+}
+
 void io_manager::epoll_loop(void) {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__

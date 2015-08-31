@@ -32,6 +32,7 @@ class io_manager {
    * Create the read_loop thread in this function.
    */
   int loop(void);
+  void stop(void);
 
  protected:
   /*
@@ -48,6 +49,9 @@ class io_manager {
   int _num_of_disp_threads = 1;
 
   std::thread _loop_th;
+
+  std::condition_variable _exit_cv;
+  std::mutex _exit_mutex;
 };
 
 }  // namespace sys
