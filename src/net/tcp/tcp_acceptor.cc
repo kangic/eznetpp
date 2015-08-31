@@ -19,7 +19,7 @@ int tcp_acceptor::open(int port, int backlog) {
   int ret = this->bind_and_listen(port, backlog);
 
   if (ret != 0)
-    return -1;
+    return ret;
 
   set_nonblocking();
   set_reuseaddr();
