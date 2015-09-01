@@ -12,7 +12,7 @@ echo_client::~echo_client(void) {
 void echo_client::start(void) {
   _io_mgr->register_socket_event_handler(&_socket, this);
 
-  _socket.connect("127.0.0.1", 56789);
+  _socket.connect("127.0.0.1", 6666);
 }
 
 void echo_client::on_connect(int err_no) {

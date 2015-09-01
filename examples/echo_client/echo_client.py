@@ -3,7 +3,7 @@ import socket
 import time
 import datetime
 
-server_addr = ("localhost", 6666)
+server_addr = (sys.argv[1], 6666)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(server_addr)
 num = 0
