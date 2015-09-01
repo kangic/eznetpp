@@ -62,7 +62,7 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
 
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET;
+  ev.events = EPOLLIN;
 
   ev.data.ptr = sock;
 
@@ -136,6 +136,8 @@ void io_manager::epoll_loop(void) {
         sock->close();
       }
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
 

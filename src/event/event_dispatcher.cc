@@ -114,32 +114,16 @@ void event_dispatcher::process_event(io_event* evt) {
       {
         // Delete the socket descriptor from epoll descriptor automatically
         // when the socket is closed.
-        close_socket_and_clear_resources(sock, handler);
+        clear_resources(sock, handler);
         evt->done();
         break;
       }
     case event::event_type::accept:
       {
-        struct sockaddr_in client_addr;
-        socklen_t client_addr_len = sizeof(client_addr);
-
-        int sock_fd = ::accept(sock->descriptor()
-            , (struct sockaddr *)&client_addr
-            , &client_addr_len);
-
-        if (sock_fd == -1 && (errno != EAGAIN && errno != EWOULDBLOCK)) {
-          // TODO : implement the error case
-          handler->on_accept(nullptr, errno);
-          evt->done();
-          eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-              , __FILE__, __FUNCTION__, __LINE__
-              , "::accept() error(%d)", errno);
-          break;
-        }
+        int sock_fd = evt->result();
 
         eznetpp::net::tcp::tcp_socket* tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
-        tcp_sock->set_peer_info(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
-        tcp_sock->set_nonblocking();
+        tcp_sock->set_peer_info(std::move(evt->data()), evt->opt_data());
         handler->on_accept(tcp_sock, 0);
         evt->done();
 
@@ -153,27 +137,8 @@ void event_dispatcher::process_event(io_event* evt) {
       }
     case event::event_type::connect:
       {
-        struct sockaddr_in server_addr;
-        bzero(&server_addr, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = inet_addr(evt->data().c_str());
-        server_addr.sin_port = htons(evt->opt_data());
-
-        // connect to server(on_connect event)
-        int ret = ::connect(sock->descriptor(), (struct sockaddr *)&server_addr
-            , sizeof(server_addr));
-        if (ret == -1) {
-          handler->on_connect(errno);
-          eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-              , __FILE__, __FUNCTION__, __LINE__
-              , "::connect() error(%d)", errno);
-          break;
-        }
-
         sock->set_peer_info(evt->data().c_str(), evt->opt_data());
-        sock->set_nonblocking();
-        handler->on_connect(0);
-
+        handler->on_connect(evt->err_no());
         evt->done();
 
         break;
@@ -181,29 +146,15 @@ void event_dispatcher::process_event(io_event* evt) {
     case event::event_type::tcp_recv:
       {
         // TODO : implement recv for epoll et mode
-        std::string data(eznetpp::opt::max_transfer_bytes, '\0');
-        int len = ::recv(sock->descriptor(), &data[0], eznetpp::opt::max_transfer_bytes, MSG_NOSIGNAL);
-        if (len == 0
-            || (len == -1 && (errno != EAGAIN && errno != EWOULDBLOCK))
-            || errno == ECONNRESET) {
-          printf("sd : %d, errno : %d, len = %d\n", sock->descriptor(), errno, len);
-          close_socket_and_clear_resources(sock, handler);
-        } else if (len != -1) {
-          handler->on_recv(data, len, errno);
-          evt->done();
-        }
+        handler->on_recv(evt->data(), evt->result(), evt->err_no());
+        evt->done();
         break;
       }
     case event::event_type::tcp_send:
       {
-        int len = ::send(sock->descriptor(), evt->data().c_str(), evt->opt_data(), MSG_NOSIGNAL);
-        if (len == -1 && (errno != EAGAIN && errno != EWOULDBLOCK)) {
-          printf("errno : %d\n", errno);
-          close_socket_and_clear_resources(sock, handler);
-        } else if (len != -1) {
-          handler->on_send(len, errno);
-          evt->done();
-        }
+        handler->on_send(evt->result(), evt->err_no());
+        evt->done();
+
         break;
       }
     case event::event_type::udp_recv:
@@ -223,7 +174,7 @@ void event_dispatcher::process_event(io_event* evt) {
   }
 }
 
-void event_dispatcher::close_socket_and_clear_resources(
+void event_dispatcher::clear_resources(
     eznetpp::net::if_socket* sock, event_handler* handler) {
   // step 1. delete events
   {
@@ -241,10 +192,8 @@ void event_dispatcher::close_socket_and_clear_resources(
     }
   }
 
-  // step 2. close socket and call to on_close
-  ::close(sock->descriptor());
+  // step 2. call to on_close
   handler->on_close(errno);
-  sock->descriptor(-1);
 
   // step 3. erase the socket and then delete it
   {
