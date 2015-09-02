@@ -13,6 +13,11 @@ io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
 }
 
 io_manager::~io_manager(void) {
+  {
+    std::lock_guard<std::mutex> lk(_exit_mutex);
+    bClosed = true;
+  }
+
   ::close(_epoll_fd);
 }
 
@@ -63,7 +68,6 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
   struct epoll_event ev;
 
   ev.events = EPOLLIN;
-
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
@@ -105,6 +109,13 @@ void io_manager::epoll_loop(void) {
                          , "start read_loop");
 
   while (1) {
+    {
+      std::lock_guard<std::mutex> lk(_exit_mutex);
+      if (bClosed) {
+        break;
+      }
+    }
+
     int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, -1);
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
@@ -130,14 +141,14 @@ void io_manager::epoll_loop(void) {
 
       if (_events[i].events & EPOLLIN) {
         sock->recv();
-      } else if (_events[i].events & EPOLLHUP || _events[i].events & EPOLLERR) {
+      } else if ((_events[i].events & EPOLLHUP)
+          || (_events[i].events & EPOLLERR)
+          || !(_events[i].events & EPOLLIN)) {
         // TODO : add log
         printf("epollhup or epollerr\n");
         sock->close();
       }
     }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
 

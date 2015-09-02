@@ -20,6 +20,8 @@ int echo_server::open(int port, int backlog) {
   }
  
   _io_mgr->register_socket_event_handler(&_acceptor, this);
+
+  return 0;
 }
 
 void echo_server::on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) {

@@ -50,7 +50,8 @@ class io_manager {
 
   std::thread _loop_th;
 
-  std::condition_variable _exit_cv;
+  // for exiting thread
+  bool bClosed = false;
   std::mutex _exit_mutex;
 };
 

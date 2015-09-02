@@ -29,7 +29,6 @@ class if_socket {
   int set_tcpnodelay(void);
   int set_reuseaddr(void);
 
-
   typedef struct _peer_addr {
     std::string ip = "";
     int port = -1;

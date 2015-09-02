@@ -193,7 +193,8 @@ void event_dispatcher::clear_resources(
   }
 
   // step 2. call to on_close
-  handler->on_close(errno);
+  if (handler != nullptr)
+    handler->on_close(errno);
 
   // step 3. erase the socket and then delete it
   {
@@ -201,8 +202,10 @@ void event_dispatcher::clear_resources(
     auto iter = _sockets_vec.begin();
     while (iter != _sockets_vec.end()) {
       if ((*iter) == sock) {
-        delete *iter;
-        *iter = nullptr;
+        if ((*iter) != nullptr) {
+          delete *iter;
+          *iter = nullptr;
+        }
 
         iter = _sockets_vec.erase(iter);
 

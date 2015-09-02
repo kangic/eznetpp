@@ -76,6 +76,7 @@ namespace errcode {
     {ENAMETOOLONG, "sys_enametoolong"}, 
     {ENOENT, "sys_enoent"}, 
     {EROFS, "sys_erofs"}, 
+    {ECONNRESET, "sys_econnreset"},
 
     // eznetpp lib errno
   };

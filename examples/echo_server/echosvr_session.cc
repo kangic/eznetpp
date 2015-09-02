@@ -10,7 +10,9 @@ echosvr_session::~echosvr_session() {
 
 void echosvr_session::on_recv(const std::string& msg, int len, int err_no) {
   if (err_no) {
-    printf("err_no : %d(%s), socket : %d(%p)\n", err_no, eznetpp::errcode::errno_to_str(err_no).c_str(), _socket->descriptor(), _socket);
+    printf("len : %d, err_no : %d(%s), socket : %d(%p)\n"
+        , len, err_no, eznetpp::errcode::errno_to_str(err_no).c_str()
+        , _socket->descriptor(), _socket);
     return;
   }
 
