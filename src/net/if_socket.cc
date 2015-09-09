@@ -2,6 +2,8 @@
 
 #include "if_socket.h"
 
+#include "sys/io_manager.h"
+
 namespace eznetpp {
 namespace net {
 
@@ -19,11 +21,15 @@ if_socket::socket_type if_socket::type(void) {
   return _sock_type;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// set if_socket options
+void if_socket::set_peer_info(const std::string& ip, int port) {
+  _peer.ip = ip;
+  _peer.port = port;
+}
+
+// set socket options
 int if_socket::set_nonblocking(void) {
   if (_sd == -1)
-    return _sd;
+    return -1;
 
   int flags = fcntl(_sd, F_GETFL);
 
@@ -48,9 +54,23 @@ int if_socket::set_reuseaddr(void) {
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 }
 
-void if_socket::set_peer_info(const std::string& ip, int port) {
-  _peer.ip = ip;
-  _peer.port = port;
+
+int if_socket::send_bytes(const std::string& data) {
+  struct epoll_event ev;
+
+  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP;
+  ev.data.ptr = this;
+
+  int ret = epoll_ctl(eznetpp::sys::io_manager::_epoll_fd
+      , EPOLL_CTL_MOD, _sd, &ev);
+
+  if (ret)
+    return errno;
+
+  _sendmsgs_vec.emplace_back(data); 
+
+
+  return 0;
 }
 
 }  // namespace net

@@ -25,10 +25,6 @@ class if_socket {
   socket_domain domain(void);
   socket_type type(void);
 
-  int set_nonblocking(void);
-  int set_tcpnodelay(void);
-  int set_reuseaddr(void);
-
   typedef struct _peer_addr {
     std::string ip = "";
     int port = -1;
@@ -36,12 +32,18 @@ class if_socket {
   void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
 
-  /*
-   * This function will implemented by each inherited class.(acceptor, connector)
-   */
-  virtual void recv(void){};
-  virtual void send(const std::string& data, int len){};
-  virtual void close(void){};
+  int set_nonblocking(void);
+  int set_tcpnodelay(void);
+  int set_reuseaddr(void);
+
+  // for user
+  int send_bytes(const std::string& data);
+  virtual void close(void) = 0;
+
+  // Below functions will implemented by each inherited class
+  // (ex : acceptor, connector)
+  virtual void recv(void) = 0;
+  virtual void send(void) = 0;
 
  protected:
   socket_domain _sock_domain = socket_domain::inet_v4;
@@ -49,6 +51,8 @@ class if_socket {
   int _sd = -1;
 
   peer_addr _peer;
+
+  std::vector<std::string> _sendmsgs_vec;
 };
 
 }  // namespace net
