@@ -54,20 +54,33 @@ int if_socket::set_reuseaddr(void) {
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 }
 
-
-int if_socket::send_bytes(const std::string& data) {
+int if_socket::set_epollout_flag(bool flag) {
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP;
+  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+  if(flag)
+    ev.events |= EPOLLOUT;
   ev.data.ptr = this;
 
-  int ret = epoll_ctl(eznetpp::sys::io_manager::_epoll_fd
-      , EPOLL_CTL_MOD, _sd, &ev);
+  return epoll_ctl(eznetpp::sys::io_manager::_epoll_fd, EPOLL_CTL_MOD, _sd, &ev);
+}
 
-  if (ret)
-    return errno;
+int if_socket::send_bytes(const std::string& data) {
+  //printf("if_socket -> send_bytes\n");
+  {
+    std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
 
-  _sendmsgs_vec.emplace_back(data); 
+    _sendmsgs_vec.emplace_back(data); 
+    if (set_epollout_flag(true) == -1) {
+      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+          , __FILE__, __FUNCTION__, __LINE__
+          , "epoll_ctl() error(%d)", errno);
+      _sendmsgs_vec.pop_back();
+      return errno;
+    }
+
+  }
+  //printf("if_socket <- send_bytes\n");
 
 
   return 0;

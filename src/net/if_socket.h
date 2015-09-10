@@ -36,6 +36,8 @@ class if_socket {
   int set_tcpnodelay(void);
   int set_reuseaddr(void);
 
+  int set_epollout_flag(bool flag);
+
   // for user
   int send_bytes(const std::string& data);
   virtual void close(void) = 0;
@@ -53,6 +55,7 @@ class if_socket {
   peer_addr _peer;
 
   std::vector<std::string> _sendmsgs_vec;
+  std::mutex _sendmsgs_mtx;
 };
 
 }  // namespace net
