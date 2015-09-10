@@ -25,6 +25,8 @@ class echosvr_session : public eznetpp::event::socket_event_handler {
   eznetpp::net::tcp::tcp_socket* _socket;
   unsigned long _recv_cnt = 0;
   unsigned long _send_cnt = 0;
+  long long _recv_bytes = 0;
+  long long _send_bytes = 0;
 };
 
 #endif  // TEST_ECHOSVR_SESSION_H_

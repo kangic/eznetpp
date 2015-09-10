@@ -2,7 +2,7 @@
 #include "sys/io_manager.h"
 
 int main(void) {
-  eznetpp::sys::io_manager io_mgr(1, true);
+  eznetpp::sys::io_manager io_mgr(true);
   io_mgr.init();
 
   echo_client client(&io_mgr);

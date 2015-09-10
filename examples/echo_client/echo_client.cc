@@ -18,11 +18,11 @@ void echo_client::start(void) {
 void echo_client::on_connect(int err_no) {
   printf("on_connect\n");
   std::string hellomsg = "hello eznetpp";
-  _socket.send(hellomsg, hellomsg.length());
+  _socket.send_bytes(hellomsg);
 }
 
 void echo_client::on_recv(const std::string& msg, int len, int err_no) {
-  _socket.send(msg, len);
+  _socket.send_bytes(msg);
   printf("on_recv\n");
 }
 

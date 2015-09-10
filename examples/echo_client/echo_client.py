@@ -11,7 +11,7 @@ send_data = "test echo message"
 while True:
     client_socket.send(send_data)
     data = client_socket.recv(1024)
-    print(data)
+    #print(data)
     if num % 10000 == 0:
         print("recieved data %d" % num)
         print(str(datetime.datetime.now()))
