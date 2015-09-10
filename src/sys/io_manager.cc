@@ -128,7 +128,6 @@ void io_manager::epoll_loop(void) {
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");
 
-      //break;
       continue;
     }
 

@@ -66,7 +66,6 @@ int if_socket::set_epollout_flag(bool flag) {
 }
 
 int if_socket::send_bytes(const std::string& data) {
-  //printf("if_socket -> send_bytes\n");
   {
     std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
 
@@ -80,8 +79,6 @@ int if_socket::send_bytes(const std::string& data) {
     }
 
   }
-  //printf("if_socket <- send_bytes\n");
-
 
   return 0;
 }

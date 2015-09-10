@@ -52,22 +52,18 @@ int tcp_socket::connect(const std::string& ip, int port) {
 }
 
 void tcp_socket::send(void) {
-  //printf("tcp_socket -> send\n");
   if (_sd == -1)
     return;
 
-  //printf("tcp_socket - send-1\n");
   {
     std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
     // step 1. check the send message vector's size
     // if it isn't empty, start the loop statement to send the message. 
-    //printf("tcp_socket - send-2(size : %d)\n", _sendmsgs_vec.size());
     while (!_sendmsgs_vec.empty()) {
       // step 2. pop a message from the send message's vector
       std::string msg = _sendmsgs_vec.front();
       _sendmsgs_vec.erase(_sendmsgs_vec.begin());
 
-      //printf("tcp_socket - send-3\n");
       // step 3. send the message and check an error case
       int ret = ::send(_sd, msg.c_str(), msg.length(), 0);
       if (ret == -1) {
@@ -91,11 +87,9 @@ void tcp_socket::send(void) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
           , "epoll_ctl() error(%d)", errno);
-  //printf("tcp_socket <- send\n");
 }
 
 void tcp_socket::recv(void) {
-  //printf("tcp_socket -> recv\n");
   if (_sd == -1)
     return;
 
@@ -123,9 +117,7 @@ void tcp_socket::recv(void) {
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
           , errno, std::move(data), 0, this));
-    //printf("tcp_socket::recv - push a event : len %d, errno %d\n", len, errno);
   }
-  //printf("tcp_socket <- recv\n");
 }
 
 void tcp_socket::close(void) {

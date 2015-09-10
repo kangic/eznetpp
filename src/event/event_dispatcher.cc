@@ -182,7 +182,6 @@ void event_dispatcher::clear_resources(
     auto iter = _ioevents_vec.begin();
     while (iter != _ioevents_vec.end()) {
       if ((*iter)->publisher() == sock) {
-        printf("close - process event\n");
         process_event(*iter);
 
         iter = _ioevents_vec.erase(iter);

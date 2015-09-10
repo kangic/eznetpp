@@ -28,7 +28,6 @@ int tcp_acceptor::open(int port, int backlog) {
 }
 
 void tcp_acceptor::recv(void) {
-  printf("tcp_acceptor - recv\n");
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
 
