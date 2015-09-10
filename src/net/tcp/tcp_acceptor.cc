@@ -21,17 +21,24 @@ int tcp_acceptor::open(int port, int backlog) {
   if (ret != 0)
     return ret;
 
+  set_nonblocking();
   set_reuseaddr();
 
   return 0;
 }
 
 void tcp_acceptor::recv(void) {
+  printf("tcp_acceptor - recv\n");
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
 
   int sock_fd = ::accept(_sd, (struct sockaddr *)&client_addr, &client_addr_len);
-  printf("accept sock_fd : %d\n", sock_fd);
+
+  if (sock_fd == -1) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      return;
+    }
+  }
 
   eznetpp::event::event_dispatcher::instance().push_event(new eznetpp::event::io_event
       (eznetpp::event::event_type::accept, sock_fd, errno, inet_ntoa(client_addr.sin_addr), client_addr.sin_port, this));
