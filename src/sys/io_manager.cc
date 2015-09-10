@@ -7,8 +7,9 @@
 namespace eznetpp {
 namespace sys {
 
-io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
-  _num_of_disp_threads = num_of_disp_threads;
+int io_manager::_epoll_fd = -1;
+
+io_manager::io_manager(bool log_enable) {
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
@@ -67,7 +68,7 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
 
   struct epoll_event ev;
 
-  ev.events = EPOLLIN;
+  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
@@ -79,7 +80,7 @@ int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock) {
 }
 
 int io_manager::loop(void) {
-  if (eznetpp::event::event_dispatcher::instance().init(_num_of_disp_threads) == -1) {
+  if (eznetpp::event::event_dispatcher::instance().init() == -1) {
     return -1;
   }
 
@@ -127,8 +128,8 @@ void io_manager::epoll_loop(void) {
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");
 
-      // TODO : decide to the action
-      break;
+      //break;
+      continue;
     }
 
     for (int i = 0; i < changed_events; ++i) {
@@ -141,11 +142,14 @@ void io_manager::epoll_loop(void) {
 
       if (_events[i].events & EPOLLIN) {
         sock->recv();
+      } else if (_events[i].events & EPOLLOUT) {
+        sock->send();
+      } else if (_events[i].events & EPOLLRDHUP) {
+        // half close by the remote connection
+        sock->close();
       } else if ((_events[i].events & EPOLLHUP)
           || (_events[i].events & EPOLLERR)
           || !(_events[i].events & EPOLLIN)) {
-        // TODO : add log
-        printf("epollhup or epollerr\n");
         sock->close();
       }
     }

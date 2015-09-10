@@ -11,7 +11,7 @@ namespace eznetpp {
 namespace sys {
 class io_manager {
  public:
-  io_manager(int num_of_disp_threads = 1, bool log_enable = false);
+  io_manager(bool log_enable = false);
   virtual ~io_manager(void);
 
   /*
@@ -34,6 +34,7 @@ class io_manager {
   int loop(void);
   void stop(void);
 
+  static int _epoll_fd;
  protected:
   /*
    * This function works to poll descriptors in _epoll_fd.
@@ -43,10 +44,8 @@ class io_manager {
   void epoll_loop(void);
  
  private:
-  int _epoll_fd = -1;
   struct epoll_event* _events = nullptr;
   int _max_descs_cnt = 1024;
-  int _num_of_disp_threads = 1;
 
   std::thread _loop_th;
 
