@@ -13,25 +13,19 @@ event_dispatcher::event_dispatcher(void) {
 }
 
 event_dispatcher::~event_dispatcher(void) {
-  for (auto& th : _disp_ths_vec) {
-    th.join();
-  }
+  _disp_th.join();
 }
 
-int event_dispatcher::init(int num_of_disp_threads) {
-  for (int i = 0; i < num_of_disp_threads; ++i) {
-    std::thread disp_th = std::thread(&event_dispatcher::dispatch_loop, this, i);
+int event_dispatcher::init(void) {
+  _disp_th = std::thread(&event_dispatcher::dispatch_loop, this);
 
-    if (!disp_th.joinable()) {
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "failed to create dispatch thread(%d)"
-                           , errno);
+  if (!_disp_th.joinable()) {
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+        , __FILE__, __FUNCTION__, __LINE__
+        , "failed to create dispatch thread(%d)"
+        , errno);
 
-      return -1;
-    }
-
-    _disp_ths_vec.push_back(std::move(disp_th));
+    return -1;
   }
 
   return 0;
@@ -59,18 +53,22 @@ bool event_dispatcher::deregister_socket_event_handler(eznetpp::net::if_socket* 
 void event_dispatcher::push_event(io_event* evt) {
   {
     std::lock_guard<std::mutex> lock(_ioevents_vec_mutex);
-    _ioevents_vec.push_back(std::move(evt));
+    // TODO : re-think the below case(urgent case?? is it right?)
+    if (evt->type() == event::event_type::close)
+      _ioevents_vec.emplace(_ioevents_vec.begin(), evt);
+    else
+      _ioevents_vec.emplace_back(evt);
   }
 
   std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
   _disp_th_cv.notify_one();
 }
 
-void event_dispatcher::dispatch_loop(int id) {
+void event_dispatcher::dispatch_loop(void) {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start dispatch_loop(id : %d)"
-                         , id);
+                         , "start dispatch_loop");
+                         
 
   while (1) {
     io_event* evt = nullptr;
@@ -124,6 +122,8 @@ void event_dispatcher::process_event(io_event* evt) {
 
         eznetpp::net::tcp::tcp_socket* tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
         tcp_sock->set_peer_info(std::move(evt->data()), evt->opt_data());
+        tcp_sock->set_nonblocking();
+        tcp_sock->set_tcpnodelay();
         handler->on_accept(tcp_sock, 0);
         evt->done();
 
