@@ -11,8 +11,8 @@ namespace event {
 
   enum event_type { 
     close = 0,
-    accept,
-    connect,
+    tcp_accept,
+    tcp_connect,
     tcp_recv,
     tcp_send,
     udp_recv,

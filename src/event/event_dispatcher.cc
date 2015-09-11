@@ -116,7 +116,7 @@ void event_dispatcher::process_event(io_event* evt) {
         evt->done();
         break;
       }
-    case event::event_type::accept:
+    case event::event_type::tcp_accept:
       {
         int sock_fd = evt->result();
 
@@ -135,7 +135,7 @@ void event_dispatcher::process_event(io_event* evt) {
 
         break;
       }
-    case event::event_type::connect:
+    case event::event_type::tcp_connect:
       {
         sock->set_peer_info(evt->data().c_str(), evt->opt_data());
         handler->on_connect(evt->err_no());

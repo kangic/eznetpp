@@ -45,7 +45,7 @@ int tcp_socket::connect(const std::string& ip, int port) {
   int ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::connect
+      new eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect
         , ret, errno, ip, port, this));
 
   return 0;
