@@ -8,6 +8,7 @@ ${PROJECT_SOURCE_DIR}/event/event_dispatcher.cc
 ${PROJECT_SOURCE_DIR}/net/if_socket.cc
 ${PROJECT_SOURCE_DIR}/net/tcp/tcp_acceptor.cc
 ${PROJECT_SOURCE_DIR}/net/tcp/tcp_socket.cc
+${PROJECT_SOURCE_DIR}/net/udp/udp_socket.cc
 ${PROJECT_SOURCE_DIR}/sys/io_manager.cc
 ${PROJECT_SOURCE_DIR}/util/logger.cc
 )
