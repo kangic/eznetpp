@@ -25,10 +25,6 @@ class if_socket {
   socket_domain domain(void);
   socket_type type(void);
 
-  typedef struct _peer_addr {
-    std::string ip = "";
-    int port = -1;
-  } peer_addr;
   void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
 
@@ -39,7 +35,7 @@ class if_socket {
   int set_epollout_flag(bool flag);
 
   // for user
-  int send_bytes(const std::string& data);
+  int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
   virtual void close(void) = 0;
 
   // Below functions will implemented by each inherited class
@@ -54,7 +50,9 @@ class if_socket {
 
   peer_addr _peer;
 
-  std::vector<std::string> _sendmsgs_vec;
+  typedef std::pair<std::string, peer_addr> msg_pair;
+  //std::vector<std::string> _sendmsgs_vec;
+  std::vector<msg_pair> _sendmsgs_vec;
   std::mutex _sendmsgs_mtx;
 };
 

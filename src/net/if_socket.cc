@@ -65,11 +65,15 @@ int if_socket::set_epollout_flag(bool flag) {
   return epoll_ctl(eznetpp::sys::io_manager::_epoll_fd, EPOLL_CTL_MOD, _sd, &ev);
 }
 
-int if_socket::send_bytes(const std::string& data) {
+int if_socket::send_bytes(const std::string& data, const std::string& ip, int port) {
   {
     std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
 
-    _sendmsgs_vec.emplace_back(data); 
+    //_sendmsgs_vec.emplace_back(data); 
+    peer_addr peer_info;
+    peer_info.ip = ip;
+    peer_info.port = port;
+    _sendmsgs_vec.emplace_back(std::make_pair(std::move(data), std::move(peer_info))); 
     if (set_epollout_flag(true) == -1) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
