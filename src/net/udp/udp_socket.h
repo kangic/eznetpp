@@ -12,15 +12,17 @@ namespace udp {
 class udp_socket : public eznetpp::net::if_socket {
  public:
   udp_socket(void);
-  udp_socket(int sd);
   virtual ~udp_socket(void);
 
-  int connect(const std::string& ip, int port);
-  void send(const std::string& msg, int len);
+  int open(int port);
   void close(void);
 
  protected:
   void recv(void); 
+  void send(void);
+
+ private:
+  int bind(int port);
 };
 
 }  // namespace udp

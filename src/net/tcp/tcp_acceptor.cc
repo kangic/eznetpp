@@ -16,7 +16,7 @@ tcp_acceptor::~tcp_acceptor(void) {
 }
 
 int tcp_acceptor::open(int port, int backlog) {
-  int ret = this->bind_and_listen(port, backlog);
+  int ret = bind_and_listen(port, backlog);
 
   if (ret != 0)
     return ret;
@@ -45,6 +45,7 @@ void tcp_acceptor::recv(void) {
 
 void tcp_acceptor::close(void) {
   ::close(_sd);
+  _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
       new eznetpp::event::io_event(eznetpp::event::event_type::close, errno, this));
@@ -57,18 +58,18 @@ int tcp_acceptor::bind_and_listen(int port, int backlog) {
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY); 
   server_addr.sin_port = htons(port);
 
-  int ret = bind(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  int ret = ::bind(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret != 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                            , __FILE__, __FUNCTION__, __LINE__
                            , "::bind() error(%d)", errno);
 
-    this->close();
+    close();
     return errno;
   }
 
-  ret = listen(_sd, backlog);
+  ret = ::listen(_sd, backlog);
 
   if (ret != 0) {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
