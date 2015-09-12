@@ -27,6 +27,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 // eznetpp headers
@@ -86,6 +87,13 @@ namespace errcode {
   }
 }
 
+namespace net {
+  typedef struct _peer_addr {
+    std::string ip = "";
+    int port = -1;
+  } peer_addr;
+}
+ 
 namespace opt {
   const int max_transfer_bytes = 4096;
 }  // namespace opt
