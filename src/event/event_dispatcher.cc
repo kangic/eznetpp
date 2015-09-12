@@ -157,11 +157,11 @@ void event_dispatcher::process_event(io_event* evt) {
 
         break;
       }
-    case event::event_type::udp_recv:
+    case event::event_type::udp_recvfrom:
       {
         break;
       }
-    case event::event_type::udp_send:
+    case event::event_type::udp_sendto:
       {
         break;
       }

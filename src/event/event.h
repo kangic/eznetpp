@@ -15,8 +15,8 @@ namespace event {
     tcp_connect,
     tcp_recv,
     tcp_send,
-    udp_recv,
-    udp_send,
+    udp_recvfrom,
+    udp_sendto,
   };
 
 class io_event {

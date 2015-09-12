@@ -16,8 +16,9 @@ class event_handler {
   virtual ~event_handler(void) = default;
 
   enum event_handler_type {
-    socket = 0,
-    acceptor,
+    tcp_socket = 0,
+    tcp_acceptor,
+    udp_socket,
   };
   event_handler_type type() { return _handler_type; };
   virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
@@ -30,12 +31,12 @@ class event_handler {
   event_handler_type _handler_type;
 };
 
-class socket_event_handler : public event_handler {
+class tcp_socket_event_handler : public event_handler {
  public:
-  socket_event_handler(void) { 
-    _handler_type = event_handler_type::socket;
+  tcp_socket_event_handler(void) { 
+    _handler_type = event_handler_type::tcp_socket;
   };
-  virtual ~socket_event_handler(void) = default;
+  virtual ~tcp_socket_event_handler(void) = default;
 
   virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len, int err_no) = 0;
@@ -46,12 +47,12 @@ class socket_event_handler : public event_handler {
   void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no){};
 };
 
-class acceptor_event_handler : public event_handler {
+class tcp_acceptor_event_handler : public event_handler {
  public:
-  acceptor_event_handler(void) {
-    _handler_type = event_handler_type::acceptor;
+  tcp_acceptor_event_handler(void) {
+    _handler_type = event_handler_type::tcp_acceptor;
   };
-  virtual ~acceptor_event_handler(void) = default;
+  virtual ~tcp_acceptor_event_handler(void) = default;
 
   virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
   virtual void on_close(int err_no) = 0;
@@ -60,6 +61,19 @@ class acceptor_event_handler : public event_handler {
   void on_connect(int err_no){};
   void on_recv(const std::string& msg, int len, int err_no){};
   void on_send(unsigned int len, int err_no){};
+};
+
+class udp_socket_event_handler : public event_handler {
+ public:
+  udp_socket_event_handler(void) { 
+    _handler_type = event_handler_type::udp_socket;
+  };
+  virtual ~udp_socket_event_handler(void) = default;
+
+  virtual void on_recvfrom(const std::string& msg, int len
+      , const std::string& peer_ip, int peer_port, int err_no) = 0;
+  virtual void on_sendto(unsigned int len, int err_no) = 0;
+  virtual void on_close(int err_no) = 0;
 };
 
 }  // namespace event
