@@ -40,7 +40,7 @@ void tcp_acceptor::recv(void) {
   }
 
   eznetpp::event::event_dispatcher::instance().push_event(new eznetpp::event::io_event
-      (eznetpp::event::event_type::tcp_accept, sock_fd, errno, inet_ntoa(client_addr.sin_addr), client_addr.sin_port, this));
+      (eznetpp::event::event_type::tcp_accept, sock_fd, errno, inet_ntoa(client_addr.sin_addr), ntohl(client_addr.sin_port), this));
 }
 
 void tcp_acceptor::close(void) {

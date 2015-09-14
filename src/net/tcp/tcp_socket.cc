@@ -116,7 +116,7 @@ void tcp_socket::recv(void) {
     }
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
-          , errno, std::move(data), 0, this));
+          , errno, std::move(data.assign(data, 0, len)), 0, this));
   }
 }
 
