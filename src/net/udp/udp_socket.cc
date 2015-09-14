@@ -52,6 +52,7 @@ void udp_socket::send(void) {
       // step 3. send the message and check an error case
       struct sockaddr_in client_addr;
       bzero(&client_addr, sizeof(client_addr));
+      printf("send - %s(%d)\n", pi.ip.c_str(), pi.port);
       client_addr.sin_addr.s_addr = inet_addr(pi.ip.c_str());
       client_addr.sin_port = htons(pi.port);
       int ret = ::sendto(_sd, msg.c_str(), msg.length(), 0
@@ -108,9 +109,15 @@ void udp_socket::recv(void) {
     if (len == eznetpp::opt::max_transfer_bytes) {
       read_again = 1;
     }
+
+    // create peer info
+    peer_addr* paddr = new peer_addr;
+    paddr->ip = inet_ntoa(client_addr.sin_addr);
+    paddr->port = ntohs(client_addr.sin_port);
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom
-          , len, errno, std::move(data), static_cast<void*>(&client_addr)
+          , len, errno, std::move(data.assign(data, 0, len))
+          , paddr
           , this));
   }
 }
