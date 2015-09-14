@@ -6,7 +6,7 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echo_client : eznetpp::event::socket_event_handler {
+class echo_client : eznetpp::event::tcp_socket_event_handler {
  public:
   echo_client(eznetpp::sys::io_manager* io_mgr);
   virtual ~echo_client();

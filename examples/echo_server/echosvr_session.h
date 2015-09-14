@@ -7,7 +7,7 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echosvr_session : public eznetpp::event::socket_event_handler {
+class echosvr_session : public eznetpp::event::tcp_socket_event_handler {
  public:
   echosvr_session(eznetpp::net::tcp::tcp_socket* sock);
   virtual ~echosvr_session();

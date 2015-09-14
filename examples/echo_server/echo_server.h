@@ -8,7 +8,7 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echo_server : public eznetpp::event::acceptor_event_handler {
+class echo_server : public eznetpp::event::tcp_acceptor_event_handler {
  public:
   echo_server(eznetpp::sys::io_manager* io_mgr);
   virtual ~echo_server();
