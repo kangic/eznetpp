@@ -161,9 +161,9 @@ void event_dispatcher::process_event(io_event* evt) {
       }
     case event::event_type::udp_recvfrom:
       {
-        struct sockaddr_in* client_addr = static_cast<struct sockaddr_in*>(evt->opt_pdata());
+        eznetpp::net::peer_addr* paddr = evt->peer_addr();
         handler->on_recvfrom(evt->data(), evt->result()
-            , inet_ntoa(client_addr->sin_addr), client_addr->sin_port
+            , paddr->ip, paddr->port
             , evt->err_no()); 
         evt->done();
 
@@ -180,6 +180,11 @@ void event_dispatcher::process_event(io_event* evt) {
 
   // step 4. delete ioevent
   if (evt != nullptr && evt->is_done()) {
+    if (evt->peer_addr() != nullptr) {
+      eznetpp::net::peer_addr* addr = evt->peer_addr();
+      delete addr;
+      addr = nullptr;
+    }
     delete evt;
     evt = nullptr;
   }
