@@ -114,6 +114,7 @@ void event_dispatcher::process_event(io_event* evt) {
         // when the socket is closed.
         clear_resources(sock, handler);
         evt->done();
+
         break;
       }
     case event::event_type::tcp_accept:
@@ -148,6 +149,7 @@ void event_dispatcher::process_event(io_event* evt) {
         // TODO : implement recv for epoll et mode
         handler->on_recv(evt->data(), evt->result(), evt->err_no());
         evt->done();
+
         break;
       }
     case event::event_type::tcp_send:
@@ -159,10 +161,19 @@ void event_dispatcher::process_event(io_event* evt) {
       }
     case event::event_type::udp_recvfrom:
       {
+        struct sockaddr_in* client_addr = evt->opt_pdata();
+        handler->on_recvfrom(evt->data(), evt->result()
+            , inet_ntoa(client_addr->sin_addr), client_addr->sin_port
+            , evt->err_no()); 
+        evt->done();
+
         break;
       }
     case event::event_type::udp_sendto:
       {
+        handler->on_sendto(evt->result(), evt->err_no());
+        evt->done();
+
         break;
       }
   }
