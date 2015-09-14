@@ -86,7 +86,11 @@ void udp_socket::recv(void) {
   bool read_again = 1;
   while (read_again) {
     std::string data(eznetpp::opt::max_transfer_bytes, '\0');
-    int len = ::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_size = sizeof(client_addr);
+    bzero(&client_addr, sizeof(client_addr));
+    int len = ::recvfrom(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0
+        , (struct sockaddr *)&client_addr, &client_addr_size);
     read_again = 0;
     if (len == 0) {
       close();
@@ -105,8 +109,9 @@ void udp_socket::recv(void) {
       read_again = 1;
     }
     eznetpp::event::event_dispatcher::instance().push_event(
-        new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom, len
-          , errno, std::move(data), 0, this));
+        new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom
+          , len, errno, std::move(data), static_cast<void*>(&client_addr)
+          , this));
   }
 }
 
