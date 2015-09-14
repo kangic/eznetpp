@@ -161,7 +161,7 @@ void event_dispatcher::process_event(io_event* evt) {
       }
     case event::event_type::udp_recvfrom:
       {
-        struct sockaddr_in* client_addr = evt->opt_pdata();
+        struct sockaddr_in* client_addr = static_cast<struct sockaddr_in*>(evt->opt_pdata());
         handler->on_recvfrom(evt->data(), evt->result()
             , inet_ntoa(client_addr->sin_addr), client_addr->sin_port
             , evt->err_no()); 

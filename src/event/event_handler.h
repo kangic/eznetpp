@@ -47,7 +47,10 @@ class tcp_socket_event_handler : public event_handler {
   virtual void on_close(int err_no) = 0;
 
  protected:
-  //void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no){};
+  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no){};
+  void on_recvfrom(const std::string& msg, int len
+      , const std::string& peer_ip, int peer_port, int err_no){};
+  void on_sendto(unsigned int len, int err_no){};
 };
 
 class tcp_acceptor_event_handler : public event_handler {
@@ -61,9 +64,12 @@ class tcp_acceptor_event_handler : public event_handler {
   virtual void on_close(int err_no) = 0;
 
  protected:
-  //void on_connect(int err_no){};
-  //void on_recv(const std::string& msg, int len, int err_no){};
-  //void on_send(unsigned int len, int err_no){};
+  void on_connect(int err_no){};
+  void on_recv(const std::string& msg, int len, int err_no){};
+  void on_send(unsigned int len, int err_no){};
+  void on_recvfrom(const std::string& msg, int len
+      , const std::string& peer_ip, int peer_port, int err_no){};
+  void on_sendto(unsigned int len, int err_no){};
 };
 
 class udp_socket_event_handler : public event_handler {
@@ -77,6 +83,12 @@ class udp_socket_event_handler : public event_handler {
       , const std::string& peer_ip, int peer_port, int err_no) = 0;
   virtual void on_sendto(unsigned int len, int err_no) = 0;
   virtual void on_close(int err_no) = 0;
+
+ protected:
+  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no){};
+  void on_connect(int err_no){};
+  void on_recv(const std::string& msg, int len, int err_no){};
+  void on_send(unsigned int len, int err_no){};
 };
 
 }  // namespace event
