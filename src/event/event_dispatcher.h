@@ -19,7 +19,7 @@ class event_dispatcher {
     return *_evt_dispatcher;
   }
 
-  int init(void);
+  int init(int num_of_disp_threads);
 
   bool register_socket_event_handler(eznetpp::net::if_socket* sock
       , event_handler* handler);
@@ -28,7 +28,7 @@ class event_dispatcher {
   void push_event(io_event* evt);
 
  protected:
-  void dispatch_loop(void);
+  void dispatch_loop(int id);
 
  private:
   event_dispatcher(void);
@@ -41,7 +41,8 @@ class event_dispatcher {
   static event_dispatcher* _evt_dispatcher;
 
   // work threads
-  std::thread _disp_th;
+  //std::thread _disp_th;
+  std::vector<std::thread> _disp_ths_vec;
 
   // socket<key>, socket_class<value>
   std::map<eznetpp::net::if_socket*, event_handler*> _handlers_map;

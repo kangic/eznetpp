@@ -9,7 +9,8 @@ namespace sys {
 
 int io_manager::_epoll_fd = -1;
 
-io_manager::io_manager(bool log_enable) {
+io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
+  _num_of_disp_threads = num_of_disp_threads;
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
@@ -80,7 +81,7 @@ int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock) {
 }
 
 int io_manager::loop(void) {
-  if (eznetpp::event::event_dispatcher::instance().init() == -1) {
+  if (eznetpp::event::event_dispatcher::instance().init(_num_of_disp_threads) == -1) {
     return -1;
   }
 

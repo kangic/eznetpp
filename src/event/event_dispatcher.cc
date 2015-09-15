@@ -13,19 +13,26 @@ event_dispatcher::event_dispatcher(void) {
 }
 
 event_dispatcher::~event_dispatcher(void) {
-  _disp_th.join();
+  //_disp_th.join();
+  for (auto& th : _disp_ths_vec) {
+    th.join();
+  }
 }
 
-int event_dispatcher::init(void) {
-  _disp_th = std::thread(&event_dispatcher::dispatch_loop, this);
+int event_dispatcher::init(int num_of_disp_threads) {
+  for (int i = 0; i < num_of_disp_threads; ++i) {
+    std::thread disp_th = std::thread(&event_dispatcher::dispatch_loop, this, i);
 
-  if (!_disp_th.joinable()) {
-    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-        , __FILE__, __FUNCTION__, __LINE__
-        , "failed to create dispatch thread(%d)"
-        , errno);
+    if (!disp_th.joinable()) {
+      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+          , __FILE__, __FUNCTION__, __LINE__
+          , "failed to create dispatch thread(%d)"
+          , errno);
 
-    return -1;
+      return -1;
+    }
+
+    _disp_ths_vec.push_back(std::move(disp_th));
   }
 
   return 0;
@@ -64,10 +71,11 @@ void event_dispatcher::push_event(io_event* evt) {
   _disp_th_cv.notify_one();
 }
 
-void event_dispatcher::dispatch_loop(void) {
+void event_dispatcher::dispatch_loop(int id) {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start dispatch_loop");
+                         , "start dispatch_loop(id : %d)"
+                         , id);
                          
 
   while (1) {
