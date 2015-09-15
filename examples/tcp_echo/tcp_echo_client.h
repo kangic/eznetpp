@@ -1,15 +1,15 @@
-#ifndef TEST_ECHO_CLIENT_H_
-#define TEST_ECHO_CLIENT_H_
+#ifndef TEST_TCP_ECHO_CLIENT_H_
+#define TEST_TCP_ECHO_CLIENT_H_
 
 #include <string>
 
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echo_client : eznetpp::event::tcp_socket_event_handler {
+class tcp_echo_client : eznetpp::event::tcp_socket_event_handler {
  public:
-  echo_client(eznetpp::sys::io_manager* io_mgr);
-  virtual ~echo_client();
+  tcp_echo_client(eznetpp::sys::io_manager* io_mgr);
+  virtual ~tcp_echo_client();
 
  public:
   void start();
@@ -25,4 +25,4 @@ class echo_client : eznetpp::event::tcp_socket_event_handler {
   eznetpp::net::tcp::tcp_socket _socket;
 };
 
-#endif  // TEST_ECHO_CLIENT_H_
+#endif  // TEST_TCP_ECHO_CLIENT_H_

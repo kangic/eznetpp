@@ -1,5 +1,5 @@
-#ifndef TEST_ECHOSVR_SESSION_H
-#define TEST_ECHOSVR_SESSION_H_
+#ifndef TEST_TCP_ECHOSVR_SESSION_H
+#define TEST_TCP_ECHOSVR_SESSION_H_
 
 #include <string>
 
@@ -7,10 +7,10 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echosvr_session : public eznetpp::event::tcp_socket_event_handler {
+class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler {
  public:
-  echosvr_session(eznetpp::net::tcp::tcp_socket* sock);
-  virtual ~echosvr_session();
+  tcp_echosvr_session(eznetpp::net::tcp::tcp_socket* sock);
+  virtual ~tcp_echosvr_session();
 
  public:
   // override
@@ -29,4 +29,4 @@ class echosvr_session : public eznetpp::event::tcp_socket_event_handler {
   long long _send_bytes = 0;
 };
 
-#endif  // TEST_ECHOSVR_SESSION_H_
+#endif  // TEST_TCP_ECHOSVR_SESSION_H_

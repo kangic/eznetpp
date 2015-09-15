@@ -5,14 +5,14 @@ set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 # TCP Echo Sample
 SET(eznetpp_tcp_echo_server_sample_srcs
-${PROJECT_SOURCE_DIR}/tcp_echo/echosvr_sample.cc
-${PROJECT_SOURCE_DIR}/tcp_echo/echo_server.cc
-${PROJECT_SOURCE_DIR}/tcp_echo/echosvr_session.cc
+${PROJECT_SOURCE_DIR}/tcp_echo/tcp_echosvr_sample.cc
+${PROJECT_SOURCE_DIR}/tcp_echo/tcp_echo_server.cc
+${PROJECT_SOURCE_DIR}/tcp_echo/tcp_echosvr_session.cc
 )
 
 SET(eznetpp_tcp_echo_client_sample_srcs
-${PROJECT_SOURCE_DIR}/tcp_echo/echoclient_sample.cc
-${PROJECT_SOURCE_DIR}/tcp_echo/echo_client.cc
+${PROJECT_SOURCE_DIR}/tcp_echo/tcp_echoclient_sample.cc
+${PROJECT_SOURCE_DIR}/tcp_echo/tcp_echo_client.cc
 )
 
 # UDP Echo Sample

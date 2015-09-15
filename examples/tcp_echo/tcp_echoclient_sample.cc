@@ -1,11 +1,11 @@
-#include "./echo_client.h"
+#include "./tcp_echo_client.h"
 #include "sys/io_manager.h"
 
 int main(void) {
   eznetpp::sys::io_manager io_mgr(true);
   io_mgr.init();
 
-  echo_client client(&io_mgr);
+  tcp_echo_client client(&io_mgr);
   client.start();
   
   io_mgr.loop();

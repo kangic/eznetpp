@@ -1,5 +1,5 @@
-#ifndef TEST_ECHO_SERVER_H_
-#define TEST_ECHO_SERVER_H_
+#ifndef TEST_TCP_ECHO_SERVER_H_
+#define TEST_TCP_ECHO_SERVER_H_
 
 #include <string>
 
@@ -8,10 +8,10 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-class echo_server : public eznetpp::event::tcp_acceptor_event_handler {
+class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
  public:
-  echo_server(eznetpp::sys::io_manager* io_mgr);
-  virtual ~echo_server();
+  tcp_echo_server(eznetpp::sys::io_manager* io_mgr);
+  virtual ~tcp_echo_server();
 
  public:
   int open(int port, int backlog);
@@ -26,4 +26,4 @@ class echo_server : public eznetpp::event::tcp_acceptor_event_handler {
   unsigned long _conns = 0;
 };
 
-#endif  // TEST_ECHO_SERVER_H_
+#endif  // TEST_TCP_ECHO_SERVER_H_
