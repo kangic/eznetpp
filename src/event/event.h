@@ -47,16 +47,6 @@ class io_event {
    _publisher = publisher;
   }
 
-  io_event(event_type type, int result, int err_no, const std::string& data
-      ,eznetpp::net::peer_addr* peer_addr, eznetpp::net::if_socket* publisher) {
-   _type = type;
-   _result = result;
-   _err_no = err_no;
-   _data = data;
-   _paddr = peer_addr;
-   _publisher = publisher;
-  }
-
   virtual ~io_event(void) = default;
 
   event_type type(void) { return _type; }
@@ -64,7 +54,6 @@ class io_event {
   int err_no(void) { return _err_no; }
   const std::string& data(void) { return _data; }
   int opt_data(void) { return _opt_data; }
-  eznetpp::net::peer_addr* peer_addr(void) { return _paddr; }
   eznetpp::net::if_socket* publisher(void) { return _publisher; }
   
   // is work done?
@@ -77,7 +66,6 @@ class io_event {
   int _err_no = 0;
   std::string _data = "";
   int _opt_data = 0;
-  eznetpp::net::peer_addr* _paddr = nullptr;
   eznetpp::net::if_socket* _publisher = nullptr;
   bool _done = false;
 };

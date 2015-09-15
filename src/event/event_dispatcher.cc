@@ -161,9 +161,8 @@ void event_dispatcher::process_event(io_event* evt) {
       }
     case event::event_type::udp_recvfrom:
       {
-        eznetpp::net::peer_addr* paddr = evt->peer_addr();
         handler->on_recvfrom(evt->data(), evt->result()
-            , paddr->ip, paddr->port
+            , sock->peer().ip, sock->peer().port
             , evt->err_no()); 
         evt->done();
 
@@ -180,11 +179,6 @@ void event_dispatcher::process_event(io_event* evt) {
 
   // step 4. delete ioevent
   if (evt != nullptr && evt->is_done()) {
-    if (evt->peer_addr() != nullptr) {
-      eznetpp::net::peer_addr* addr = evt->peer_addr();
-      delete addr;
-      addr = nullptr;
-    }
     delete evt;
     evt = nullptr;
   }
@@ -198,7 +192,7 @@ void event_dispatcher::clear_resources(
     auto iter = _ioevents_vec.begin();
     while (iter != _ioevents_vec.end()) {
       if ((*iter)->publisher() == sock) {
-        process_event(*iter);
+        //process_event(*iter);
 
         iter = _ioevents_vec.erase(iter);
       } else {
