@@ -34,6 +34,8 @@ class if_socket {
 
   int set_epollout_flag(bool flag);
 
+  int last_error(void) { return _last_errno; }
+
   // for user
   int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
   virtual void close(void) = 0;
@@ -47,11 +49,11 @@ class if_socket {
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;
+  int _last_errno = 0;
 
   peer_addr _peer;
 
   typedef std::pair<std::string, peer_addr> msg_pair;
-  //std::vector<std::string> _sendmsgs_vec;
   std::vector<msg_pair> _sendmsgs_vec;
   std::mutex _sendmsgs_mtx;
 };
