@@ -139,7 +139,7 @@ void event_dispatcher::process_event(io_event* evt) {
     case event::event_type::tcp_connect:
       {
         sock->set_peer_info(evt->data().c_str(), evt->opt_data());
-        handler->on_connect(evt->err_no());
+        handler->on_connect(sock->last_error());
         evt->done();
 
         break;
@@ -147,14 +147,14 @@ void event_dispatcher::process_event(io_event* evt) {
     case event::event_type::tcp_recv:
       {
         // TODO : implement recv for epoll et mode
-        handler->on_recv(evt->data(), evt->result(), evt->err_no());
+        handler->on_recv(evt->data(), evt->result());
         evt->done();
 
         break;
       }
     case event::event_type::tcp_send:
       {
-        handler->on_send(evt->result(), evt->err_no());
+        handler->on_send(evt->result());
         evt->done();
 
         break;
@@ -162,15 +162,14 @@ void event_dispatcher::process_event(io_event* evt) {
     case event::event_type::udp_recvfrom:
       {
         handler->on_recvfrom(evt->data(), evt->result()
-            , sock->peer().ip, sock->peer().port
-            , evt->err_no()); 
+            , sock->peer().ip, sock->peer().port);
         evt->done();
 
         break;
       }
     case event::event_type::udp_sendto:
       {
-        handler->on_sendto(evt->result(), evt->err_no());
+        handler->on_sendto(evt->result());
         evt->done();
 
         break;
@@ -203,7 +202,7 @@ void event_dispatcher::clear_resources(
 
   // step 2. call to on_close
   if (handler != nullptr)
-    handler->on_close(errno);
+    handler->on_close(sock->last_error());
 
   // step 3. erase the socket and then delete it
   {
