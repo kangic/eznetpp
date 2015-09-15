@@ -32,6 +32,7 @@ void tcp_acceptor::recv(void) {
   socklen_t client_addr_len = sizeof(client_addr);
 
   int sock_fd = ::accept(_sd, (struct sockaddr *)&client_addr, &client_addr_len);
+  _last_errno = errno;
 
   if (sock_fd == -1) {
     if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -40,7 +41,7 @@ void tcp_acceptor::recv(void) {
   }
 
   eznetpp::event::event_dispatcher::instance().push_event(new eznetpp::event::io_event
-      (eznetpp::event::event_type::tcp_accept, sock_fd, errno, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), this));
+      (eznetpp::event::event_type::tcp_accept, sock_fd, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), this));
 }
 
 void tcp_acceptor::close(void) {
@@ -48,7 +49,7 @@ void tcp_acceptor::close(void) {
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, errno, this));
+      new eznetpp::event::io_event(eznetpp::event::event_type::close, this));
 }
 
 int tcp_acceptor::bind_and_listen(int port, int backlog) {
@@ -65,7 +66,8 @@ int tcp_acceptor::bind_and_listen(int port, int backlog) {
                            , __FILE__, __FUNCTION__, __LINE__
                            , "::bind() error(%d)", errno);
 
-    close();
+    ::close(_sd);
+    _sd = -1;
     return errno;
   }
 
@@ -76,7 +78,8 @@ int tcp_acceptor::bind_and_listen(int port, int backlog) {
                            , __FILE__, __FUNCTION__, __LINE__
                            , "::listen() error(%d)", errno);
 
-    this->close();
+    ::close(_sd);
+    _sd = -1;
     return errno;
   }
 

@@ -56,6 +56,7 @@ void udp_socket::send(void) {
       client_addr.sin_port = htons(pi.port);
       int ret = ::sendto(_sd, msg.c_str(), msg.length(), 0
           , (struct sockaddr *)&client_addr, sizeof(client_addr));
+      _last_errno = errno;
       if (ret == -1) {
         // error check
         if (errno == EAGAIN) {
@@ -68,7 +69,7 @@ void udp_socket::send(void) {
       if (ret > 0) {
         eznetpp::event::event_dispatcher::instance().push_event(
             new eznetpp::event::io_event(eznetpp::event::event_type::udp_sendto
-              , ret, errno, this));
+              , ret, this));
       }
     }
   } // lock_guard
@@ -91,6 +92,7 @@ void udp_socket::recv(void) {
     bzero(&client_addr, sizeof(client_addr));
     int len = ::recvfrom(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0
         , (struct sockaddr *)&client_addr, &client_addr_size);
+    _last_errno = errno;
     read_again = 0;
     if (len == 0) {
       close();
@@ -113,7 +115,7 @@ void udp_socket::recv(void) {
     set_peer_info(inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom
-          , len, errno, std::move(data.assign(data, 0, len)), 0, this));
+          , len, std::move(data.assign(data, 0, len)), 0, this));
   }
 }
 
@@ -122,7 +124,7 @@ void udp_socket::close(void) {
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, errno, this));
+      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, this));
 }
 
 int udp_socket::bind(int port) {

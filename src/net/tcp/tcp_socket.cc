@@ -46,7 +46,7 @@ int tcp_socket::connect(const std::string& ip, int port) {
 
   eznetpp::event::event_dispatcher::instance().push_event(
       new eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect
-        , ret, errno, ip, port, this));
+        , ret, ip, port, this));
 
   return 0;
 }
@@ -78,7 +78,7 @@ void tcp_socket::send(void) {
       if (ret > 0) {
         eznetpp::event::event_dispatcher::instance().push_event(
             new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send
-              , ret, errno, this));
+              , ret, this));
       }
     }
   } // lock_guard
@@ -97,6 +97,7 @@ void tcp_socket::recv(void) {
   while (read_again) {
     std::string data(eznetpp::opt::max_transfer_bytes, '\0');
     int len = ::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
+    _last_errno = errno;
     read_again = 0;
     if (len == 0) {
       close();
@@ -116,7 +117,7 @@ void tcp_socket::recv(void) {
     }
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
-          , errno, std::move(data.assign(data, 0, len)), 0, this));
+          , std::move(data.assign(data, 0, len)), 0, this));
   }
 }
 
@@ -125,7 +126,7 @@ void tcp_socket::close(void) {
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, errno, this));
+      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, this));
 }
 
 }  // namespace tcp
