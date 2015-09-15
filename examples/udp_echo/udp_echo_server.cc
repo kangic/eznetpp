@@ -23,14 +23,14 @@ int udp_echo_server::open(int port) {
 }
 
 void udp_echo_server::on_recvfrom(const std::string& msg, int len
-      , const std::string& peer_ip, int peer_port, int err_no) {
+      , const std::string& peer_ip, int peer_port) {
 
   printf("received %d bytes from %s(%d)\n", len, peer_ip.c_str(), peer_port);
 
   _socket.send_bytes(msg, peer_ip, peer_port);
 }
 
-void udp_echo_server::on_sendto(unsigned int len, int err_no) {
+void udp_echo_server::on_sendto(unsigned int len) {
   printf("sent %d bytes\n", len);
 }
 

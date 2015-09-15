@@ -21,12 +21,12 @@ void echo_client::on_connect(int err_no) {
   _socket.send_bytes(hellomsg);
 }
 
-void echo_client::on_recv(const std::string& msg, int len, int err_no) {
+void echo_client::on_recv(const std::string& msg, int len) {
   _socket.send_bytes(msg);
   printf("on_recv\n");
 }
 
-void echo_client::on_send(unsigned int len, int err_no) {
+void echo_client::on_send(unsigned int len) {
   printf("on_send\n");
 }
 

@@ -16,8 +16,8 @@ class echo_client : eznetpp::event::tcp_socket_event_handler {
 
   // override
   void on_connect(int err_no);
-  void on_recv(const std::string& msg, int len, int err_no);
-  void on_send(unsigned int len, int err_no);
+  void on_recv(const std::string& msg, int len);
+  void on_send(unsigned int len);
   void on_close(int err_no);
 
  private:

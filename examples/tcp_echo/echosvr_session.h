@@ -14,8 +14,8 @@ class echosvr_session : public eznetpp::event::tcp_socket_event_handler {
 
  public:
   // override
-  void on_recv(const std::string& msg, int len, int err_no);
-  void on_send(unsigned int len, int err_no);
+  void on_recv(const std::string& msg, int len);
+  void on_send(unsigned int len);
   void on_close(int err_no);
 
   // do not need 

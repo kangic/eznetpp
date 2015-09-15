@@ -17,8 +17,8 @@ class udp_echo_server : public eznetpp::event::udp_socket_event_handler {
 
   // override
   void on_recvfrom(const std::string& msg, int len
-      , const std::string& peer_ip, int peer_port, int err_no);
-  void on_sendto(unsigned int len, int err_no);
+      , const std::string& peer_ip, int peer_port);
+  void on_sendto(unsigned int len);
   void on_close(int err_no);
 
  private:
