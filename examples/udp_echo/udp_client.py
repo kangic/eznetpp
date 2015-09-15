@@ -5,7 +5,7 @@ import datetime
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 num = 0
-send_data = "test echo message"
+send_data = "echotest"
 
 print("%d" % int(sys.argv[2]))
 while True:

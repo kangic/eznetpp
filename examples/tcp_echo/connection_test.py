@@ -4,7 +4,7 @@ import time
 import datetime
 
 num = 1
-server_addr = ("localhost", 56789)
+server_addr = (sys.argv[1], int(sys.argv[2]))
 #for i in range(int(sys.argv[1])) :
 while True:
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
