@@ -21,10 +21,6 @@ class tcp_socket : public eznetpp::net::if_socket {
  protected:
   void recv(void); 
   void send(void);
-
- private:
-  long long rc = 0;
-  long long sc = 0;
 };
 
 }  // namespace tcp
