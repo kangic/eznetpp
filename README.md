@@ -123,3 +123,6 @@ int main(void) {
 ``` 
 
 * There are some samples in `examples` directory for using eznetpp.
+
+## Email
+kangic21@gmail.com
