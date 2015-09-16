@@ -17,6 +17,10 @@ SET(eznetpp_udp_echo_server_sample_srcs
 ${PROJECT_SOURCE_DIR}/udp_echo/udp_echosvr_sample.cc
 )
 
+SET(eznetpp_udp_echo_client_sample_srcs
+${PROJECT_SOURCE_DIR}/udp_echo/udp_echoclient_sample.cc
+)
+
 
 find_package(Threads)
 include_directories(${PROJECT_BINARY_DIR})
@@ -32,5 +36,9 @@ target_link_libraries(tcp_echoclient_sample ${CMAKE_THREAD_LIBS_INIT})
 add_executable(udp_echosvr_sample ${eznetpp_udp_echo_server_sample_srcs})
 target_link_libraries(udp_echosvr_sample ${CMAKE_CURRENT_SOURCE_DIR}/../build/libeznetpp.a)
 target_link_libraries(udp_echosvr_sample ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(udp_echoclient_sample ${eznetpp_udp_echo_client_sample_srcs})
+target_link_libraries(udp_echoclient_sample ${CMAKE_CURRENT_SOURCE_DIR}/../build/libeznetpp.a)
+target_link_libraries(udp_echoclient_sample ${CMAKE_THREAD_LIBS_INIT})
 
 
