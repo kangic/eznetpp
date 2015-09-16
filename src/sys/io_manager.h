@@ -11,7 +11,7 @@ namespace eznetpp {
 namespace sys {
 class io_manager {
  public:
-  io_manager(int num_of_disp_threads, bool log_enable = false);
+  io_manager(int num_of_disp_threads = 1, bool log_enable = false);
   virtual ~io_manager(void);
 
   /*
