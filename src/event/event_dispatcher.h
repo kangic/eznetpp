@@ -18,7 +18,7 @@ class event_dispatcher {
 
     return *_evt_dispatcher;
   }
-  static void release_instance() {
+  static void release() {
     if (_evt_dispatcher != nullptr) {
       delete _evt_dispatcher;
       _evt_dispatcher = nullptr;
