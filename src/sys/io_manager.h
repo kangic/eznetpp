@@ -35,6 +35,7 @@ class io_manager {
   void stop(void);
 
   static int _epoll_fd;
+
  protected:
   /*
    * This function works to poll descriptors in _epoll_fd.

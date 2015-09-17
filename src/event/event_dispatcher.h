@@ -18,6 +18,12 @@ class event_dispatcher {
 
     return *_evt_dispatcher;
   }
+  static void release_instance() {
+    if (_evt_dispatcher != nullptr) {
+      delete _evt_dispatcher;
+      _evt_dispatcher = nullptr;
+    }
+  }
 
   int init(int num_of_disp_threads);
 

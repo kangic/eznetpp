@@ -21,6 +21,8 @@ io_manager::~io_manager(void) {
   }
 
   ::close(_epoll_fd);
+
+  eznetpp::event::event_dispatcher::instance().release_instance();
 }
 
 /*
