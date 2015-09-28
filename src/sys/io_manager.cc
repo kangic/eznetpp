@@ -76,6 +76,8 @@ int io_manager::init(int max_descs_cnt) {
 
   _max_descs_cnt = max_descs_cnt;
 
+  signal(SIGPIPE, SIG_IGN);
+
   return 0;
 
 }
@@ -154,7 +156,7 @@ void io_manager::epoll_loop(void) {
     }
 
     for (int i = 0; i < changed_events; ++i) {
-      eznetpp::net::if_socket* sock = static_cast<eznetpp::net::if_socket*>(_events[i].data.ptr);
+      auto sock = static_cast<eznetpp::net::if_socket*>(_events[i].data.ptr);
 
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
