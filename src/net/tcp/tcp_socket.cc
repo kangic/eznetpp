@@ -142,6 +142,7 @@ void tcp_socket::recv(void) {
 
 void tcp_socket::close(void) {
   int ret = ::close(_sd);
+  _last_errno = errno;
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(

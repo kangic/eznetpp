@@ -67,6 +67,7 @@ void tcp_acceptor::recv(void) {
 
 void tcp_acceptor::close(void) {
   ::close(_sd);
+  _last_errno = errno;
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
