@@ -126,8 +126,8 @@ void event_dispatcher::dispatch_loop(int id) {
 }
 
 void event_dispatcher::process_event(io_event* evt) {
-  eznetpp::net::if_socket* sock = evt->publisher();
-  event_handler* handler = _handlers_map[sock];
+  auto sock = evt->publisher();
+  auto handler = _handlers_map[sock];
 
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
       , __FILE__, __FUNCTION__, __LINE__
@@ -148,7 +148,7 @@ void event_dispatcher::process_event(io_event* evt) {
       {
         int sock_fd = evt->result();
 
-        eznetpp::net::tcp::tcp_socket* tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
+        auto tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
         tcp_sock->set_peer_info(std::move(evt->data()), evt->opt_data());
         tcp_sock->set_nonblocking();
         tcp_sock->set_tcpnodelay();
@@ -218,7 +218,8 @@ void event_dispatcher::clear_resources(
     auto iter = _ioevents_vec.begin();
     while (iter != _ioevents_vec.end()) {
       if ((*iter)->publisher() == sock) {
-        //process_event(*iter);
+        delete *iter;
+        *iter = nullptr;
 
         iter = _ioevents_vec.erase(iter);
       } else {

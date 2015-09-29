@@ -140,6 +140,7 @@ void udp_socket::recv(void) {
 
 void udp_socket::close(void) {
   int ret = ::close(_sd);
+  _last_errno = errno;
   _sd = -1;
 
   eznetpp::event::event_dispatcher::instance().push_event(
