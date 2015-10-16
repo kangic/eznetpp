@@ -124,5 +124,8 @@ int main(void) {
 
 * There are some samples in `examples` directory for using eznetpp.
 
+## How to contribute
+Just fork this repo and then send the Pull Request.
+
 ## Email
 kangic21@gmail.com
