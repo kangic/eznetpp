@@ -34,22 +34,22 @@ event_dispatcher::event_dispatcher(void) {
 event_dispatcher::~event_dispatcher(void) {
   bClosed = true;
 
-
   std::unique_lock<std::mutex> exit_lk(_exit_mutex);
   {
     while(_num_of_disp_ths) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      printf("~event_dispatcher::lock, %d\n", _num_of_disp_ths);
 
+      // wake a thread of work thread group.
       {
         std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
         _disp_th_cv.notify_one();
       }
+
+      // wait the signal from the work thread.
       _exit_cv.wait(exit_lk);
     }
   }
 
-  printf("~event_dispatcher::destroy\n");
   for (auto& th : _disp_ths_vec) {
     th.join();
   }
@@ -122,13 +122,12 @@ void event_dispatcher::dispatch_loop(int id) {
     {
       // step 1. wait for signal
       std::unique_lock<std::mutex> lk(_disp_th_cv_mutex);
-        printf("before _disp_th_cv wait\n");
 
       while (_ioevents_vec.empty() && !bClosed) {
-        printf("_disp_th_cv wait\n");
         _disp_th_cv.wait(lk);
       }
 
+      // exit condition
       if (bClosed)
         break;
 
@@ -149,11 +148,9 @@ void event_dispatcher::dispatch_loop(int id) {
 
   } // while-loop
 
-  printf("end of while of disp\n");
   std::unique_lock<std::mutex> exit_lk(_exit_mutex);
   {
     --_num_of_disp_ths;
-    printf("_num_of_disp_ths : %d\n", _num_of_disp_ths);
     _exit_cv.notify_one();
   }
 }
