@@ -27,7 +27,6 @@
 eznetpp::sys::io_manager g_io_mgr(4);
 
 void sig_handler(int signum) {
-  printf("hello signal handler\n");
   g_io_mgr.stop();
 }
 
@@ -92,12 +91,7 @@ class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
 };
 
 int main(void) {
-  if (signal(SIGINT, sig_handler) == SIG_ERR)
-    printf("can't catch SIGINT\n");
-  signal(SIGABRT, sig_handler);
-  signal(SIGTERM, sig_handler);
-  signal(SIGKILL, sig_handler);
-
+  signal(SIGINT, sig_handler);
 
   g_io_mgr.init();
 
