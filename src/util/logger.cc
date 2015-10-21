@@ -66,10 +66,9 @@ void logger::log(log_level level, const char* file, const char* func, int line
     printf("[%s] ", log_level_str[level]);
 
     va_list arg;
-    int count;
 
     va_start(arg, format);
-    count = vprintf(format, arg);
+    vprintf(format, arg);
     va_end(arg);
 
     printf("(%s::%s::%d)\n", file, func, line);
