@@ -122,12 +122,9 @@ int io_manager::loop(void) {
 void io_manager::stop(void) {
   bClosed = true;
 
-  printf("io_manager::stop\n");
   // wait terminate signal
   std::unique_lock<std::mutex> lk(_term_mutex);
-  printf("io_manager - wait lock\n");
   _term_cv.wait(lk);
-  printf("io_manager - after wait lock\n");
 }
 
 void io_manager::epoll_loop(void) {
@@ -138,7 +135,6 @@ void io_manager::epoll_loop(void) {
   while (1) {
     {
       if (bClosed) {
-        printf("recevied flag\n");
         break;
       }
     }
@@ -149,7 +145,9 @@ void io_manager::epoll_loop(void) {
                           , "changed_events : %d"
                           , changed_events);
 
-    if (changed_events < 0) {
+    if (changed_events == 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    } else if (changed_events < 0) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");
@@ -180,7 +178,6 @@ void io_manager::epoll_loop(void) {
     }
   }
 
-  printf("notify!!\n");
   std::unique_lock<std::mutex> lk(_term_mutex);
   _term_cv.notify_one();
 }
