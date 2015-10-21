@@ -25,7 +25,6 @@
 // c headers
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -39,6 +38,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <csignal>
 #include <condition_variable>
 #include <cstdarg>
 #include <cstdio>
