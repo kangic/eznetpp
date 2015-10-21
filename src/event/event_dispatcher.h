@@ -67,6 +67,7 @@ class event_dispatcher {
 
   // work threads
   //std::thread _disp_th;
+  int _num_of_disp_ths;
   std::vector<std::thread> _disp_ths_vec;
 
   // socket<key>, socket_class<value>
@@ -79,9 +80,14 @@ class event_dispatcher {
   std::vector<io_event*> _ioevents_vec;
   std::mutex _ioevents_vec_mutex;
 
-  // condition variables
+  // condition variable for dispatching the event
   std::condition_variable _disp_th_cv;  
   std::mutex _disp_th_cv_mutex;
+
+  // condition variable for exiting the thread
+  bool bClosed = false;
+  std::condition_variable _exit_cv;
+  std::mutex _exit_mutex;
 
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
 };

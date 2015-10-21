@@ -28,17 +28,13 @@ namespace sys {
 
 int io_manager::_epoll_fd = -1;
 
-io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
+io_manager::io_manager(int num_of_disp_threads, bool log_enable)
+: _loop_th() {
   _num_of_disp_threads = num_of_disp_threads;
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
 io_manager::~io_manager(void) {
-  {
-    std::lock_guard<std::mutex> lk(_exit_mutex);
-    bClosed = true;
-  }
-
   ::close(_epoll_fd);
 
   eznetpp::event::event_dispatcher::instance().release();
@@ -118,14 +114,20 @@ int io_manager::loop(void) {
     return -1;
   }
 
-
   _loop_th.join();
 
   return 0;
 }
 
 void io_manager::stop(void) {
-  _loop_th.detach();
+  bClosed = true;
+
+  printf("io_manager::stop\n");
+  // wait terminate signal
+  std::unique_lock<std::mutex> lk(_term_mutex);
+  printf("io_manager - wait lock\n");
+  _term_cv.wait(lk);
+  printf("io_manager - after wait lock\n");
 }
 
 void io_manager::epoll_loop(void) {
@@ -135,13 +137,13 @@ void io_manager::epoll_loop(void) {
 
   while (1) {
     {
-      std::lock_guard<std::mutex> lk(_exit_mutex);
       if (bClosed) {
+        printf("recevied flag\n");
         break;
       }
     }
 
-    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, -1);
+    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 0);
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "changed_events : %d"
@@ -177,6 +179,10 @@ void io_manager::epoll_loop(void) {
       }
     }
   }
+
+  printf("notify!!\n");
+  std::unique_lock<std::mutex> lk(_term_mutex);
+  _term_cv.notify_one();
 }
 
 }  // namespace sys

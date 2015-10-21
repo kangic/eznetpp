@@ -72,7 +72,10 @@ class io_manager {
 
   // for exiting thread
   bool bClosed = false;
-  std::mutex _exit_mutex;
+  std::mutex _term_mutex;
+  std::condition_variable _term_cv;
+
+  DISALLOW_COPY_AND_ASSIGN(io_manager);
 };
 
 }  // namespace sys
