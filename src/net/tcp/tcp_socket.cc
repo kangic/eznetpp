@@ -102,10 +102,11 @@ void tcp_socket::send(void) {
     }
   } // lock_guard
   
-  if (set_epollout_flag(false) == -1)
+  if (set_epollout_flag(false) == -1) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
           , "epoll_ctl() error(%d)", errno);
+  }
 }
 
 void tcp_socket::recv(void) {
@@ -118,6 +119,7 @@ void tcp_socket::recv(void) {
     int len = ::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
     _last_errno = errno;
     read_again = 0;
+
     if (len == 0) {
       close();
       break;
@@ -131,9 +133,11 @@ void tcp_socket::recv(void) {
       close();
       break;
     }
+
     if (len == eznetpp::opt::max_transfer_bytes) {
       read_again = 1;
     }
+
     eznetpp::event::event_dispatcher::instance().push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
           , std::move(data.assign(data, 0, len)), 0, this));

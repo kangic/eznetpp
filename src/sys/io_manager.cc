@@ -133,21 +133,17 @@ void io_manager::epoll_loop(void) {
                          , "start read_loop");
 
   while (1) {
-    {
-      if (bClosed) {
-        break;
-      }
+    if (bClosed) {
+      break;
     }
 
-    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 0);
+    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 1);
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "changed_events : %d"
                           , changed_events);
 
-    if (changed_events == 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    } else if (changed_events < 0) {
+    if (changed_events < 0) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");

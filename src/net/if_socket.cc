@@ -88,7 +88,6 @@ int if_socket::send_bytes(const std::string& data, const std::string& ip, int po
   {
     std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
 
-    //_sendmsgs_vec.emplace_back(data); 
     peer_addr peer_info;
     peer_info.ip = ip;
     peer_info.port = port;
