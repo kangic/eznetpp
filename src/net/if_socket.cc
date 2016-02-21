@@ -73,11 +73,11 @@ int if_socket::set_reuseaddr(void) {
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 }
 
-int if_socket::set_epollout_flag(bool flag) {
+int if_socket::update_epoll_event(bool out_flag) {
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
-  if(flag)
+  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
+  if(out_flag)
     ev.events |= EPOLLOUT;
   ev.data.ptr = this;
 
@@ -92,7 +92,7 @@ int if_socket::send_bytes(const std::string& data, const std::string& ip, int po
     peer_info.ip = ip;
     peer_info.port = port;
     _sendmsgs_vec.emplace_back(std::make_pair(std::move(data), std::move(peer_info))); 
-    if (set_epollout_flag(true) == -1) {
+    if (update_epoll_event(true) == -1) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
           , "epoll_ctl() error(%d)", errno);

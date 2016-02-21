@@ -102,7 +102,7 @@ void tcp_socket::send(void) {
     }
   } // lock_guard
   
-  if (set_epollout_flag(false) == -1) {
+  if (update_epoll_event(false) == -1) {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
           , "epoll_ctl() error(%d)", errno);

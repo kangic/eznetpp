@@ -37,6 +37,11 @@ io_manager::io_manager(int num_of_disp_threads, bool log_enable)
 io_manager::~io_manager(void) {
   ::close(_epoll_fd);
 
+  if (_events != nullptr) {
+    delete _events;
+    _events = nullptr;
+  }
+
   eznetpp::event::event_dispatcher::instance().release();
 }
 
@@ -88,7 +93,7 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
 
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);

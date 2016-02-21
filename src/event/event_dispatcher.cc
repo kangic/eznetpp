@@ -170,7 +170,7 @@ void event_dispatcher::process_event(io_event* evt) {
         // Delete the socket descriptor from epoll descriptor automatically
         // when the socket is closed.
         clear_resources(sock, handler);
-        evt->done();
+        //evt->done();
 
         break;
       }
@@ -183,7 +183,7 @@ void event_dispatcher::process_event(io_event* evt) {
         tcp_sock->set_nonblocking();
         tcp_sock->set_tcpnodelay();
         handler->on_accept(tcp_sock, 0);
-        evt->done();
+        //evt->done();
 
         {
           std::lock_guard<std::mutex> lock(_sockets_vec_mutex);
@@ -196,21 +196,21 @@ void event_dispatcher::process_event(io_event* evt) {
       {
         sock->set_peer_info(evt->data().c_str(), evt->opt_data());
         handler->on_connect(sock->last_error());
-        evt->done();
+        //evt->done();
 
         break;
       }
     case event::event_type::tcp_recv:
       {
         handler->on_recv(evt->data(), evt->result());
-        evt->done();
+        //evt->done();
 
         break;
       }
     case event::event_type::tcp_send:
       {
         handler->on_send(evt->result());
-        evt->done();
+        //evt->done();
 
         break;
       }
@@ -218,21 +218,22 @@ void event_dispatcher::process_event(io_event* evt) {
       {
         handler->on_recvfrom(evt->data(), evt->result()
             , sock->peer().ip, sock->peer().port);
-        evt->done();
+        //evt->done();
 
         break;
       }
     case event::event_type::udp_sendto:
       {
         handler->on_sendto(evt->result());
-        evt->done();
+        //evt->done();
 
         break;
       }
   }
 
   // step 4. delete ioevent
-  if (evt != nullptr && evt->is_done()) {
+  //if (evt != nullptr && evt->is_done()) {
+  if (evt != nullptr) {
     delete evt;
     evt = nullptr;
   }
@@ -260,7 +261,7 @@ void event_dispatcher::clear_resources(
   if (handler != nullptr)
     handler->on_close(sock->last_error());
 
-  // step 3. erase the socket and then delete it
+  // step 3. delete the socket and then erase the iterator
   {
     std::lock_guard<std::mutex> guard(_sockets_vec_mutex);
     auto iter = _sockets_vec.begin();
