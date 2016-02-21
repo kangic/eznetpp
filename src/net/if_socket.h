@@ -32,7 +32,7 @@ class if_socket {
   int set_tcpnodelay(void);
   int set_reuseaddr(void);
 
-  int set_epollout_flag(bool flag);
+  int update_epoll_event(bool flag);
 
   int last_error(void) { return _last_errno; }
 
