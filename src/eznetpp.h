@@ -102,13 +102,15 @@ namespace errcode {
     // eznetpp lib errno
   };
 
-  static const std::string& errno_to_str(int err_no) {
+  static const std::string& errno_to_str(int err_no)
+  {
     return errno_str_table[err_no];
   }
 }
 
 namespace net {
-  typedef struct _peer_addr {
+  typedef struct _peer_addr
+  {
     std::string ip = "";
     int port = -1;
   } peer_addr;

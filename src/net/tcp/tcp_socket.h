@@ -28,7 +28,9 @@
 namespace eznetpp {
 namespace net {
 namespace tcp {
-class tcp_socket : public eznetpp::net::if_socket {
+class tcp_socket
+  : public eznetpp::net::if_socket
+{
  public:
   tcp_socket(void);
   tcp_socket(int sd);

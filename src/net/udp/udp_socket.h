@@ -28,7 +28,9 @@
 namespace eznetpp {
 namespace net {
 namespace udp {
-class udp_socket : public eznetpp::net::if_socket {
+class udp_socket
+  : public eznetpp::net::if_socket
+{
  public:
   udp_socket(void);
   virtual ~udp_socket(void);

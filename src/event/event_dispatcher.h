@@ -29,15 +29,19 @@
 
 namespace eznetpp {
 namespace event {
-class event_dispatcher {
+class event_dispatcher
+{
  public:
-  static event_dispatcher& instance() {
+  static event_dispatcher& instance()
+  {
     if (_evt_dispatcher == nullptr)
       _evt_dispatcher = new event_dispatcher();
 
     return *_evt_dispatcher;
   }
-  static void release() {
+
+  static void release()
+  {
     if (_evt_dispatcher != nullptr) {
       delete _evt_dispatcher;
       _evt_dispatcher = nullptr;
@@ -66,9 +70,8 @@ class event_dispatcher {
   static event_dispatcher* _evt_dispatcher;
 
   // work threads
-  //std::thread _disp_th;
-  int _num_of_disp_ths;
-  std::vector<std::thread> _disp_ths_vec;
+  int _num_of_disp_threads;
+  std::vector<std::thread> _disp_threads_vec;
 
   // socket<key>, socket_class<value>
   std::map<eznetpp::net::if_socket*, event_handler*> _handlers_map;

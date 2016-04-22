@@ -29,12 +29,14 @@
 namespace eznetpp {
 namespace event {
 
-class event_handler {
+class event_handler
+{
  public:
   event_handler(void) = default;
   virtual ~event_handler(void) = default;
 
-  enum event_handler_type {
+  enum event_handler_type
+  {
     tcp_socket = 0,
     tcp_acceptor,
     udp_socket,
@@ -53,9 +55,12 @@ class event_handler {
   event_handler_type _handler_type;
 };
 
-class tcp_socket_event_handler : public event_handler {
+class tcp_socket_event_handler
+  : public event_handler
+{
  public:
-  tcp_socket_event_handler(void) { 
+  tcp_socket_event_handler(void)
+  { 
     _handler_type = event_handler_type::tcp_socket;
   };
   virtual ~tcp_socket_event_handler(void) = default;
@@ -72,9 +77,12 @@ class tcp_socket_event_handler : public event_handler {
   void on_sendto(unsigned int len) final {};
 };
 
-class tcp_acceptor_event_handler : public event_handler {
+class tcp_acceptor_event_handler
+  : public event_handler
+{
  public:
-  tcp_acceptor_event_handler(void) {
+  tcp_acceptor_event_handler(void)
+  {
     _handler_type = event_handler_type::tcp_acceptor;
   };
   virtual ~tcp_acceptor_event_handler(void) = default;
@@ -91,9 +99,12 @@ class tcp_acceptor_event_handler : public event_handler {
   void on_sendto(unsigned int len) final {};
 };
 
-class udp_socket_event_handler : public event_handler {
+class udp_socket_event_handler
+  : public event_handler
+{
  public:
-  udp_socket_event_handler(void) { 
+  udp_socket_event_handler(void)
+  { 
     _handler_type = event_handler_type::udp_socket;
   };
   virtual ~udp_socket_event_handler(void) = default;

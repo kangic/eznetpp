@@ -26,10 +26,12 @@
 
 namespace eznetpp {
 namespace util {
-class logger {
+class logger
+{
  public:
   // log level
-  typedef enum _log_level {
+  typedef enum _log_level
+  {
     fatal = 0,
     error,
     warn,
@@ -43,12 +45,12 @@ class logger {
 
   void set_enable_option(bool enable);
 
-  void log(log_level level, const char* file, const char* func, int line
-           , const char* format, ...);
+  void log(log_level level, const char* file, const char* func, int line, const char* format, ...);
 
  protected:
   friend class cleanup;
-  class cleanup {
+  class cleanup
+  {
    public:
     ~cleanup();
   };

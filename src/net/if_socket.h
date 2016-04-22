@@ -29,7 +29,8 @@
  */
 namespace eznetpp {
 namespace net {
-class if_socket {
+class if_socket
+{
  public:
   if_socket(void);
   virtual ~if_socket(void);

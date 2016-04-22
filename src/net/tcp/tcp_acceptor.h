@@ -31,7 +31,9 @@
 namespace eznetpp {
 namespace net {
 namespace tcp {
-class tcp_acceptor : public eznetpp::net::tcp::tcp_socket {
+class tcp_acceptor
+  : public eznetpp::net::tcp::tcp_socket
+{
  public:
   tcp_acceptor(void);
   virtual ~tcp_acceptor(void);
