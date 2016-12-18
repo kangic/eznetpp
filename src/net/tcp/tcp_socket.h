@@ -32,16 +32,16 @@ class tcp_socket
   : public eznetpp::net::if_socket
 {
  public:
-  tcp_socket(void);
+  tcp_socket();
   tcp_socket(int sd);
-  virtual ~tcp_socket(void);
+  virtual ~tcp_socket();
 
   int connect(const std::string& ip, int port);
-  void close(void);
+  void close();
 
  protected:
-  void recv(void); 
-  void send(void);
+  int recv();
+  int send();
 };
 
 }  // namespace tcp

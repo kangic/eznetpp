@@ -29,7 +29,7 @@ namespace eznetpp {
 namespace net {
 namespace tcp {
 
-tcp_socket::tcp_socket(void)
+tcp_socket::tcp_socket()
 {
   _sock_domain = socket_domain::inet_v4;
   _sock_type = socket_type::tcp;
@@ -45,7 +45,7 @@ tcp_socket::tcp_socket(int sd)
   _sd = sd;
 }
 
-tcp_socket::~tcp_socket(void) {}
+tcp_socket::~tcp_socket() {}
 
 int tcp_socket::connect(const std::string& ip, int port)
 {
@@ -66,18 +66,18 @@ int tcp_socket::connect(const std::string& ip, int port)
   // connect to server(on_connect event)
   int ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-  eznetpp::event::event_dispatcher::instance().push_event(
+  evt_dispatcher.push_event(
       new eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect
         , ret, ip, port, this));
 
   return 0;
 }
 
-void tcp_socket::send(void)
+int tcp_socket::send()
 {
   if (_sd == -1)
   {
-    return;
+    return -1;
   }
 
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
@@ -101,31 +101,30 @@ void tcp_socket::send(void)
           continue;
         }
 
-        break;
+        eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+            , __FILE__, __FUNCTION__, __LINE__
+            , "send() error(%d)", errno);
+        close();
+        return -1;
       }
 
       if (ret > 0)
       {
-        eznetpp::event::event_dispatcher::instance().push_event(
+        evt_dispatcher.push_event(
             new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send
               , ret, this));
       }
     }
   } // lock_guard
-  
-  if (update_epoll_event(false) == -1)
-  {
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-          , __FILE__, __FUNCTION__, __LINE__
-          , "epoll_ctl() error(%d)", errno);
-  }
+
+  return 0;
 }
 
-void tcp_socket::recv(void)
+int tcp_socket::recv()
 {
   if (_sd == -1)
   {
-    return;
+    return -1;
   }
 
   bool read_again = 1;
@@ -139,18 +138,20 @@ void tcp_socket::recv(void)
     if (len == 0)
     {
       close();
-      break;
+      return -1;
     }
     else if (len == -1)
     {
       if (errno == EAGAIN || errno == EWOULDBLOCK)
+      {
         break;
+      }
 
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
           , __FILE__, __FUNCTION__, __LINE__
           , "recv() error(%d)", errno);
       close();
-      break;
+      return -1;
     }
 
     if (len == eznetpp::opt::max_transfer_bytes)
@@ -158,19 +159,21 @@ void tcp_socket::recv(void)
       read_again = 1;
     }
 
-    eznetpp::event::event_dispatcher::instance().push_event(
+    evt_dispatcher.push_event(
         new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
           , std::move(data.assign(data, 0, len)), 0, this));
   }
+
+  return 0;
 }
 
-void tcp_socket::close(void)
+void tcp_socket::close()
 {
   int ret = ::close(_sd);
   _last_errno = errno;
   _sd = -1;
 
-  eznetpp::event::event_dispatcher::instance().push_event(
+  eznetpp::event::event_dispatcher.push_event(
       new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, this));
 }
 

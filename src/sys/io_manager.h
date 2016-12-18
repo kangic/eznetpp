@@ -54,7 +54,7 @@ class io_manager
   int loop(void);
   void stop(void);
 
-  static int _epoll_fd;
+  static int update_epoll_event(eznetpp::net::if_socket* sock, bool write_flag);
 
  protected:
   /*
@@ -65,10 +65,14 @@ class io_manager
   void epoll_loop(int idx);
  
  private:
+  static int _epoll_fd;
   struct epoll_event* _events = nullptr;
   int _max_descs_cnt = 1024;
   int _num_of_loop_threads = 1;
-  int _num_of_work_threads = 1;
+
+  // socket<key>, socket_class<value>
+  std::map<eznetpp::net::if_socket*, eznetpp::event::event_handler*> _handlers_map;
+  std::mutex _handlers_map_mutex;
 
   //std::thread _loop_th;
   std::vector<std::thread> _loop_threads_vec;

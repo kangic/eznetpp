@@ -26,16 +26,16 @@
 namespace eznetpp {
 namespace net {
 
-if_socket::if_socket(void) {}
+if_socket::if_socket() {}
 
-if_socket::~if_socket(void) {}
+if_socket::~if_socket() {}
 
-if_socket::socket_domain if_socket::domain(void)
+if_socket::socket_domain if_socket::domain()
 {
   return _sock_domain;
 }
 
-if_socket::socket_type if_socket::type(void)
+if_socket::socket_type if_socket::type()
 {
   return _sock_type;
 }
@@ -47,7 +47,7 @@ void if_socket::set_peer_info(const std::string& ip, int port)
 }
 
 // set socket options
-int if_socket::set_nonblocking(void)
+int if_socket::set_nonblocking()
 {
   if (_sd == -1)
   {
@@ -61,7 +61,7 @@ int if_socket::set_nonblocking(void)
   return fcntl(_sd, F_SETFL, flags);
 }
 
-int if_socket::set_tcpnodelay(void)
+int if_socket::set_tcpnodelay()
 {
   if (_sd == -1)
   {
@@ -72,7 +72,7 @@ int if_socket::set_tcpnodelay(void)
   return setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int));
 }
 
-int if_socket::set_reuseaddr(void)
+int if_socket::set_reuseaddr()
 {
   if (_sd == -1)
   {
@@ -83,18 +83,6 @@ int if_socket::set_reuseaddr(void)
   return setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 }
 
-int if_socket::update_epoll_event(bool out_flag)
-{
-  struct epoll_event ev;
-
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
-  if(out_flag)
-    ev.events |= EPOLLOUT;
-  ev.data.ptr = this;
-
-  return epoll_ctl(eznetpp::sys::io_manager::_epoll_fd, EPOLL_CTL_MOD, _sd, &ev);
-}
-
 int if_socket::send_bytes(const std::string& data, const std::string& ip, int port)
 {
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
@@ -103,14 +91,6 @@ int if_socket::send_bytes(const std::string& data, const std::string& ip, int po
     peer_info.ip = ip;
     peer_info.port = port;
     _sendmsgs_vec.emplace_back(std::make_pair(std::move(data), std::move(peer_info))); 
-    if (update_epoll_event(true) == -1)
-    {
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-          , __FILE__, __FUNCTION__, __LINE__
-          , "epoll_ctl() error(%d)", errno);
-      _sendmsgs_vec.pop_back();
-      return errno;
-    }
   }
 
   return 0;

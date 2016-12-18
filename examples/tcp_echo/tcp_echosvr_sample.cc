@@ -24,7 +24,7 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-eznetpp::sys::io_manager g_io_mgr(4);
+eznetpp::sys::io_manager g_io_mgr(4, false);
 
 void sig_handler(int signum) {
   g_io_mgr.stop();
@@ -40,11 +40,18 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler {
  public:
   // override
   void on_recv(const std::string& msg, int len) {
-    printf("received %d bytes\n", len);
+    //printf("received %d bytes\n", len);
+    ++recv_num;
+    if (recv_num % 1000 == 0)
+      printf("[%d] received %d\n", _socket->descriptor(), recv_num);
+
     _socket->send_bytes(msg);
   }
   void on_send(unsigned int len) {
-    printf("sent %d bytes\n", len);
+    //printf("sent %d bytes\n", len);
+    ++send_num;
+    if (send_num % 1000 == 0)
+      printf("[%d] sent %d\n", _socket->descriptor(), send_num);
   }
   void on_close(int err_no) {
     printf("closed the session(%d)\n", err_no);
@@ -55,6 +62,8 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler {
 
  private:
   eznetpp::net::tcp::tcp_socket* _socket;
+  unsigned int recv_num = 0;
+  unsigned int send_num = 0;
 };
 
 class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
@@ -79,6 +88,7 @@ class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
 
   // override
   void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) {
+    printf("on_accept\n");
     _io_mgr->register_socket_event_handler(sock, new tcp_echosvr_session(sock));
   }
   void on_close(int err_no) {

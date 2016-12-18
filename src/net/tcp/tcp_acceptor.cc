@@ -28,10 +28,10 @@ namespace eznetpp {
 namespace net {
 namespace tcp {
 
-tcp_acceptor::tcp_acceptor(void) {
+tcp_acceptor::tcp_acceptor() {
 }
 
-tcp_acceptor::~tcp_acceptor(void) {
+tcp_acceptor::~tcp_acceptor() {
 }
 
 int tcp_acceptor::open(int port, int backlog) {
@@ -46,7 +46,7 @@ int tcp_acceptor::open(int port, int backlog) {
   return 0;
 }
 
-void tcp_acceptor::recv(void) {
+int tcp_acceptor::recv() {
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
@@ -56,22 +56,24 @@ void tcp_acceptor::recv(void) {
 
     if (sock_fd == -1) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
-        break;
+        // It is not an error case.
+        return 0;
       }
     }
 
-    eznetpp::event::event_dispatcher::instance().push_event(new eznetpp::event::io_event
-        (eznetpp::event::event_type::tcp_accept, sock_fd, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), this));
+    eznetpp::event::event_dispatcher::dispatch_event(eznetpp::event::io_event(eznetpp::event::event_type::tcp_acceptor
+          , sock_fd, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), this));
   }
+
+  return 0;
 }
 
-void tcp_acceptor::close(void) {
+void tcp_acceptor::close() {
   ::close(_sd);
   _last_errno = errno;
   _sd = -1;
 
-  eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, this));
+  eznetpp::event::event_dispatcher::dispatch_event(eznetpp::event::io_event(eznetpp::event::event_type::close, this));
 }
 
 int tcp_acceptor::bind_and_listen(int port, int backlog) {

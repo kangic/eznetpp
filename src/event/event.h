@@ -70,17 +70,12 @@ class io_event {
   int opt_data(void) { return _opt_data; }
   eznetpp::net::if_socket* publisher(void) { return _publisher; }
   
-  // is work done?
-  bool is_done() { return _done; }
-  void done() { _done = true; }
-
  private:
   event_type _type = event_type::close;
   int _result = 0;
   std::string _data = "";
   int _opt_data = 0;
   eznetpp::net::if_socket* _publisher = nullptr;
-  bool _done = false;
 };
 
 }  // namespace event

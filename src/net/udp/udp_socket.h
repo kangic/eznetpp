@@ -39,8 +39,8 @@ class udp_socket
   void close(void);
 
  protected:
-  void recv(void); 
-  void send(void);
+  int recv(void); 
+  int send(void);
 
  private:
   int bind(int port);

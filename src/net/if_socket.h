@@ -32,38 +32,36 @@ namespace net {
 class if_socket
 {
  public:
-  if_socket(void);
-  virtual ~if_socket(void);
+  if_socket();
+  virtual ~if_socket();
 
   enum socket_domain { inet_v4 = PF_INET, inet_v6 = PF_INET6, unix = PF_LOCAL };
   enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
 
   // socket descriptor
-  int descriptor(void) const { return _sd; }
+  int descriptor() const { return _sd; }
   void descriptor(int sd) { _sd = sd; }
 
-  socket_domain domain(void);
-  socket_type type(void);
+  socket_domain domain();
+  socket_type type();
 
   void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
 
-  int set_nonblocking(void);
-  int set_tcpnodelay(void);
-  int set_reuseaddr(void);
+  int set_nonblocking();
+  int set_tcpnodelay();
+  int set_reuseaddr();
 
-  int update_epoll_event(bool flag);
-
-  int last_error(void) { return _last_errno; }
+  int last_error() { return _last_errno; }
 
   // for user
   int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
-  virtual void close(void) = 0;
+  virtual void close() = 0;
 
   // Below functions will implemented by each inherited class
   // (ex : acceptor, connector)
-  virtual void recv(void) = 0;
-  virtual void send(void) = 0;
+  virtual int recv() = 0;
+  virtual int send() = 0;
 
  protected:
   socket_domain _sock_domain = socket_domain::inet_v4;

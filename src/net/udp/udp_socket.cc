@@ -56,11 +56,11 @@ int udp_socket::open(int port)
   return 0;
 }
 
-void udp_socket::send(void)
+int udp_socket::send(void)
 {
   if (_sd == -1)
   {
-    return;
+    return -1;
   }
 
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
@@ -92,7 +92,11 @@ void udp_socket::send(void)
           continue;
         }
 
-        break;
+        eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+            , __FILE__, __FUNCTION__, __LINE__
+            , "send() error(%d)", errno);
+        close();
+        return -1;
       }
 
       if (ret > 0)
@@ -104,18 +108,15 @@ void udp_socket::send(void)
     }
   } // lock_guard
   
-  if (update_epoll_event(false) == -1)
-  {
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-          , __FILE__, __FUNCTION__, __LINE__
-          , "epoll_ctl() error(%d)", errno);
-  }
+  return 0;
 }
 
-void udp_socket::recv(void)
+int udp_socket::recv(void)
 {
   if (_sd == -1)
-    return;
+  {
+    return -1;
+  }
 
   bool read_again = 1;
   while (read_again)
@@ -132,7 +133,7 @@ void udp_socket::recv(void)
     if (len == 0)
     {
       close();
-      break;
+      return -1;
     }
     else if (len == -1)
     {
@@ -145,7 +146,7 @@ void udp_socket::recv(void)
           , __FILE__, __FUNCTION__, __LINE__
           , "recv() error(%d)", errno);
       close();
-      break;
+      return -1;
     }
 
     if (len == eznetpp::opt::max_transfer_bytes)
@@ -159,6 +160,8 @@ void udp_socket::recv(void)
         new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom
           , len, std::move(data.assign(data, 0, len)), 0, this));
   }
+
+  return 0;
 }
 
 void udp_socket::close(void)

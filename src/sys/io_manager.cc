@@ -22,7 +22,6 @@
 #include "io_manager.h"
 #include "event/event_dispatcher.h"
 
-
 namespace eznetpp {
 namespace sys {
 
@@ -30,7 +29,7 @@ int io_manager::_epoll_fd = -1;
 
 io_manager::io_manager(int num_of_work_threads, bool log_enable)
 {
-  _num_of_work_threads = num_of_work_threads;
+  _num_of_loop_threads = num_of_work_threads;
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
@@ -43,8 +42,6 @@ io_manager::~io_manager(void)
     delete _events;
     _events = nullptr;
   }
-
-  eznetpp::event::event_dispatcher::instance().release();
 }
 
 /*
@@ -85,22 +82,14 @@ int io_manager::init(int max_descs_cnt)
   signal(SIGPIPE, SIG_IGN);
 
   return 0;
-
 }
 
 int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
       , eznetpp::event::event_handler* handler)
 {
-  // Find the socket class in the event_dispatcher's handlers map to check
-  // to register already.
-  if (!eznetpp::event::event_dispatcher::instance().register_socket_event_handler(sock, handler))
-  {
-    return -1;
-  }
-
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
+  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
@@ -108,18 +97,34 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
 
 int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock)
 {
-  eznetpp::event::event_dispatcher::instance().deregister_socket_event_handler(sock);
+  {
+    std::lock_guard<std::mutex> guard(_handlers_map_mutex);
+
+    if (_handlers_map.find(sock) == _handlers_map.end())
+      return false;
+
+    _handlers_map.erase(sock);
+  }
+
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
+int io_manager::update_epoll_event(eznetpp::net::if_socket* sock, bool write_flag)
+{
+  struct epoll_event ev;
+
+  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
+  if (write_flag) {
+    ev.events |= EPOLLOUT;
+  }
+  ev.data.ptr = sock;
+
+  return epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, sock->descriptor(), &ev);
+}
+
+
 int io_manager::loop(void)
 {
-  _num_of_loop_threads = _num_of_work_threads / 2;
-  if (eznetpp::event::event_dispatcher::instance().init(_num_of_work_threads - _num_of_loop_threads) == -1)
-  {
-    return -1;
-  }
-
   for (int i = 0; i < _num_of_loop_threads; ++i)
   {
     std::thread loop_th = std::thread(&io_manager::epoll_loop, this, i);
@@ -137,8 +142,8 @@ int io_manager::loop(void)
     _loop_threads_vec.push_back(std::move(loop_th));
   }
 
-  std::unique_lock<std::mutex> term_lk(_term_mutex);
   {
+    std::unique_lock<std::mutex> term_lk(_term_mutex);
     _term_cv.wait(term_lk);
   }
 
@@ -147,14 +152,18 @@ int io_manager::loop(void)
 
 void io_manager::stop(void)
 {
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "-> S");
+
   bClosed = true;
 
-  std::unique_lock<std::mutex> exit_lk(_exit_mutex);
-  {
-    while(_num_of_work_threads) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  while(_num_of_loop_threads) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
+    {
       // wait the signal from the work thread.
+      std::unique_lock<std::mutex> exit_lk(_exit_mutex);
       _exit_cv.wait(exit_lk);
     }
   }
@@ -164,10 +173,15 @@ void io_manager::stop(void)
     th.join();
   }
 
-  std::unique_lock<std::mutex> term_lk(_term_mutex);
   {
+    std::unique_lock<std::mutex> term_lk(_term_mutex);
     _term_cv.notify_one();
   }
+
+
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "<- E");
 }
 
 void io_manager::epoll_loop(int idx)
@@ -177,6 +191,9 @@ void io_manager::epoll_loop(int idx)
                          , "start read_loop(%d)"
                          , idx);
 
+  eznetpp::event::event_dispatcher evt_disp;
+
+  /*
   while (1)
   {
     if (bClosed)
@@ -184,7 +201,7 @@ void io_manager::epoll_loop(int idx)
       break;
     }
 
-    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 1);
+    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 1000);
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "changed_events : %d"
@@ -210,11 +227,17 @@ void io_manager::epoll_loop(int idx)
 
       if (_events[i].events & EPOLLIN)
       {
-        sock->recv();
+        if (sock->recv() == 0)
+        {
+          update_epoll_event(sock, false);
+        }
       }
       else if (_events[i].events & EPOLLOUT)
       {
-        sock->send();
+        if (sock->send() == 0)
+        {
+          update_epoll_event(sock, false);
+        }
       }
       else if (_events[i].events & EPOLLRDHUP)
       {
@@ -229,12 +252,18 @@ void io_manager::epoll_loop(int idx)
       }
     }
   }
+  */
 
-  std::unique_lock<std::mutex> exit_lk(_exit_mutex);
   {
+    std::unique_lock<std::mutex> exit_lk(_exit_mutex);
     --_num_of_loop_threads;
     _exit_cv.notify_one();
   }
+
+
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "<- E");
 }
 
 }  // namespace sys
