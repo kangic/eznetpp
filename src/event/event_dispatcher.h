@@ -35,7 +35,7 @@ class event_dispatcher
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
 
-  static void dispatch_event(const io_event& evt, const event_handler& handler);
+  static void dispatch_event(const io_event& evt, const if_event_handler* handler);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);

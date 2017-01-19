@@ -66,8 +66,8 @@ int udp_socket::send(void)
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
   {
     // step 1. check the send message vector's size
-    // if it isn't empty, start the loop statement to send the message. 
-    
+    // if it isn't empty, start the loop statement to send the message.
+
     while (!_sendmsgs_vec.empty())
     {
       // step 2. pop a message from the send message's vector
@@ -101,13 +101,13 @@ int udp_socket::send(void)
 
       if (ret > 0)
       {
-        eznetpp::event::event_dispatcher::instance().push_event(
-            new eznetpp::event::io_event(eznetpp::event::event_type::udp_sendto
-              , ret, this));
+        eznetpp::event::event_dispatcher::dispatch_event(
+            eznetpp::event::io_event(eznetpp::event::event_type::udp_sendto, ret)
+            , get_event_handler());
       }
     }
   } // lock_guard
-  
+
   return 0;
 }
 
@@ -156,9 +156,9 @@ int udp_socket::recv(void)
 
     // create peer info
     set_peer_info(inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-    eznetpp::event::event_dispatcher::instance().push_event(
-        new eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom
-          , len, std::move(data.assign(data, 0, len)), 0, this));
+    eznetpp::event::event_dispatcher::dispatch_event(
+        eznetpp::event::io_event(eznetpp::event::event_type::udp_recvfrom, len, std::move(data.assign(data, 0, len)), 0)
+        , get_event_handler());
   }
 
   return 0;
@@ -170,8 +170,8 @@ void udp_socket::close(void)
   _last_errno = errno;
   _sd = -1;
 
-  eznetpp::event::event_dispatcher::instance().push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, this));
+  eznetpp::event::event_dispatcher::dispatch_event(eznetpp::event::io_event(eznetpp::event::event_type::close, ret)
+      , get_event_handler());
 }
 
 int udp_socket::bind(int port)
@@ -179,7 +179,7 @@ int udp_socket::bind(int port)
   struct sockaddr_in server_addr;
   bzero(&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = htonl(INADDR_ANY); 
+  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   server_addr.sin_port = htons(port);
 
   int ret = ::bind(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));

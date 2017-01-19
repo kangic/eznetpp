@@ -28,8 +28,7 @@
 namespace eznetpp {
 namespace net {
 namespace udp {
-class udp_socket
-  : public eznetpp::net::if_socket
+class udp_socket : public eznetpp::net::if_socket
 {
  public:
   udp_socket(void);
@@ -39,7 +38,7 @@ class udp_socket
   void close(void);
 
  protected:
-  int recv(void); 
+  int recv(void);
   int send(void);
 
  private:

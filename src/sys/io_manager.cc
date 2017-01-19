@@ -57,7 +57,7 @@ int io_manager::init(int max_descs_cnt)
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll_create error(%d)"
                           , errno);
-  
+
     return errno;
   }
 
@@ -85,26 +85,32 @@ int io_manager::init(int max_descs_cnt)
 }
 
 int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
-      , eznetpp::event::event_handler* handler)
+      , eznetpp::event::if_event_handler* handler)
 {
   struct epoll_event ev;
 
   ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
 
-  return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
+  int ret = epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
+
+  if (ret != 0) {
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+        , __FILE__, __FUNCTION__, __LINE__
+        , "failed epoll_ctl() : %d"
+        , ret);
+
+    return ret;
+  }
+
+  sock->set_event_handler(handler);
+
+  return 0;
 }
 
 int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock)
 {
-  {
-    std::lock_guard<std::mutex> guard(_handlers_map_mutex);
-
-    if (_handlers_map.find(sock) == _handlers_map.end())
-      return false;
-
-    _handlers_map.erase(sock);
-  }
+  sock->set_event_handler(nullptr);
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }

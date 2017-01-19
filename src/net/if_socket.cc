@@ -90,7 +90,7 @@ int if_socket::send_bytes(const std::string& data, const std::string& ip, int po
     peer_addr peer_info;
     peer_info.ip = ip;
     peer_info.port = port;
-    _sendmsgs_vec.emplace_back(std::make_pair(std::move(data), std::move(peer_info))); 
+    _sendmsgs_vec.emplace_back(std::make_pair(std::move(data), std::move(peer_info)));
   }
 
   return 0;

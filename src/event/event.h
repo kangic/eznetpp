@@ -28,7 +28,7 @@
 namespace eznetpp {
 namespace event {
 
-  enum event_type { 
+  enum event_type {
     close = 0,
     tcp_accept,
     tcp_connect,
@@ -42,24 +42,20 @@ class io_event {
  public:
   io_event(void) = delete;
 
-  io_event(event_type type, eznetpp::net::if_socket* publisher) {
+  io_event(event_type type) {
    _type = type;
-   _publisher = publisher;
   }
 
-  io_event(event_type type, int result, eznetpp::net::if_socket* publisher) {
+  io_event(event_type type, int result) {
    _type = type;
    _result = result;
-   _publisher = publisher;
   }
 
-  io_event(event_type type, int result, const std::string& data
-      ,int opt_data, eznetpp::net::if_socket* publisher) {
+  io_event(event_type type, int result, const std::string& data, int opt_data) {
    _type = type;
    _result = result;
    _data = data;
    _opt_data = opt_data;
-   _publisher = publisher;
   }
 
   virtual ~io_event(void) = default;
@@ -68,14 +64,12 @@ class io_event {
   int result(void) { return _result; }
   const std::string& data(void) { return _data; }
   int opt_data(void) { return _opt_data; }
-  eznetpp::net::if_socket* publisher(void) { return _publisher; }
-  
+
  private:
   event_type _type = event_type::close;
   int _result = 0;
   std::string _data = "";
   int _opt_data = 0;
-  eznetpp::net::if_socket* _publisher = nullptr;
 };
 
 }  // namespace event

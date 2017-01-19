@@ -11,7 +11,7 @@ ${PROJECT_SOURCE_DIR}/net/tcp/tcp_socket.cc
 ${PROJECT_SOURCE_DIR}/net/udp/udp_socket.cc
 ${PROJECT_SOURCE_DIR}/sys/io_manager.cc
 ${PROJECT_SOURCE_DIR}/util/logger.cc
-)
+        event/event_handler.h)
 
 set(EZNETPP_VERSION_MAJOR 0)
 set(EZNETPP_VERSION_MINOR 1)

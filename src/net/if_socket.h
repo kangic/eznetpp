@@ -22,13 +22,16 @@
 #ifndef INCLUDE_SOCKET_H_
 #define INCLUDE_SOCKET_H_
 
+#include <event/if_event_handler.h>
 #include "eznetpp.h"
+
 
 /*
  * Socket Interface Class
  */
 namespace eznetpp {
 namespace net {
+
 class if_socket
 {
  public:
@@ -39,8 +42,13 @@ class if_socket
   enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
 
   // socket descriptor
-  int descriptor() const { return _sd; }
   void descriptor(int sd) { _sd = sd; }
+  int descriptor() const { return _sd; }
+
+  // event handler
+  void set_event_handler(eznetpp::event::if_event_handler* handler) { _event_handler = handler; }
+  eznetpp::event::if_event_handler* get_event_handler() { return _event_handler; }
+
 
   socket_domain domain();
   socket_type type();
@@ -74,6 +82,9 @@ class if_socket
   typedef std::pair<std::string, peer_addr> msg_pair;
   std::vector<msg_pair> _sendmsgs_vec;
   std::mutex _sendmsgs_mtx;
+
+  // event handler
+  eznetpp::event::if_event_handler* _event_handler;
 };
 
 }  // namespace net

@@ -66,9 +66,9 @@ int tcp_socket::connect(const std::string& ip, int port)
   // connect to server(on_connect event)
   int ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-  evt_dispatcher.push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect
-        , ret, ip, port, this));
+  eznetpp::event::event_dispatcher::dispatch_event(
+      eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect, ret, ip, port)
+      , get_event_handler());
 
   return 0;
 }
@@ -83,7 +83,7 @@ int tcp_socket::send()
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
   {
     // step 1. check the send message vector's size
-    // if it isn't empty, start the loop statement to send the message. 
+    // if it isn't empty, start the loop statement to send the message.
     while (!_sendmsgs_vec.empty()) {
       // step 2. pop a message from the send message's vector
       std::string msg = _sendmsgs_vec[0].first;
@@ -110,9 +110,9 @@ int tcp_socket::send()
 
       if (ret > 0)
       {
-        evt_dispatcher.push_event(
-            new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send
-              , ret, this));
+        eznetpp::event::event_dispatcher::dispatch_event(
+            eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, ret)
+            , get_event_handler());
       }
     }
   } // lock_guard
@@ -159,9 +159,9 @@ int tcp_socket::recv()
       read_again = 1;
     }
 
-    evt_dispatcher.push_event(
-        new eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len
-          , std::move(data.assign(data, 0, len)), 0, this));
+    eznetpp::event::event_dispatcher::dispatch_event(
+        eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len, std::move(data.assign(data, 0, len)), 0)
+        , get_event_handler());
   }
 
   return 0;
@@ -173,8 +173,9 @@ void tcp_socket::close()
   _last_errno = errno;
   _sd = -1;
 
-  eznetpp::event::event_dispatcher.push_event(
-      new eznetpp::event::io_event(eznetpp::event::event_type::close, ret, this));
+  eznetpp::event::event_dispatcher::dispatch_event(
+      eznetpp::event::io_event(eznetpp::event::event_type::close, ret)
+      , get_event_handler());
 }
 
 }  // namespace tcp

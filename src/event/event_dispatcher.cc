@@ -36,7 +36,7 @@ event_dispatcher::~event_dispatcher(void)
 {
 }
 
-void event_dispatcher::dispatch_event(const io_event& evt, const event_handler& handler)
+void event_dispatcher::dispatch_event(const io_event& evt, const if_event_handler* handler)
 {
 
 }
