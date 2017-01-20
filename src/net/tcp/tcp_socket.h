@@ -39,8 +39,9 @@ class tcp_socket : public eznetpp::net::if_socket
   void close();
 
  protected:
-  int recv();
-  int send();
+  eznetpp::event::io_event* _recv();
+  eznetpp::event::io_event* _send();
+  eznetpp::event::io_event* _close();
 };
 
 }  // namespace tcp

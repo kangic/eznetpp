@@ -20,7 +20,6 @@ class tcp_socket_event_handler : public event::if_event_handler
   };
   virtual ~tcp_socket_event_handler(void) = default;
 
-  virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len) = 0;
   virtual void on_send(unsigned int len) = 0;
   virtual void on_close(int err_no) = 0;
@@ -45,7 +44,6 @@ class tcp_acceptor_event_handler : public event::if_event_handler
   virtual void on_close(int err_no) = 0;
 
  protected:
-  void on_connect(int err_no) final {};
   void on_recv(const std::string& msg, int len) final {};
   void on_send(unsigned int len) final {};
   void on_recvfrom(const std::string& msg, int len
@@ -69,7 +67,6 @@ class udp_socket_event_handler : public event::if_event_handler
 
  protected:
   void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) {};
-  void on_connect(int err_no) final {};
   void on_recv(const std::string& msg, int len) final {};
   void on_send(unsigned int len) final {};
 };

@@ -197,9 +197,8 @@ void io_manager::epoll_loop(int idx)
                          , "start read_loop(%d)"
                          , idx);
 
-  eznetpp::event::event_dispatcher evt_disp;
+  eznetpp::event::event_dispatcher evt_dispatcher;
 
-  /*
   while (1)
   {
     if (bClosed)
@@ -231,34 +230,49 @@ void io_manager::epoll_loop(int idx)
                           , "changed descriptor : %d"
                           , sock->descriptor());
 
+      eznetpp::event::io_event* evt = nullptr;
+
       if (_events[i].events & EPOLLIN)
       {
-        if (sock->recv() == 0)
-        {
-          update_epoll_event(sock, false);
-        }
+        printf("epollin\n");
+        evt = sock->_recv();
       }
       else if (_events[i].events & EPOLLOUT)
       {
-        if (sock->send() == 0)
-        {
-          update_epoll_event(sock, false);
-        }
+        evt = sock->_send();
       }
       else if (_events[i].events & EPOLLRDHUP)
       {
         // half close by the remote connection
-        sock->close();
+        evt = sock->_close();
+
+        if (sock != nullptr) {
+          delete sock;
+          sock = nullptr;
+        }
       }
       else if ((_events[i].events & EPOLLHUP)
           || (_events[i].events & EPOLLERR)
           || !(_events[i].events & EPOLLIN))
       {
-        sock->close();
+        evt = sock->_close();
+
+        if (sock != nullptr) {
+          delete sock;
+          sock = nullptr;
+        }
+      }
+
+      update_epoll_event(sock, false);
+      if (evt != nullptr)
+      {
+        evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+
+        delete evt;
+        evt = nullptr;
       }
     }
   }
-  */
 
   {
     std::unique_lock<std::mutex> exit_lk(_exit_mutex);

@@ -38,10 +38,9 @@ class tcp_acceptor : public eznetpp::net::tcp::tcp_socket
   virtual ~tcp_acceptor();
 
   int open(int port, int backlog = 5);
-  void close();
 
  protected:
-  int recv();
+  eznetpp::event::io_event* _recv();
 
  private:
   int bind_and_listen(int port, int backlog);

@@ -38,8 +38,9 @@ class udp_socket : public eznetpp::net::if_socket
   void close(void);
 
  protected:
-  int recv(void);
-  int send(void);
+  eznetpp::event::io_event* _recv();
+  eznetpp::event::io_event* _send();
+  eznetpp::event::io_event* _close();
 
  private:
   int bind(int port);

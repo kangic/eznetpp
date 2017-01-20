@@ -23,9 +23,9 @@
 #define INCLUDE_IO_EVENT_H_
 
 #include "eznetpp.h"
-#include "net/if_socket.h"
 
 namespace eznetpp {
+namespace net { class if_socket; }
 namespace event {
 
   enum event_type {
@@ -58,7 +58,7 @@ class io_event {
    _opt_data = opt_data;
   }
 
-  virtual ~io_event(void) = default;
+  virtual ~io_event(void) {};
 
   event_type type(void) { return _type; }
   int result(void) { return _result; }

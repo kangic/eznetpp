@@ -36,9 +36,44 @@ event_dispatcher::~event_dispatcher(void)
 {
 }
 
-void event_dispatcher::dispatch_event(const io_event& evt, const if_event_handler* handler)
+void event_dispatcher::dispatch_event(io_event* evt, if_event_handler* handler)
 {
+  switch (evt->type())
+  {
+    case event::event_type::close:
+    {
+      // Delete the socket descriptor from epoll descriptor automatically
+      // when the socket is closed.
+      // Call the on_close event in clear_resources() function.
+      handler->on_close(0);
 
+      break;
+    }
+    case event::event_type::tcp_accept:
+    {
+      int sock_fd = evt->result();
+
+      auto tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
+      tcp_sock->set_peer_info(std::move(evt->data()), evt->opt_data());
+      tcp_sock->set_nonblocking();
+      tcp_sock->set_tcpnodelay();
+      handler->on_accept(tcp_sock, 0);
+
+      break;
+    }
+    case event::event_type::tcp_recv:
+    {
+      handler->on_recv(evt->data(), evt->result());
+
+      break;
+    }
+    case event::event_type::tcp_send:
+    {
+      handler->on_send(evt->result());
+
+      break;
+    }
+  }
 }
 /*
 void event_dispatcher::dispatch_event(const io_event& evt, const event_handler& handler)

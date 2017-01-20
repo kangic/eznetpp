@@ -36,6 +36,7 @@ tcp_socket::tcp_socket()
 
   // TODO : implement for PF_INET6
   _sd = ::socket(_sock_domain, _sock_type, 0);
+  _desc = desc_tcp_socket;
 }
 
 tcp_socket::tcp_socket(int sd)
@@ -43,6 +44,7 @@ tcp_socket::tcp_socket(int sd)
   _sock_domain = socket_domain::inet_v4;
   _sock_type = socket_type::tcp;
   _sd = sd;
+  _desc = desc_tcp_socket;
 }
 
 tcp_socket::~tcp_socket() {}
@@ -66,20 +68,22 @@ int tcp_socket::connect(const std::string& ip, int port)
   // connect to server(on_connect event)
   int ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-  eznetpp::event::event_dispatcher::dispatch_event(
-      eznetpp::event::io_event(eznetpp::event::event_type::tcp_connect, ret, ip, port)
-      , get_event_handler());
+  if (ret == 0)
+  {
+    set_peer_info(ip, port);
+  }
 
-  return 0;
+  return ret;
 }
 
-int tcp_socket::send()
+eznetpp::event::io_event* tcp_socket::_send()
 {
   if (_sd == -1)
   {
-    return -1;
+    return nullptr;
   }
 
+  int send_bytes = 0;
   std::lock_guard<std::mutex> lock(_sendmsgs_mtx);
   {
     // step 1. check the send message vector's size
@@ -90,7 +94,7 @@ int tcp_socket::send()
       _sendmsgs_vec.erase(_sendmsgs_vec.begin());
 
       // step 3. send the message and check an error case
-      int ret = ::send(_sd, msg.c_str(), msg.length(), 0);
+      int ret = (int)::send(_sd, msg.c_str(), msg.length(), 0);
 
       if (ret == -1)
       {
@@ -105,77 +109,74 @@ int tcp_socket::send()
             , __FILE__, __FUNCTION__, __LINE__
             , "send() error(%d)", errno);
         close();
-        return -1;
+        return nullptr;
       }
 
       if (ret > 0)
       {
-        eznetpp::event::event_dispatcher::dispatch_event(
-            eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, ret)
-            , get_event_handler());
+        send_bytes += ret;
+
       }
     }
   } // lock_guard
 
-  return 0;
+  return new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, send_bytes);
 }
 
-int tcp_socket::recv()
+eznetpp::event::io_event* tcp_socket::_recv()
 {
+  printf("tcp_socket _recv()\n");
   if (_sd == -1)
   {
-    return -1;
+    return nullptr;
   }
 
-  bool read_again = 1;
-  while (read_again)
+  std::string data(eznetpp::opt::max_transfer_bytes, '\0');
+  int len = (int)::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
+  _last_errno = errno;
+
+  if (len == 0)
   {
-    std::string data(eznetpp::opt::max_transfer_bytes, '\0');
-    int len = ::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
-    _last_errno = errno;
-    read_again = 0;
-
-    if (len == 0)
+    close();
+    return nullptr;
+  }
+  else if (len == -1)
+  {
+    if (errno == EAGAIN || errno == EWOULDBLOCK)
     {
-      close();
-      return -1;
-    }
-    else if (len == -1)
-    {
-      if (errno == EAGAIN || errno == EWOULDBLOCK)
-      {
-        break;
-      }
-
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-          , __FILE__, __FUNCTION__, __LINE__
-          , "recv() error(%d)", errno);
-      close();
-      return -1;
+      return nullptr;
     }
 
-    if (len == eznetpp::opt::max_transfer_bytes)
-    {
-      read_again = 1;
-    }
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+        , __FILE__, __FUNCTION__, __LINE__
+        , "recv() error(%d)", errno);
 
-    eznetpp::event::event_dispatcher::dispatch_event(
-        eznetpp::event::io_event(eznetpp::event::event_type::tcp_recv, len, std::move(data.assign(data, 0, len)), 0)
-        , get_event_handler());
+    close();
+    return nullptr;
   }
 
-  return 0;
+  return new eznetpp::event::io_event(
+      eznetpp::event::event_type::tcp_recv, len, std::move(data.assign(data, 0, len)), 0);
 }
 
-void tcp_socket::close()
+eznetpp::event::io_event* tcp_socket::_close()
 {
   int ret = ::close(_sd);
   _last_errno = errno;
   _sd = -1;
 
-  eznetpp::event::event_dispatcher::dispatch_event(
-      eznetpp::event::io_event(eznetpp::event::event_type::close, ret)
-      , get_event_handler());
+  return new eznetpp::event::io_event(eznetpp::event::event_type::close, ret);
+}
+
+void tcp_socket::close()
+{
+  eznetpp::event::io_event* evt = _close();
+  if (evt != nullptr)
+  {
+    delete evt;
+  }
+
+  get_event_handler()->on_close(0);
 }
 
 }  // namespace tcp

@@ -43,7 +43,6 @@ class if_event_handler
   event_handler_type type() { return _handler_type; };
 
   virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
-  virtual void on_connect(int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len) = 0;
   virtual void on_send(unsigned int len) = 0;
   virtual void on_recvfrom(const std::string& msg, int len

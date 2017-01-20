@@ -22,6 +22,7 @@
 #ifndef INCLUDE_SOCKET_H_
 #define INCLUDE_SOCKET_H_
 
+#include <event/event.h>
 #include <event/if_event_handler.h>
 #include "eznetpp.h"
 
@@ -38,20 +39,41 @@ class if_socket
   if_socket();
   virtual ~if_socket();
 
-  enum socket_domain { inet_v4 = PF_INET, inet_v6 = PF_INET6, unix = PF_LOCAL };
-  enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
+  enum socket_domain
+  {
+    inet_v4 = PF_INET,
+    inet_v6 = PF_INET6,
+    unix = PF_LOCAL
+  };
+
+  enum socket_type
+  {
+    tcp = SOCK_STREAM,
+    udp = SOCK_DGRAM
+  };
 
   // socket descriptor
   void descriptor(int sd) { _sd = sd; }
   int descriptor() const { return _sd; }
 
+  socket_domain domain();
+  socket_type type();
+
+  int last_error() { return _last_errno; }
+
+  // for user
+  int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
+  virtual void close() = 0;
+
   // event handler
   void set_event_handler(eznetpp::event::if_event_handler* handler) { _event_handler = handler; }
   eznetpp::event::if_event_handler* get_event_handler() { return _event_handler; }
 
-
-  socket_domain domain();
-  socket_type type();
+  // Below functions will implemented by each inherited class
+  // (ex : acceptor, connector)
+  virtual eznetpp::event::io_event* _recv() = 0;
+  virtual eznetpp::event::io_event* _send() = 0;
+  virtual eznetpp::event::io_event* _close() = 0;
 
   void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
@@ -60,18 +82,15 @@ class if_socket
   int set_tcpnodelay();
   int set_reuseaddr();
 
-  int last_error() { return _last_errno; }
-
-  // for user
-  int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
-  virtual void close() = 0;
-
-  // Below functions will implemented by each inherited class
-  // (ex : acceptor, connector)
-  virtual int recv() = 0;
-  virtual int send() = 0;
-
  protected:
+  typedef enum _socket_impl_desc
+  {
+    desc_tcp_acceptor = 0,
+    desc_tcp_socket = 1,
+    desc_udp_socket = 2
+  } socket_impl_desc;
+
+  // variables
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;
@@ -85,6 +104,9 @@ class if_socket
 
   // event handler
   eznetpp::event::if_event_handler* _event_handler;
+
+  // socket's description
+  socket_impl_desc _desc;
 };
 
 }  // namespace net
