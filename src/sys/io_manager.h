@@ -54,7 +54,7 @@ class io_manager
   int loop(void);
   void stop(void);
 
-  static int update_epoll_event(eznetpp::net::if_socket* sock, bool write_flag);
+  static int update_epoll_event(eznetpp::net::if_socket* sock);
 
  protected:
   /*

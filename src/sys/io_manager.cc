@@ -115,14 +115,11 @@ int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock)
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
-int io_manager::update_epoll_event(eznetpp::net::if_socket* sock, bool write_flag)
+int io_manager::update_epoll_event(eznetpp::net::if_socket* sock)
 {
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
-  if (write_flag) {
-    ev.events |= EPOLLOUT;
-  }
+  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
 
   return epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, sock->descriptor(), &ev);
@@ -263,7 +260,7 @@ void io_manager::epoll_loop(int idx)
         }
       }
 
-      update_epoll_event(sock, false);
+      update_epoll_event(sock);
       if (evt != nullptr)
       {
         evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
