@@ -40,7 +40,7 @@ class tcp_acceptor : public eznetpp::net::tcp::tcp_socket
   int open(int port, int backlog = 5);
 
  protected:
-  eznetpp::event::io_event* _recv();
+  eznetpp::event::io_event* _recv(int& ret);
 
  private:
   int bind_and_listen(int port, int backlog);

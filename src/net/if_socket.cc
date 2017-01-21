@@ -30,16 +30,6 @@ if_socket::if_socket() {}
 
 if_socket::~if_socket() {}
 
-if_socket::socket_domain if_socket::domain()
-{
-  return _sock_domain;
-}
-
-if_socket::socket_type if_socket::type()
-{
-  return _sock_type;
-}
-
 void if_socket::set_peer_info(const std::string& ip, int port)
 {
   _peer.ip = ip;

@@ -231,8 +231,38 @@ void io_manager::epoll_loop(int idx)
 
       if (_events[i].events & EPOLLIN)
       {
-        printf("epollin\n");
-        evt = sock->_recv();
+        int ret;
+        bool read_again = true;
+        while (read_again)
+        {
+          evt = sock->_recv(ret);
+          eznetpp::event::if_event_handler* handler = sock->get_event_handler();
+          read_again = false;
+
+          if (handler->type() == eznetpp::event::if_event_handler::event_handler_type::tcp_acceptor)
+          {
+            if (ret > 0)
+            {
+              read_again = true;
+            }
+          }
+          else
+          {
+            if (ret == eznetpp::opt::max_transfer_bytes)
+            {
+              read_again = true;
+            }
+          }
+
+          if (read_again && evt != nullptr)
+          {
+            evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+
+            delete evt;
+            evt = nullptr;
+          }
+        }
+        //evt = sock->_recv(ret);
       }
       else if (_events[i].events & EPOLLOUT)
       {

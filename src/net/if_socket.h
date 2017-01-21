@@ -52,12 +52,21 @@ class if_socket
     udp = SOCK_DGRAM
   };
 
+  enum socket_impl_desc
+  {
+    desc_tcp_acceptor = 0,
+    desc_tcp_socket = 1,
+    desc_udp_socket = 2
+  };
+
   // socket descriptor
   void descriptor(int sd) { _sd = sd; }
   int descriptor() const { return _sd; }
 
-  socket_domain domain();
-  socket_type type();
+  socket_domain domain() { return _sock_domain; }
+  socket_type type() { return _sock_type; }
+
+  socket_impl_desc desc() { return _desc; }
 
   int last_error() { return _last_errno; }
 
@@ -71,7 +80,7 @@ class if_socket
 
   // Below functions will implemented by each inherited class
   // (ex : acceptor, connector)
-  virtual eznetpp::event::io_event* _recv() = 0;
+  virtual eznetpp::event::io_event* _recv(int& ret) = 0;
   virtual eznetpp::event::io_event* _send() = 0;
   virtual eznetpp::event::io_event* _close() = 0;
 
@@ -83,13 +92,6 @@ class if_socket
   int set_reuseaddr();
 
  protected:
-  typedef enum _socket_impl_desc
-  {
-    desc_tcp_acceptor = 0,
-    desc_tcp_socket = 1,
-    desc_udp_socket = 2
-  } socket_impl_desc;
-
   // variables
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;

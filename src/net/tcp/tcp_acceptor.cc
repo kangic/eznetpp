@@ -50,7 +50,7 @@ int tcp_acceptor::open(int port, int backlog)
   return 0;
 }
 
-eznetpp::event::io_event* tcp_acceptor::_recv()
+eznetpp::event::io_event* tcp_acceptor::_recv(int &ret)
 {
   int sock_fd;
   struct sockaddr_in client_addr;
@@ -58,6 +58,8 @@ eznetpp::event::io_event* tcp_acceptor::_recv()
 
   sock_fd = ::accept(_sd, (struct sockaddr *)&client_addr, &client_addr_len);
   _last_errno = errno;
+
+  ret = sock_fd;
 
   if (sock_fd == -1)
   {

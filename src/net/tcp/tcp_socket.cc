@@ -115,7 +115,6 @@ eznetpp::event::io_event* tcp_socket::_send()
       if (ret > 0)
       {
         send_bytes += ret;
-
       }
     }
   } // lock_guard
@@ -123,9 +122,8 @@ eznetpp::event::io_event* tcp_socket::_send()
   return new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, send_bytes);
 }
 
-eznetpp::event::io_event* tcp_socket::_recv()
+eznetpp::event::io_event* tcp_socket::_recv(int& ret)
 {
-  printf("tcp_socket _recv()\n");
   if (_sd == -1)
   {
     return nullptr;
@@ -134,6 +132,8 @@ eznetpp::event::io_event* tcp_socket::_recv()
   std::string data(eznetpp::opt::max_transfer_bytes, '\0');
   int len = (int)::recv(_sd, &data[0], eznetpp::opt::max_transfer_bytes, 0);
   _last_errno = errno;
+
+  ret = len;
 
   if (len == 0)
   {

@@ -114,7 +114,7 @@ eznetpp::event::io_event* udp_socket::_send(void)
   return 0;
 }
 
-eznetpp::event::io_event* udp_socket::_recv(void)
+eznetpp::event::io_event* udp_socket::_recv(int& ret)
 {
   if (_sd == -1)
   {
