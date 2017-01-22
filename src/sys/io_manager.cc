@@ -34,13 +34,7 @@ io_manager::io_manager(bool log_enable)
 
 io_manager::~io_manager(void)
 {
-  ::close(_epoll_fd);
 
-  if (_events != nullptr)
-  {
-    delete _events;
-    _events = nullptr;
-  }
 }
 
 /*
@@ -150,6 +144,14 @@ void io_manager::stop(void)
                          , __FILE__, __FUNCTION__, __LINE__
                          , "-> S");
 
+  ::close(_epoll_fd);
+
+  if (_events != nullptr)
+  {
+    delete _events;
+    _events = nullptr;
+  }
+
   bClosed = true;
   if (_loop_th.joinable())
   {
@@ -192,7 +194,6 @@ void io_manager::epoll_loop(void)
     }
 
     eznetpp::event::io_event* evt = nullptr;
-    bool out_flag = false;    // it is a flag to EPOLLOUT
     for (int i = 0; i < changed_events; ++i)
     {
       auto sock = static_cast<eznetpp::net::if_socket*>(_events[i].data.ptr);
@@ -241,11 +242,6 @@ void io_manager::epoll_loop(void)
       else if (_events[i].events & EPOLLOUT)
       {
         evt = sock->_send();
-
-        if (evt != nullptr)
-        {
-          out_flag = true;
-        }
       }
       else if ((_events[i].events & EPOLLHUP)
                || (_events[i].events & EPOLLRDHUP)  // half close by the remote connection
