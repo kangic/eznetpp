@@ -24,7 +24,7 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-eznetpp::sys::io_manager g_io_mgr(4, true);
+eznetpp::sys::io_manager g_io_mgr(false);
 
 void sig_handler(int signum) {
   g_io_mgr.stop();
