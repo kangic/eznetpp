@@ -19,35 +19,43 @@
  * THE SOFTWARE.
  */
 
-#ifndef INCLUDE_UDP_SOCKET_H_
-#define INCLUDE_UDP_SOCKET_H_
+#ifndef INCLUDE_IF_EVENT_HANDLER_H_
+#define INCLUDE_IF_EVENT_HANDLER_H_
 
 #include "eznetpp.h"
-#include "net/if_socket.h"
 
 namespace eznetpp {
-namespace net {
-namespace udp {
-class udp_socket : public eznetpp::net::if_socket
+namespace net { namespace tcp { class tcp_socket; } }
+namespace event {
+
+class if_event_handler
 {
  public:
-  udp_socket(void);
-  virtual ~udp_socket(void);
+  if_event_handler(void) = default;
+  virtual ~if_event_handler(void) = default;
 
-  int open(int port);
-  void close(void);
+  enum event_handler_type
+  {
+    tcp_socket = 0,
+    tcp_acceptor,
+    udp_socket,
+  };
+  event_handler_type type() { return _handler_type; };
+
+  virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
+  virtual void on_recv(const std::string& msg, int len) = 0;
+  virtual void on_send(unsigned int len) = 0;
+  virtual void on_recvfrom(const std::string& msg, int len
+      , const std::string& peer_ip, int peer_port) = 0;
+  virtual void on_sendto(unsigned int len) = 0;
+  virtual void on_close(int err_no) = 0;
 
  protected:
-  eznetpp::event::io_event* _recv(int& ret);
-  eznetpp::event::io_event* _send();
-  eznetpp::event::io_event* _close();
-
- private:
-  int bind(int port);
+  event_handler_type _handler_type;
 };
 
-}  // namespace udp
-}  // namespace net
+
+}  // namespace event
 }  // namespace eznetpp
 
-#endif  // INCLUDE_UDP_SOCKET_H_
+#endif  // INCLUDE_IF_EVENT_HANDLER_H_

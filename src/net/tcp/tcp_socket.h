@@ -22,24 +22,26 @@
 #ifndef INCLUDE_TCP_SOCKET_H_
 #define INCLUDE_TCP_SOCKET_H_
 
+#include <net/if_socket.h>
 #include "eznetpp.h"
-#include "net/if_socket.h"
 
 namespace eznetpp {
 namespace net {
 namespace tcp {
-class tcp_socket : public eznetpp::net::if_socket {
+class tcp_socket : public eznetpp::net::if_socket
+{
  public:
-  tcp_socket(void);
+  tcp_socket();
   tcp_socket(int sd);
-  virtual ~tcp_socket(void);
+  virtual ~tcp_socket();
 
   int connect(const std::string& ip, int port);
-  void close(void);
+  void close();
 
  protected:
-  void recv(void); 
-  void send(void);
+  eznetpp::event::io_event* _recv(int& ret);
+  eznetpp::event::io_event* _send();
+  eznetpp::event::io_event* _close();
 };
 
 }  // namespace tcp

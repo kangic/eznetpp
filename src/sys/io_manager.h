@@ -28,13 +28,14 @@
 
 namespace eznetpp {
 namespace sys {
-class io_manager {
+class io_manager
+{
  public:
-  io_manager(int num_of_disp_threads = 1, bool log_enable = false);
+  io_manager(bool log_enable = false);
   virtual ~io_manager(void);
 
   /*
-   * After the class declaration, must be called this function for preparing 
+   * After the class declaration, must be called this function for preparing
    * to work epoll* functions.
    */
   int init(int max_descs_cnt = 1024); // TODO(kangic) : define the value
@@ -44,16 +45,16 @@ class io_manager {
    * event.
    */
   int register_socket_event_handler(eznetpp::net::if_socket* sock
-      , eznetpp::event::event_handler* handler);
+      , eznetpp::event::if_event_handler* handler);
   int deregister_socket_event_handler(eznetpp::net::if_socket* sock);
-  
+
   /*
    * Create the read_loop thread in this function.
    */
   int loop(void);
   void stop(void);
 
-  static int _epoll_fd;
+  static int update_epoll_event(eznetpp::net::if_socket* sock);
 
  protected:
   /*
@@ -61,18 +62,19 @@ class io_manager {
    * If exists a changed descriptor, read data and pass to event_dispatcher for
    * queueing.
    */
-  void epoll_loop(void);
- 
+  void epoll_loop();
+
  private:
+  static int _epoll_fd;
   struct epoll_event* _events = nullptr;
   int _max_descs_cnt = 1024;
-  int _num_of_disp_threads = 1;
 
   std::thread _loop_th;
 
   // for exiting thread
   bool bClosed = false;
-  std::mutex _exit_mutex;
+
+  DISALLOW_COPY_AND_ASSIGN(io_manager);
 };
 
 }  // namespace sys

@@ -22,45 +22,47 @@
 #include "io_manager.h"
 #include "event/event_dispatcher.h"
 
-
 namespace eznetpp {
 namespace sys {
 
 int io_manager::_epoll_fd = -1;
 
-io_manager::io_manager(int num_of_disp_threads, bool log_enable) {
-  _num_of_disp_threads = num_of_disp_threads;
+io_manager::io_manager(bool log_enable)
+{
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
-io_manager::~io_manager(void) {
-  {
-    std::lock_guard<std::mutex> lk(_exit_mutex);
-    bClosed = true;
-  }
-
+io_manager::~io_manager(void)
+{
   ::close(_epoll_fd);
 
-  eznetpp::event::event_dispatcher::instance().release();
+  if (_events != nullptr)
+  {
+    delete _events;
+    _events = nullptr;
+  }
 }
 
 /*
  * create epoll file descriptor and events
  */
-int io_manager::init(int max_descs_cnt) {
+int io_manager::init(int max_descs_cnt)
+{
   // create epoll fd and event structures
   _epoll_fd = epoll_create(max_descs_cnt);
-  if (_epoll_fd == -1) {
+  if (_epoll_fd == -1)
+  {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll_create error(%d)"
                           , errno);
-  
+
     return errno;
   }
 
   _events = new epoll_event[max_descs_cnt];
-  if (_events == nullptr) {
+  if (_events == nullptr)
+  {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
                           , __FILE__, __FUNCTION__, __LINE__
                           , "failed to create events(%d)"
@@ -79,75 +81,107 @@ int io_manager::init(int max_descs_cnt) {
   signal(SIGPIPE, SIG_IGN);
 
   return 0;
-
 }
 
 int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
-      , eznetpp::event::event_handler* handler) {
-  // Find the socket class in the event_dispatcher's handlers map to check
-  // to register already.
-  if (!eznetpp::event::event_dispatcher::instance().register_socket_event_handler(sock, handler)) {
-    return -1;
-  }
-
+      , eznetpp::event::if_event_handler* handler)
+{
   struct epoll_event ev;
 
-  ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
 
-  return epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
+  int ret = epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, sock->descriptor(), &ev);
+
+  if (ret != 0) {
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+        , __FILE__, __FUNCTION__, __LINE__
+        , "failed epoll_ctl() : %d"
+        , ret);
+
+    return ret;
+  }
+
+  sock->set_event_handler(handler);
+
+  return 0;
 }
 
-int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock) {
-  eznetpp::event::event_dispatcher::instance().deregister_socket_event_handler(sock);
+int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock)
+{
+  sock->set_event_handler(nullptr);
+
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
-int io_manager::loop(void) {
-  if (eznetpp::event::event_dispatcher::instance().init(_num_of_disp_threads) == -1) {
-    return -1;
-  }
+int io_manager::update_epoll_event(eznetpp::net::if_socket* sock)
+{
+  struct epoll_event ev;
 
+  ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
+  ev.data.ptr = sock;
+
+  return epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, sock->descriptor(), &ev);
+}
+
+
+int io_manager::loop(void)
+{
   _loop_th = std::thread(&io_manager::epoll_loop, this);
 
-  if (!_loop_th.joinable()) {
+  if (!_loop_th.joinable())
+  {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-                           , __FILE__, __FUNCTION__, __LINE__
-                           , "failed to create read thread(%d)"
-                           , errno);
+        , __FILE__, __FUNCTION__, __LINE__
+        , "failed to create epoll_loop thread(%d)"
+        , errno);
+
     return -1;
   }
-
 
   _loop_th.join();
 
   return 0;
 }
 
-void io_manager::stop(void) {
-  _loop_th.detach();
-}
-
-void io_manager::epoll_loop(void) {
+void io_manager::stop(void)
+{
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start read_loop");
+                         , "-> S");
 
-  while (1) {
+  bClosed = true;
+
+  _loop_th.detach();
+
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "<- E");
+}
+
+void io_manager::epoll_loop(void)
+{
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "start epoll_loop");
+
+  eznetpp::event::event_dispatcher evt_dispatcher;
+
+  while (1)
+  {
+    if (bClosed)
     {
-      std::lock_guard<std::mutex> lk(_exit_mutex);
-      if (bClosed) {
-        break;
-      }
+      break;
     }
 
-    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, -1);
+    int changed_events = epoll_wait(_epoll_fd, _events, _max_descs_cnt, 1000);
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "changed_events : %d"
                           , changed_events);
 
-    if (changed_events < 0) {
+    if (changed_events < 0)
+    {
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                           , __FILE__, __FUNCTION__, __LINE__
                           , "epoll failed");
@@ -155,7 +189,8 @@ void io_manager::epoll_loop(void) {
       continue;
     }
 
-    for (int i = 0; i < changed_events; ++i) {
+    for (int i = 0; i < changed_events; ++i)
+    {
       auto sock = static_cast<eznetpp::net::if_socket*>(_events[i].data.ptr);
 
       eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
@@ -163,20 +198,83 @@ void io_manager::epoll_loop(void) {
                           , "changed descriptor : %d"
                           , sock->descriptor());
 
-      if (_events[i].events & EPOLLIN) {
-        sock->recv();
-      } else if (_events[i].events & EPOLLOUT) {
-        sock->send();
-      } else if (_events[i].events & EPOLLRDHUP) {
+      eznetpp::event::io_event* evt = nullptr;
+
+      if (_events[i].events & EPOLLIN)
+      {
+        int ret;
+        bool read_again = true;
+        while (read_again)
+        {
+          evt = sock->_recv(ret);
+          eznetpp::event::if_event_handler* handler = sock->get_event_handler();
+          read_again = false;
+
+          if (handler->type() == eznetpp::event::if_event_handler::event_handler_type::tcp_acceptor)
+          {
+            if (ret > 0)
+            {
+              read_again = true;
+            }
+          }
+          else
+          {
+            if (ret == eznetpp::opt::max_transfer_bytes)
+            {
+              read_again = true;
+            }
+          }
+
+          if (read_again && evt != nullptr)
+          {
+            evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+
+            delete evt;
+            evt = nullptr;
+          }
+        }
+        //evt = sock->_recv(ret);
+      }
+      else if (_events[i].events & EPOLLOUT)
+      {
+        evt = sock->_send();
+      }
+      else if (_events[i].events & EPOLLRDHUP)
+      {
         // half close by the remote connection
-        sock->close();
-      } else if ((_events[i].events & EPOLLHUP)
+        evt = sock->_close();
+
+        if (sock != nullptr) {
+          delete sock;
+          sock = nullptr;
+        }
+      }
+      else if ((_events[i].events & EPOLLHUP)
           || (_events[i].events & EPOLLERR)
-          || !(_events[i].events & EPOLLIN)) {
-        sock->close();
+          || !(_events[i].events & EPOLLIN))
+      {
+        evt = sock->_close();
+
+        if (sock != nullptr) {
+          delete sock;
+          sock = nullptr;
+        }
+      }
+
+      update_epoll_event(sock);
+      if (evt != nullptr)
+      {
+        evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+
+        delete evt;
+        evt = nullptr;
       }
     }
   }
+
+  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
+                         , __FILE__, __FUNCTION__, __LINE__
+                         , "<- E");
 }
 
 }  // namespace sys

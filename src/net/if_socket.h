@@ -22,49 +22,77 @@
 #ifndef INCLUDE_SOCKET_H_
 #define INCLUDE_SOCKET_H_
 
+#include <event/event.h>
+#include <event/if_event_handler.h>
 #include "eznetpp.h"
+
 
 /*
  * Socket Interface Class
  */
 namespace eznetpp {
 namespace net {
-class if_socket {
- public:
-  if_socket(void);
-  virtual ~if_socket(void);
 
-  enum socket_domain { inet_v4 = PF_INET, inet_v6 = PF_INET6, unix = PF_LOCAL };
-  enum socket_type { tcp = SOCK_STREAM, udp = SOCK_DGRAM };
+class if_socket
+{
+ public:
+  if_socket();
+  virtual ~if_socket();
+
+  enum socket_domain
+  {
+    inet_v4 = PF_INET,
+    inet_v6 = PF_INET6,
+    unix = PF_LOCAL
+  };
+
+  enum socket_type
+  {
+    tcp = SOCK_STREAM,
+    udp = SOCK_DGRAM
+  };
+
+  enum socket_impl_desc
+  {
+    desc_tcp_acceptor = 0,
+    desc_tcp_socket = 1,
+    desc_udp_socket = 2
+  };
 
   // socket descriptor
-  int descriptor(void) const { return _sd; }
   void descriptor(int sd) { _sd = sd; }
+  int descriptor() const { return _sd; }
 
-  socket_domain domain(void);
-  socket_type type(void);
+  socket_domain domain() { return _sock_domain; }
+  socket_type type() { return _sock_type; }
+
+  socket_impl_desc desc() { return _desc; }
+
+  int last_error() { return _last_errno; }
+
+  // for user
+  int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
+  virtual void close() = 0;
+
+  // event handler
+  void set_event_handler(eznetpp::event::if_event_handler* handler) { _event_handler = handler; }
+  eznetpp::event::if_event_handler* get_event_handler() { return _event_handler; }
+
+  // Below functions will implemented by each inherited class
+  // (ex : acceptor, connector)
+  virtual eznetpp::event::io_event* _recv(int& ret) = 0;
+  virtual eznetpp::event::io_event* _send() = 0;
+  virtual eznetpp::event::io_event* _close() = 0;
 
   void set_peer_info(const std::string& ip, int port);
   struct _peer_addr& peer() { return _peer; }
 
-  int set_nonblocking(void);
-  int set_tcpnodelay(void);
-  int set_reuseaddr(void);
-
-  int set_epollout_flag(bool flag);
-
-  int last_error(void) { return _last_errno; }
-
-  // for user
-  int send_bytes(const std::string& data, const std::string& ip = "", int port = 0);
-  virtual void close(void) = 0;
-
-  // Below functions will implemented by each inherited class
-  // (ex : acceptor, connector)
-  virtual void recv(void) = 0;
-  virtual void send(void) = 0;
+  int set_nonblocking();
+  int set_tcpnodelay();
+  int set_reuseaddr();
 
  protected:
+  // variables
   socket_domain _sock_domain = socket_domain::inet_v4;
   socket_type _sock_type = socket_type::tcp;
   int _sd = -1;
@@ -75,6 +103,12 @@ class if_socket {
   typedef std::pair<std::string, peer_addr> msg_pair;
   std::vector<msg_pair> _sendmsgs_vec;
   std::mutex _sendmsgs_mtx;
+
+  // event handler
+  eznetpp::event::if_event_handler* _event_handler;
+
+  // socket's description
+  socket_impl_desc _desc;
 };
 
 }  // namespace net

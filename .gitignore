@@ -17,3 +17,5 @@ GTAGS
 GSYMS
 .cs_*
 core
+.idea/
+*.cbp

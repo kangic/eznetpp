@@ -4,7 +4,7 @@ import time
 import datetime
 import thread
 
-server_addr = (sys.argv[1], 6666)
+server_addr = (sys.argv[1], int(sys.argv[2]))
 num_of_threads = int(sys.argv[3])
 
 def echotest_func(idx):
