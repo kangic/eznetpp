@@ -151,8 +151,10 @@ void io_manager::stop(void)
                          , "-> S");
 
   bClosed = true;
-
-  _loop_th.detach();
+  if (_loop_th.joinable())
+  {
+    _loop_th.detach();
+  }
 
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
