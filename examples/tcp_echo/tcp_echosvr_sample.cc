@@ -24,41 +24,50 @@
 #include "net/tcp/tcp_socket.h"
 #include "sys/io_manager.h"
 
-eznetpp::sys::io_manager g_io_mgr(4, false);
+eznetpp::sys::io_manager g_io_mgr(4, true);
 
 void sig_handler(int signum) {
   g_io_mgr.stop();
 }
 
-class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler {
+class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler
+{
  public:
-  tcp_echosvr_session(eznetpp::net::tcp::tcp_socket* sock) {
+  tcp_echosvr_session(eznetpp::net::tcp::tcp_socket* sock)
+  {
     _socket = sock;
   }
   virtual ~tcp_echosvr_session() = default;
 
  public:
   // override
-  void on_recv(const std::string& msg, int len) {
+  void on_recv(const std::string& msg, int len)
+  {
     //printf("received %d bytes\n", len);
     ++recv_num;
-    if (recv_num % 1000 == 0)
-      printf("[%d] received %d\n", _socket->descriptor(), recv_num);
+    //if (recv_num % 1000 == 0)
+    //  printf("[%d] received %d\n", _socket->descriptor(), recv_num);
 
     _socket->send_bytes(msg);
   }
-  void on_send(unsigned int len) {
+
+  void on_send(unsigned int len)
+  {
     //printf("sent %d bytes\n", len);
     ++send_num;
-    if (send_num % 1000 == 0)
-      printf("[%d] sent %d\n", _socket->descriptor(), send_num);
+    //if (send_num % 1000 == 0)
+    //  printf("[%d] sent %d\n", _socket->descriptor(), send_num);
   }
-  void on_close(int err_no) {
+
+  void on_close(int err_no)
+  {
     printf("closed the session(%d)\n", err_no);
   }
 
-  // do not need 
-  void on_connect(int err_no) {};
+  void on_connect(int err_no)
+  {
+    // do not need
+  };
 
  private:
   eznetpp::net::tcp::tcp_socket* _socket;
@@ -66,17 +75,21 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler {
   unsigned int send_num = 0;
 };
 
-class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
+class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler
+{
  public:
-  tcp_echo_server(eznetpp::sys::io_manager* io_mgr) {
+  tcp_echo_server(eznetpp::sys::io_manager* io_mgr)
+  {
     _io_mgr = io_mgr;
   }
   virtual ~tcp_echo_server() = default;
 
-  int open(int port, int backlog) {
+  int open(int port, int backlog)
+  {
     int ret = _acceptor.open(port, backlog);
 
-    if (ret) {
+    if (ret)
+    {
       printf("%s\n", eznetpp::errcode::errno_to_str(ret).c_str());
       return -1;
     }
@@ -87,11 +100,14 @@ class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
   }
 
   // override
-  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) {
+  void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no)
+  {
     printf("on_accept\n");
     _io_mgr->register_socket_event_handler(sock, new tcp_echosvr_session(sock));
   }
-  void on_close(int err_no) {
+
+  void on_close(int err_no)
+  {
     printf("closed the acceptor(%d)\n", err_no);
   }
 
@@ -100,7 +116,8 @@ class tcp_echo_server : public eznetpp::event::tcp_acceptor_event_handler {
   eznetpp::net::tcp::tcp_acceptor _acceptor;
 };
 
-int main(void) {
+int main(void)
+{
   signal(SIGINT, sig_handler);
 
   g_io_mgr.init();
