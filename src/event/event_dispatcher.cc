@@ -36,8 +36,14 @@ event_dispatcher::~event_dispatcher(void)
 {
 }
 
-void event_dispatcher::dispatch_event(io_event* evt, if_event_handler* handler)
+void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* sock)
 {
+  if (evt == nullptr || sock == nullptr)
+  {
+    return;
+  }
+
+  if_event_handler* handler = sock->get_event_handler();
   switch (evt->type())
   {
     case event::event_type::close:
@@ -46,6 +52,7 @@ void event_dispatcher::dispatch_event(io_event* evt, if_event_handler* handler)
       // when the socket is closed.
       // Call the on_close event in clear_resources() function.
       handler->on_close(0);
+
 
       break;
     }
@@ -73,80 +80,20 @@ void event_dispatcher::dispatch_event(io_event* evt, if_event_handler* handler)
 
       break;
     }
-  }
-}
-/*
-void event_dispatcher::dispatch_event(const io_event& evt, const event_handler& handler)
-{
-  auto sock = evt.publisher();
-
-  eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
-      , __FILE__, __FUNCTION__, __LINE__
-      , "io_event : %p(type : %d), socket : %p, handler : %p"
-      , evt, evt.type(), &sock, handler);
-
-  switch (evt.type())
-  {
-    case event::event_type::close:
-    {
-      // Delete the socket descriptor from epoll descriptor automatically
-      // when the socket is closed.
-      // Call the on_close event in clear_resources() function.
-      handler.on_close(0);
-
-      if (sock != nullptr) {
-        delete sock;
-        sock = nullptr;
-      }
-
-      break;
-    }
-    case event::event_type::tcp_accept:
-    {
-      int sock_fd = evt.result();
-
-      auto tcp_sock = new eznetpp::net::tcp::tcp_socket(sock_fd);
-      tcp_sock->set_peer_info(std::move(evt.data()), evt.opt_data());
-      tcp_sock->set_nonblocking();
-      tcp_sock->set_tcpnodelay();
-      handler.on_accept(tcp_sock, 0);
-
-      break;
-    }
-    case event::event_type::tcp_connect:
-    {
-      sock->set_peer_info(evt.data().c_str(), evt.opt_data());
-      handler.on_connect(sock->last_error());
-
-      break;
-    }
-    case event::event_type::tcp_recv:
-    {
-      handler.on_recv(evt.data(), evt.result());
-
-      break;
-    }
-    case event::event_type::tcp_send:
-    {
-      handler.on_send(evt.result());
-
-      break;
-    }
     case event::event_type::udp_recvfrom:
     {
-      handler.on_recvfrom(evt.data(), evt.result(), sock->peer().ip, sock->peer().port);
+      handler->on_recvfrom(evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
 
       break;
     }
     case event::event_type::udp_sendto:
     {
-      handler.on_sendto(evt.result());
+      handler->on_sendto(evt->result());
 
       break;
     }
   }
 }
-*/
 
 }  // namespace event
 }  // namespace eznetpp

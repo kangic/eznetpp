@@ -35,7 +35,7 @@ class udp_socket : public eznetpp::net::if_socket
   virtual ~udp_socket(void);
 
   int open(int port);
-  void close(void);
+  void close();
 
  protected:
   eznetpp::event::io_event* _recv(int& ret);
