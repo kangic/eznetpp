@@ -27,9 +27,8 @@ namespace sys {
 
 int io_manager::_epoll_fd = -1;
 
-io_manager::io_manager(int num_of_work_threads, bool log_enable)
+io_manager::io_manager(bool log_enable)
 {
-  _num_of_loop_threads = num_of_work_threads;
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
@@ -128,27 +127,19 @@ int io_manager::update_epoll_event(eznetpp::net::if_socket* sock)
 
 int io_manager::loop(void)
 {
-  for (int i = 0; i < _num_of_loop_threads; ++i)
+  _loop_th = std::thread(&io_manager::epoll_loop, this);
+
+  if (!_loop_th.joinable())
   {
-    std::thread loop_th = std::thread(&io_manager::epoll_loop, this, i);
+    eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
+        , __FILE__, __FUNCTION__, __LINE__
+        , "failed to create epoll_loop thread(%d)"
+        , errno);
 
-    if (!loop_th.joinable())
-    {
-      eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
-          , __FILE__, __FUNCTION__, __LINE__
-          , "failed to create epoll_loop thread(%d)"
-          , errno);
-
-      return -1;
-    }
-
-    _loop_threads_vec.push_back(std::move(loop_th));
+    return -1;
   }
 
-  {
-    std::unique_lock<std::mutex> term_lk(_term_mutex);
-    _term_cv.wait(term_lk);
-  }
+  _loop_th.join();
 
   return 0;
 }
@@ -161,40 +152,18 @@ void io_manager::stop(void)
 
   bClosed = true;
 
-  while(true) {
-    {
-      // wait the signal from the work thread.
-      std::unique_lock<std::mutex> exit_lk(_exit_mutex);
-      _exit_cv.wait(exit_lk);
-
-      if (_num_of_loop_threads == 0) {
-        break;
-      }
-    }
-  }
-
-  for (auto& th : _loop_threads_vec)
-  {
-    th.join();
-  }
-
-  {
-    std::unique_lock<std::mutex> term_lk(_term_mutex);
-    _term_cv.notify_one();
-  }
-
+  _loop_th.detach();
 
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
                          , "<- E");
 }
 
-void io_manager::epoll_loop(int idx)
+void io_manager::epoll_loop(void)
 {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
-                         , "start read_loop(%d)"
-                         , idx);
+                         , "start epoll_loop");
 
   eznetpp::event::event_dispatcher evt_dispatcher;
 
@@ -302,13 +271,6 @@ void io_manager::epoll_loop(int idx)
       }
     }
   }
-
-  {
-    std::unique_lock<std::mutex> exit_lk(_exit_mutex);
-    --_num_of_loop_threads;
-    _exit_cv.notify_one();
-  }
-
 
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__

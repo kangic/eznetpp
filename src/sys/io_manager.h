@@ -31,7 +31,7 @@ namespace sys {
 class io_manager
 {
  public:
-  io_manager(int num_of_work_threads = 1, bool log_enable = false);
+  io_manager(bool log_enable = false);
   virtual ~io_manager(void);
 
   /*
@@ -62,25 +62,17 @@ class io_manager
    * If exists a changed descriptor, read data and pass to event_dispatcher for
    * queueing.
    */
-  void epoll_loop(int idx);
+  void epoll_loop();
 
  private:
   static int _epoll_fd;
   struct epoll_event* _events = nullptr;
   int _max_descs_cnt = 1024;
-  int _num_of_loop_threads = 1;
 
-  //std::thread _loop_th;
-  std::vector<std::thread> _loop_threads_vec;
+  std::thread _loop_th;
 
   // for exiting thread
   bool bClosed = false;
-  std::mutex _exit_mutex;
-  std::condition_variable _exit_cv;
-
-  // for terminating
-  std::mutex _term_mutex;
-  std::condition_variable _term_cv;
 
   DISALLOW_COPY_AND_ASSIGN(io_manager);
 };
