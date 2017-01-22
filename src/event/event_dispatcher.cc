@@ -51,8 +51,14 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       // Delete the socket descriptor from epoll descriptor automatically
       // when the socket is closed.
       // Call the on_close event in clear_resources() function.
-      handler->on_close(0);
+      auto f = [](if_event_handler* handler)
+      {
+        handler->on_close(0);
+      };
+      std::thread local_th = std::thread(f, handler);
+      local_th.detach();
 
+      //handler->on_close(0);
 
       break;
     }
@@ -64,31 +70,69 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       tcp_sock->set_peer_info(std::move(evt->data()), evt->opt_data());
       tcp_sock->set_nonblocking();
       tcp_sock->set_tcpnodelay();
-      handler->on_accept(tcp_sock, 0);
+
+      auto f = [](if_event_handler* handler, eznetpp::net::tcp::tcp_socket* tcp_sock, int result)
+      {
+        handler->on_accept(tcp_sock, result);
+      };
+
+      std::thread local_th = std::thread(f, handler, tcp_sock, 0);
+      local_th.detach();
+
+      //handler->on_accept(tcp_sock, 0);
 
       break;
     }
     case event::event_type::tcp_recv:
     {
-      handler->on_recv(evt->data(), evt->result());
+      auto f = [](if_event_handler* handler, const std::string& data, int result)
+      {
+        handler->on_recv(data, result);
+      };
+      std::thread local_th = std::thread(f, handler, evt->data(), evt->result());
+      local_th.detach();
+      //handler->on_recv(evt->data(), evt->result());
 
       break;
     }
     case event::event_type::tcp_send:
     {
-      handler->on_send(evt->result());
+      auto f = [](if_event_handler* handler, int result)
+      {
+        handler->on_send(result);
+      };
+      std::thread local_th = std::thread(f, handler, evt->result());
+      local_th.detach();
+
+      //handler->on_send(evt->result());
 
       break;
     }
     case event::event_type::udp_recvfrom:
     {
-      handler->on_recvfrom(evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
+      auto f = [](if_event_handler* handler, const std::string& data, int result, const std::string& ip, int port)
+      {
+        //handler->on_recv(data, result);
+        handler->on_recvfrom(data, result, ip, port);
+      };
+      std::thread local_th = std::thread(f, handler, evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
+      local_th.detach();
+
+
+      //handler->on_recvfrom(evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
 
       break;
     }
     case event::event_type::udp_sendto:
     {
-      handler->on_sendto(evt->result());
+      auto f = [](if_event_handler* handler, int result)
+      {
+        handler->on_sendto(result);
+      };
+      std::thread local_th = std::thread(f, handler, evt->result());
+      local_th.detach();
+
+      //handler->on_sendto(evt->result());
 
       break;
     }

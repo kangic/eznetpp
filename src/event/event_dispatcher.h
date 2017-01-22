@@ -35,7 +35,7 @@ class event_dispatcher
   event_dispatcher(void);
   virtual ~event_dispatcher(void);
 
-  static void dispatch_event(io_event* evt, eznetpp::net::if_socket* sock);
+  void dispatch_event(io_event* evt, eznetpp::net::if_socket* sock);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(event_dispatcher);
