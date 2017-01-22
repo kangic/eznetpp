@@ -119,7 +119,14 @@ eznetpp::event::io_event* tcp_socket::_send()
     }
   } // lock_guard
 
-  return new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, send_bytes);
+  if (send_bytes > 0)
+  {
+    return new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, send_bytes);
+  }
+  else
+  {
+    return nullptr;
+  }
 }
 
 eznetpp::event::io_event* tcp_socket::_recv(int& ret)
@@ -176,7 +183,7 @@ void tcp_socket::close()
     delete evt;
   }
 
-  get_event_handler()->on_close(0);
+  _event_handler->on_close(0);
 }
 
 }  // namespace tcp
