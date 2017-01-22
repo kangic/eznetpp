@@ -189,6 +189,8 @@ void io_manager::epoll_loop(void)
       continue;
     }
 
+    eznetpp::event::io_event* evt = nullptr;
+    bool out_flag = false;    // it is a flag to EPOLLOUT
     for (int i = 0; i < changed_events; ++i)
     {
       auto sock = static_cast<eznetpp::net::if_socket*>(_events[i].data.ptr);
@@ -198,8 +200,6 @@ void io_manager::epoll_loop(void)
                           , "changed descriptor : %d"
                           , sock->descriptor());
 
-      eznetpp::event::io_event* evt = nullptr;
-
       if (_events[i].events & EPOLLIN)
       {
         int ret;
@@ -207,6 +207,8 @@ void io_manager::epoll_loop(void)
         while (read_again)
         {
           evt = sock->_recv(ret);
+
+          // TODO : Need to refactoring simplify.
           eznetpp::event::if_event_handler* handler = sock->get_event_handler();
           read_again = false;
 
@@ -227,31 +229,26 @@ void io_manager::epoll_loop(void)
 
           if (read_again && evt != nullptr)
           {
-            evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+            evt_dispatcher.dispatch_event(evt, sock);
 
             delete evt;
             evt = nullptr;
           }
         }
-        //evt = sock->_recv(ret);
       }
       else if (_events[i].events & EPOLLOUT)
       {
         evt = sock->_send();
-      }
-      else if (_events[i].events & EPOLLRDHUP)
-      {
-        // half close by the remote connection
-        evt = sock->_close();
 
-        if (sock != nullptr) {
-          delete sock;
-          sock = nullptr;
+        if (evt != nullptr)
+        {
+          out_flag = true;
         }
       }
       else if ((_events[i].events & EPOLLHUP)
-          || (_events[i].events & EPOLLERR)
-          || !(_events[i].events & EPOLLIN))
+               || (_events[i].events & EPOLLRDHUP)  // half close by the remote connection
+               || (_events[i].events & EPOLLERR)
+               || !(_events[i].events & EPOLLIN))
       {
         evt = sock->_close();
 
@@ -262,9 +259,9 @@ void io_manager::epoll_loop(void)
       }
 
       update_epoll_event(sock);
-      if (evt != nullptr)
-      {
-        evt_dispatcher.dispatch_event(evt, sock->get_event_handler());
+
+      if (evt != nullptr) {
+        evt_dispatcher.dispatch_event(evt, sock);
 
         delete evt;
         evt = nullptr;
