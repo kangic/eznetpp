@@ -161,13 +161,15 @@ void io_manager::stop(void)
 
   bClosed = true;
 
-  while(_num_of_loop_threads) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
+  while(true) {
     {
       // wait the signal from the work thread.
       std::unique_lock<std::mutex> exit_lk(_exit_mutex);
       _exit_cv.wait(exit_lk);
+
+      if (_num_of_loop_threads == 0) {
+        break;
+      }
     }
   }
 
