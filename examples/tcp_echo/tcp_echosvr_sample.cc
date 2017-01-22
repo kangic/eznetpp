@@ -43,7 +43,7 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler
   // override
   void on_recv(const std::string& msg, int len)
   {
-    //printf("received %d bytes\n", len);
+    printf("received %d bytes\n", len);
     ++recv_num;
     //if (recv_num % 1000 == 0)
     //  printf("[%d] received %d\n", _socket->descriptor(), recv_num);
@@ -53,7 +53,7 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler
 
   void on_send(unsigned int len)
   {
-    //printf("sent %d bytes\n", len);
+    printf("sent %d bytes\n", len);
     ++send_num;
     //if (send_num % 1000 == 0)
     //  printf("[%d] sent %d\n", _socket->descriptor(), send_num);
@@ -63,11 +63,6 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler
   {
     printf("closed the session(%d)\n", err_no);
   }
-
-  void on_connect(int err_no)
-  {
-    // do not need
-  };
 
  private:
   eznetpp::net::tcp::tcp_socket* _socket;

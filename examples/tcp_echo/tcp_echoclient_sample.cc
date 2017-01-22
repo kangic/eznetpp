@@ -32,13 +32,13 @@ class tcp_echo_client : eznetpp::event::tcp_socket_event_handler {
   void start() {
     _io_mgr->register_socket_event_handler(&_socket, this);
 
-    _socket.connect("127.0.0.1", 56789);
+    if (0 == _socket.connect("127.0.0.1", 56789))
+    {
+      _socket.send_bytes("echotest");
+    }
   };
 
   // override
-  void on_connect(int err_no) {
-    _socket.send_bytes("echotest");
-  }
   void on_recv(const std::string& msg, int len) {
     printf("received %d bytes\n", len);
     _socket.send_bytes(msg);
