@@ -32,7 +32,7 @@ io_manager::io_manager(bool log_enable)
   eznetpp::util::logger::instance().set_enable_option(log_enable);
 }
 
-io_manager::~io_manager(void)
+io_manager::~io_manager()
 {
 
 }
@@ -40,10 +40,10 @@ io_manager::~io_manager(void)
 /*
  * create epoll file descriptor and events
  */
-int io_manager::init(int max_descs_cnt)
+int io_manager::init(int max_desc_cnt)
 {
   // create epoll fd and event structures
-  _epoll_fd = epoll_create(max_descs_cnt);
+  _epoll_fd = epoll_create(max_desc_cnt);
   if (_epoll_fd == -1)
   {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
@@ -54,7 +54,7 @@ int io_manager::init(int max_descs_cnt)
     return errno;
   }
 
-  _events = new epoll_event[max_descs_cnt];
+  _events = new epoll_event[max_desc_cnt];
   if (_events == nullptr)
   {
     eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::error
@@ -70,7 +70,7 @@ int io_manager::init(int max_descs_cnt)
                         , "created epoll_fd : %d"
                         , _epoll_fd);
 
-  _max_descs_cnt = max_descs_cnt;
+  _max_descs_cnt = max_desc_cnt;
 
   signal(SIGPIPE, SIG_IGN);
 
@@ -80,7 +80,7 @@ int io_manager::init(int max_descs_cnt)
 int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
       , eznetpp::event::if_event_handler* handler)
 {
-  struct epoll_event ev;
+  struct epoll_event ev{};
 
   ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
@@ -104,13 +104,13 @@ int io_manager::register_socket_event_handler(eznetpp::net::if_socket* sock
 int io_manager::deregister_socket_event_handler(eznetpp::net::if_socket* sock)
 {
   sock->set_event_handler(nullptr);
-
+    
   return epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, sock->descriptor(), NULL);
 }
 
 int io_manager::update_epoll_event(eznetpp::net::if_socket* sock)
 {
-  struct epoll_event ev;
+  struct epoll_event ev{};
 
   ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP | EPOLLONESHOT;
   ev.data.ptr = sock;
@@ -119,7 +119,7 @@ int io_manager::update_epoll_event(eznetpp::net::if_socket* sock)
 }
 
 
-int io_manager::loop(void)
+int io_manager::loop()
 {
   _loop_th = std::thread(&io_manager::epoll_loop, this);
 
@@ -138,7 +138,7 @@ int io_manager::loop(void)
   return 0;
 }
 
-void io_manager::stop(void)
+void io_manager::stop()
 {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
@@ -163,7 +163,7 @@ void io_manager::stop(void)
                          , "<- E");
 }
 
-void io_manager::epoll_loop(void)
+void io_manager::epoll_loop()
 {
   eznetpp::util::logger::instance().log(eznetpp::util::logger::log_level::debug
                          , __FILE__, __FUNCTION__, __LINE__
@@ -171,7 +171,7 @@ void io_manager::epoll_loop(void)
 
   eznetpp::event::event_dispatcher evt_dispatcher;
 
-  while (1)
+  while (true)
   {
     if (bClosed)
     {
@@ -250,10 +250,8 @@ void io_manager::epoll_loop(void)
       {
         evt = sock->_close();
 
-        if (sock != nullptr) {
-          delete sock;
-          sock = nullptr;
-        }
+        delete sock;
+        sock = nullptr;
       }
 
       update_epoll_event(sock);

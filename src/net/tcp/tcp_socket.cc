@@ -59,14 +59,14 @@ int tcp_socket::connect(const std::string& ip, int port)
     return -1;
   }
 
-  struct sockaddr_in server_addr;
+  struct sockaddr_in server_addr{};
   bzero(&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
   server_addr.sin_port = htons(port);
 
   // connect to server(on_connect event)
-  int ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  auto ret = ::connect(_sd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret == 0)
   {
@@ -94,7 +94,7 @@ eznetpp::event::io_event* tcp_socket::_send()
       _sendmsgs_vec.erase(_sendmsgs_vec.begin());
 
       // step 3. send the message and check an error case
-      int ret = (int)::send(_sd, msg.c_str(), msg.length(), 0);
+      auto ret = ::send(_sd, msg.c_str(), msg.length(), 0);
 
       if (ret == -1)
       {
@@ -123,10 +123,8 @@ eznetpp::event::io_event* tcp_socket::_send()
   {
     return new eznetpp::event::io_event(eznetpp::event::event_type::tcp_send, send_bytes);
   }
-  else
-  {
-    return nullptr;
-  }
+
+  return nullptr;
 }
 
 eznetpp::event::io_event* tcp_socket::_recv(int& ret)
@@ -178,10 +176,7 @@ eznetpp::event::io_event* tcp_socket::_close()
 void tcp_socket::close()
 {
   eznetpp::event::io_event* evt = _close();
-  if (evt != nullptr)
-  {
-    delete evt;
-  }
+  delete evt;
 
   _event_handler->on_close(0);
 }

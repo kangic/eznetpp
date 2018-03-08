@@ -28,14 +28,6 @@
 namespace eznetpp {
 namespace event {
 
-event_dispatcher::event_dispatcher(void)
-{
-}
-
-event_dispatcher::~event_dispatcher(void)
-{
-}
-
 void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* sock)
 {
   if (evt == nullptr || sock == nullptr)
@@ -58,8 +50,6 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       std::thread local_th = std::thread(f, handler);
       local_th.detach();
 
-      //handler->on_close(0);
-
       break;
     }
     case event::event_type::tcp_accept:
@@ -79,8 +69,6 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       std::thread local_th = std::thread(f, handler, tcp_sock, 0);
       local_th.detach();
 
-      //handler->on_accept(tcp_sock, 0);
-
       break;
     }
     case event::event_type::tcp_recv:
@@ -91,7 +79,6 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       };
       std::thread local_th = std::thread(f, handler, evt->data(), evt->result());
       local_th.detach();
-      //handler->on_recv(evt->data(), evt->result());
 
       break;
     }
@@ -104,8 +91,6 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       std::thread local_th = std::thread(f, handler, evt->result());
       local_th.detach();
 
-      //handler->on_send(evt->result());
-
       break;
     }
     case event::event_type::udp_recvfrom:
@@ -117,9 +102,6 @@ void event_dispatcher::dispatch_event(io_event* evt, eznetpp::net::if_socket* so
       };
       std::thread local_th = std::thread(f, handler, evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
       local_th.detach();
-
-
-      //handler->on_recvfrom(evt->data(), evt->result(), sock->peer().ip, sock->peer().port);
 
       break;
     }

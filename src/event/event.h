@@ -39,7 +39,7 @@ namespace event {
 
 class io_event {
  public:
-  io_event(void) = delete;
+  io_event() = delete;
 
   io_event(event_type type) {
    _type = type;
@@ -57,12 +57,12 @@ class io_event {
    _opt_data = opt_data;
   }
 
-  virtual ~io_event(void) {};
+  virtual ~io_event() {};
 
-  event_type type(void) { return _type; }
-  int result(void) { return _result; }
-  const std::string& data(void) { return _data; }
-  int opt_data(void) { return _opt_data; }
+  event_type type() { return _type; }
+  int result() { return _result; }
+  const std::string& data() { return _data; }
+  int opt_data() { return _opt_data; }
 
  private:
   event_type _type = event_type::close;

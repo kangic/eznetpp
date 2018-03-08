@@ -31,8 +31,8 @@ namespace event {
 class if_event_handler
 {
  public:
-  if_event_handler(void) = default;
-  virtual ~if_event_handler(void) = default;
+  if_event_handler() = default;
+  virtual ~if_event_handler() = default;
 
   enum event_handler_type
   {
@@ -44,10 +44,10 @@ class if_event_handler
 
   virtual void on_accept(eznetpp::net::tcp::tcp_socket* sock, int err_no) = 0;
   virtual void on_recv(const std::string& msg, int len) = 0;
-  virtual void on_send(unsigned int len) = 0;
+  virtual void on_send(int len) = 0;
   virtual void on_recvfrom(const std::string& msg, int len
       , const std::string& peer_ip, int peer_port) = 0;
-  virtual void on_sendto(unsigned int len) = 0;
+  virtual void on_sendto(int len) = 0;
   virtual void on_close(int err_no) = 0;
 
  protected:

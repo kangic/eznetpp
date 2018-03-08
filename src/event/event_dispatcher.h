@@ -32,8 +32,8 @@ namespace event {
 class event_dispatcher
 {
  public:
-  event_dispatcher(void);
-  virtual ~event_dispatcher(void);
+  event_dispatcher() = default;
+  virtual ~event_dispatcher() = default;
 
   void dispatch_event(io_event* evt, eznetpp::net::if_socket* sock);
 

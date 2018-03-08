@@ -31,14 +31,14 @@ namespace sys {
 class io_manager
 {
  public:
-  io_manager(bool log_enable = false);
-  virtual ~io_manager(void);
+  explicit io_manager(bool log_enable = false);
+  virtual ~io_manager();
 
   /*
    * After the class declaration, must be called this function for preparing
    * to work epoll* functions.
    */
-  int init(int max_descs_cnt = 1024); // TODO(kangic) : define the value
+  int init(int max_desc_cnt = 1024); // TODO(kangic) : define the value
 
   /*
    * Register/Unregister the socket class and the event handler to recieve the
@@ -51,8 +51,8 @@ class io_manager
   /*
    * Create the read_loop thread in this function.
    */
-  int loop(void);
-  void stop(void);
+  int loop();
+  void stop();
 
   static int update_epoll_event(eznetpp::net::if_socket* sock);
 
