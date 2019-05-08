@@ -49,7 +49,7 @@ class udp_echo_server : public eznetpp::event::udp_socket_event_handler {
     printf("received %d bytes from %s(%d)\n", len, peer_ip.c_str(), peer_port);
     _socket.send_bytes(msg, peer_ip, peer_port);
   }
-  void on_sendto(unsigned int len) {
+  void on_sendto(int len) {
     printf("sent %d bytes\n", len);
   }
   void on_close(int err_no) {

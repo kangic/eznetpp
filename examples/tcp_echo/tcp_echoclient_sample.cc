@@ -43,7 +43,7 @@ class tcp_echo_client : eznetpp::event::tcp_socket_event_handler {
     printf("received %d bytes\n", len);
     _socket.send_bytes(msg);
   }
-  void on_send(unsigned int len) {
+  void on_send(int len) {
     printf("sent %d bytes\n", len);
   }
   void on_close(int err_no) {
@@ -62,7 +62,7 @@ int main(void) {
 
   tcp_echo_client client(&io_mgr);
   client.start();
-  
+
   io_mgr.loop();
 
   return 0;

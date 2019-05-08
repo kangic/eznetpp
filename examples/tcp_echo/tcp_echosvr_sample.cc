@@ -51,7 +51,7 @@ class tcp_echosvr_session : public eznetpp::event::tcp_socket_event_handler
     _socket->send_bytes(msg);
   }
 
-  void on_send(unsigned int len)
+  void on_send(int len)
   {
     printf("sent %d bytes\n", len);
     ++send_num;

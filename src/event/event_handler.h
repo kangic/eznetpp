@@ -62,7 +62,7 @@ class udp_socket_event_handler : public event::if_event_handler
 
   virtual void on_recvfrom(const std::string& msg, int len
       , const std::string& peer_ip, int peer_port) = 0;
-  virtual void on_sendto(unsigned int len) = 0;
+  virtual void on_sendto(int len) = 0;
   virtual void on_close(int err_no) = 0;
 
  protected:
