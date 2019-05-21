@@ -19,3 +19,8 @@ GSYMS
 core
 .idea/
 *.cbp
+
+## vscode
+*.ipch
+*.bin
+.gitignore
