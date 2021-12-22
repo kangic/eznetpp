@@ -10,12 +10,12 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set(PROJECT_INCLUDE_DIRS 
-${CMAKE_CURRENT_SOURCE_DIR}/src
+${CMAKE_CURRENT_SOURCE_DIR}/core
 )
 
 include_directories(${PROJECT_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_subdirectory(src)
+add_subdirectory(core)
 add_subdirectory(examples)
 

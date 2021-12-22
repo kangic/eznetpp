@@ -19,3 +19,4 @@ GSYMS
 core
 .idea/
 *.cbp
+.vscode/
